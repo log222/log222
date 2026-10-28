@@ -1,16 +1,21 @@
-## Hi there 👋
+# Olá, eu sou o Francisco 👋
 
-<!--
-**log222/log222** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+Desenvolvedor full stack em Uberlândia (MG). Criei o **Texas Poker**, um jogo de cassino multiplayer 3D, do cliente ao servidor. Aberto a vagas de desenvolvimento full stack ou de jogos.
 
-Here are some ideas to get you started:
+## Em destaque
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+- 🎰 [texas-poker](https://github.com/log222/texas-poker): vitrine do jogo (Unity, Nakama, TypeScript). [Jogar](https://loja.texaspoker.com.br)
+- 🃏 [poker-hand-evaluator](https://github.com/log222/poker-hand-evaluator): avaliador de mãos de Texas Hold'em, sem dependências, licença MIT
+- 🧰 [nakama-typescript-bundle-template](https://github.com/log222/nakama-typescript-bundle-template): template para empacotar o runtime TypeScript do Nakama com esbuild
+
+## Tecnologias
+
+Unity (C#) · TypeScript · Node.js · Nakama · PostgreSQL · Docker
+
+## Contato
+
+[LinkedIn](https://www.linkedin.com/in/francisco-brazao-neto-97946327a/)
+
+---
+
+**EN:** Full stack developer from Uberlândia, Brazil. Creator of Texas Poker, a 3D multiplayer casino game built end to end (Unity, Nakama, TypeScript). Open to full stack and game development roles.
