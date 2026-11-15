@@ -384,6 +384,41 @@
     // a picareta no breu: escurece tudo menos o recorte
     g.save(); g.fillStyle = `rgba(6,4,12,${o.breu ?? 0.35})`; g.fillRect(0, 0, ART.W, ART.H); g.restore();
   };
+  /** braço dobrado mostrando o muque (silhueta clássica de bíceps), em contraluz. Origem = ombro (canto inferior direito).
+   *  o = {x, y (ombro, px), s, rim (0..1 luz de recorte), pump (0..1 bíceps inflando), giro (graus, + = desce o punho para a esquerda),
+   *       picareta (0..1: picareta no punho), pulso (graus: gira a picareta no punho; + = cabeça desce para a esquerda), cor} -> {punho:[x,y], ponta:[x,y]} em px */
+  ART.obj.muque = (g, t, o = {}) => {
+    const x = o.x ?? 1120, y = o.y ?? 1110, s = o.s ?? 1, rk = ART.clamp(o.rim ?? 1), pump = ART.clamp(o.pump ?? 0);
+    const body = o.cor || "#1E1830", rim = ART.mix("#1E1830", "#C9B8FF", rk);
+    g.save(); g.translate(x, y); g.scale(s, s); g.rotate(ART.deg(-(o.giro || 0)));
+    const b = 1 + 0.07 * pump; // bíceps cresce
+    const arm = new Path2D(`M40,-150 C-90,-210 -230,${-330 * b} -390,${-345 * b} C-520,${-350 * b} -600,-260 -620,-200
+      C-610,-320 -620,-420 -615,-470 C-600,-520 -560,-560 -585,-600 C-610,-660 -700,-675 -760,-640 C-810,-610 -805,-540 -770,-490
+      C-800,-380 -800,-200 -770,-60 C-740,20 -650,50 -560,40 C-380,60 -150,70 60,70 Z`);
+    // halo atrás (contraluz)
+    ART.glow(g, -420, -330, 620, "#6A55C8", 0.55 * rk, "source-over");
+    // picareta no punho (atrás da mão)
+    const pk = ART.clamp(o.picareta ?? 0);
+    let ponta = null;
+    if (pk > 0) { g.save(); g.globalAlpha = pk; g.translate(-690, -600); g.rotate(ART.deg(-(o.pulso || 0))); g.scale(3.4, 3.4); const r = ART.drawPick(g, "ferro", 230); ponta = g.getTransform().transformPoint(new DOMPoint(r.tipB[0], r.tipB[1])); g.restore(); }
+    g.fillStyle = body; g.fill(arm);
+    // luz de recorte: borda de cima/esquerda
+    g.save(); g.clip(arm); g.lineWidth = 34; g.strokeStyle = rim; g.translate(10, 14); g.stroke(arm); g.restore();
+    g.save(); g.clip(arm);
+    // volumes: pico do bíceps, antebraço, punho
+    ART.ell(g, -380, -300 * b, 170, 70 * b, -0.05); g.fillStyle = ART.rgba("#B9A8FF", 0.16 * rk + 0.12 * pump * rk); g.fill();
+    ART.ell(g, -700, -330, 55, 150, 0.05); g.fillStyle = ART.rgba("#B9A8FF", 0.1 * rk); g.fill();
+    g.strokeStyle = ART.rgba("#0A0612", 0.7); g.lineWidth = 10; g.lineCap = "round";
+    g.beginPath(); g.moveTo(-560, -230); g.quadraticCurveTo(-470, -150, -330, -140); g.stroke();       // dobra bíceps/cotovelo
+    g.beginPath(); g.moveTo(-735, -450); g.quadraticCurveTo(-700, -330, -720, -150); g.stroke();       // músculo do antebraço
+    for (const yy of [-620, -580, -540]) { g.beginPath(); g.moveTo(-760, yy); g.lineTo(-705, yy + 8); g.stroke(); } // dedos
+    g.restore();
+    // brilho de "força" no pico do bíceps (estrelinha)
+    if (pump > 0.05) { g.save(); g.globalCompositeOperation = "lighter"; g.globalAlpha = pump * rk; g.fillStyle = "#FFF4D8"; g.translate(-420, -340 * b - 10); g.rotate(0.3); g.fillRect(-60, -4, 120, 8); g.fillRect(-4, -60, 8, 120); g.restore(); ART.glow(g, -420, -350, 90, "#FFF0C8", 0.7 * pump * rk); }
+    const punho = g.getTransform().transformPoint(new DOMPoint(-690, -600));
+    g.restore();
+    return { punho: [punho.x, punho.y], ponta: ponta ? [ponta.x, ponta.y] : null };
+  };
   /** ampulheta dourada em close (ramo Tempo). o = {x, y, s, areia (0..1 caindo), brilho} */
   ART.obj.ampulheta = (g, t, o = {}) => {
     const x = o.x ?? 540, y = o.y ?? 860, s = o.s ?? 1, ar = clamp(o.areia ?? ((t * 0.2) % 1));

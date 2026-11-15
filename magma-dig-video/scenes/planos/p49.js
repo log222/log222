@@ -10,13 +10,21 @@ MD.plano("p49", {
     if (k > 0) {
       g.save(); g.globalAlpha = k;
       ART.palco(g, t, { zoom: 1 }, ART.cenas.tocaDesfocada(), null, { frame: ctx.frame, legenda: false });
+      // empurrão lento contínuo até o corte
+      const z = ART.lerp(1, 1.07, ART.prog(t, tM - 0.1, D, "linear"));
+      g.translate(540, 700); g.scale(z, z); g.translate(-540, -700);
       ART.ui.titulo(g, 540, 420, "MERCADO", { s: 1.1 });
+      // brilho passando pelo título
+      { const sx = ART.lerp(200, 900, ART.prog(t, tM + 0.15, D, "inOutSine")); g.save(); g.globalCompositeOperation = "lighter"; g.globalAlpha = k * 0.55;
+        g.fillStyle = ART.lg(g, sx - 90, 0, sx + 90, 0, [[0, "rgba(255,240,200,0)"], [0.5, "rgba(255,240,200,.9)"], [1, "rgba(255,240,200,0)"]]); g.fillRect(sx - 90, 360, 180, 120); g.restore(); }
       [["pedra", "Pedra", "×7"], ["cobre", "Cobre", "×1"]].forEach(([ic, nome, q], i) => {
-        const y = 560 + i * 160, sl = (1 - ART.ease.outCubic(ART.prog(t, tM + i * 0.08, tM + 0.3 + i * 0.08))) * 60;
+        const y = 560 + i * 160, d0 = tM + i * Math.max(0.08, (D - tM) * 0.3), sl = (1 - ART.ease.outCubic(ART.prog(t, d0, d0 + 0.4))) * 80, al = ART.prog(t, d0 - 0.05, d0 + 0.25);
+        g.save(); g.globalAlpha *= al;
         ART.ui.cartao(g, 130 + sl, y, 820, 130, { r: 26, sombra: false });
         ART.rr(g, 150 + sl, y + 20, 90, 90, 20); g.fillStyle = "#2A2640"; g.fill(); ART.ui.pix(g, ic, 195 + sl, y + 65, 56);
         g.font = '900 48px "Nunito"'; g.fillStyle = "#F4EEDC"; g.textBaseline = "middle"; g.textAlign = "left"; g.fillText(nome, 270 + sl, y + 67);
         g.font = '800 38px "Nunito"'; g.fillStyle = "#A3A0AE"; g.textAlign = "right"; g.fillText(q, 900 + sl, y + 67);
+        g.restore();
       });
       g.restore();
     }

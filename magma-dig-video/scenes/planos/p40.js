@@ -10,7 +10,7 @@ MD.plano("p40", {
     const c0 = GA.centroBloco();
     ART.palco(g, t, cam, ART.cenas.mina({}), gg => {
       ART.cubo(gg, GA.B.X, GA.B.Z, { crack: 1 + (nh % 3) * 0.9, seed: 4 + Math.floor(nh / 3) });
-      ART.zeca.draw(gg, GA.cava(t, H, { ...GA.Z, turn: 0.85, lamp: 1, cone: 0.35, rim: "#FFC88A", sweat: 0.6 }, { periodoMax: 0.5 }));
+      ART.zeca.draw(gg, GA.cava(t, H, { ...GA.Z, turn: 0.85, lamp: 1, cone: 0.35, coneAng: 24, rim: "#FFC88A", sweat: 0.6 }, { periodoMax: 0.5 }));
       for (const h of H) {
         for (const p of ART.burst(t, { t0: h, count: 14, x: c0[0] - 70, y: c0[1] - 40, speed: [300, 800], angle: [-175, -30], gravity: 2200, life: [0.3, 0.6], seed: 40 + h * 13, size: [7, 15] })) { gg.save(); gg.globalAlpha = p.alpha; gg.fillStyle = p.i % 3 ? "#BAAB87" : "#76756A"; gg.fillRect(p.x, p.y, p.size, p.size * 0.7); gg.restore(); }
         const sp = ART.burst(t, { t0: h, count: 10, x: c0[0] - 70, y: c0[1] - 60, speed: [600, 1100], angle: [-170, -10], gravity: 1500, life: [0.15, 0.3], seed: 60 + h * 7 });

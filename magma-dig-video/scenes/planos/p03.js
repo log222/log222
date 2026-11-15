@@ -37,7 +37,7 @@ MD.plano("p03", {
     const eF = ART.kf(ph, [[0, 8], [0.5, -12], [0.66, 6, "inQuart"], [1, 8]]);
     const lean = ART.kf(ph, [[0, 3], [0.5, -6, "outCubic"], [0.66, 12, "inQuart"], [1, 6]]);
     const pz = ART.zeca.pose("cavando", t, { x: 650, y: 1285, s: 2.5, turn: -0.85, aF, eF, aB: aF - 14, eB: eF + 4, lean, headTilt: lean * 0.4, sq: 1 + 0.06 * ART.pulse(ph, 0.64, 0.1),
-      lamp: luz, cone: 0.9 * luz, coneLen: 700, rim: "#FFB060", rimA: 0.4 * luz }, { periodo: PER, t0: cT0 });
+      lamp: luz, cone: 0.9 * luz, coneAng: 38, coneLen: 560, rim: "#FFB060", rimA: 0.4 * luz }, { periodo: PER, t0: cT0 });
     // bloco de pedra que ele acerta + faíscas em cada impacto (66% do ciclo)
     ART.rocha(g, 235, 1215, 105, 7);
     if (luz > 0.05) ART.zeca.draw(g, pz); else ART.zeca.drawEscuro(g, pz, 1);
