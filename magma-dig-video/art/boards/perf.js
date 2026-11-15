@@ -19,6 +19,15 @@ window.__PECAS__ = () => {
   T("cronometro", t => ART.ui.cronometro(g, 790, 340, { valor: 7, icone: "sol" }));
   T("crac", t => ART.ui.crac(g, 650, 900, 0.2, 0));
   T("cartaoMeta(vidro)", t => ART.ui.cartaoMeta(g, 540, 400, {}));
+  const vila = ART.cenas.vila({}), toca = ART.cenas.toca({ meta: { riscados: 1 } });
+  vila.fundo.forEach((L, i) => T("vila_f" + i, t => ART.withLayer(g, cam, L.d, gg => L.draw(gg, t))));
+  T("vila_frente", t => { for (const L of vila.frente) ART.withLayer(g, cam, L.d, gg => L.draw(gg, t)); });
+  T("vila_luz", t => vila.luz(g, t, cam));
+  toca.fundo.forEach((L, i) => T("toca_f" + i, t => ART.withLayer(g, cam, L.d, gg => L.draw(gg, t))));
+  T("toca_frente", t => { for (const L of toca.frente) ART.withLayer(g, cam, L.d, gg => L.draw(gg, t)); });
+  T("toca_luz", t => toca.luz(g, t, cam));
+  cena.fundo.forEach((L, i) => T("mina_f" + i, t => ART.withLayer(g, cam, L.d, gg => L.draw(gg, t))));
+  T("post", t => ART.post(g, 3, {}));
   T("clear", t => g.clearRect(0, 0, 1080, 1920));
   return out;
 };
