@@ -341,7 +341,8 @@ def fala_clips(falas, voice, speed, pron, rec_audio=None, rec_tempos=None, workd
             pal += [(w, t + x, t + y) for w, (x, y) in zip(ws, tt)]
             parts.append(a); t += len(a) / T.SR
             if j < len(rng) - 1:                # pausa entre frases da mesma fala: valor configurado
-                g = max(0.0, pausas[P.tipo(ws[-1]) or "fim_frase"] - 2 * P.KEEP)
+                g = max(0.0, (P.alvo_fim(len(ws), pausas) if P.tipo(ws[-1]) in (None, "fim_frase")
+                              else pausas[P.tipo(ws[-1])]) - 2 * P.KEEP)
                 parts.append(np.zeros(int(round(g * T.SR)), np.float32)); t += len(parts[-1]) / T.SR
         clips[i] = {"audio": np.concatenate(parts), "palavras": pal}
     return clips
@@ -376,8 +377,10 @@ def layout(falas, clips, tempo, meta, workdir, pausas):
         if f.get("pausa_depois") is not None:                       # pausa intencional por dado
             silence(float(f["pausa_depois"]))
         elif i < len(falas) - 1:
-            ult = f["_words"][-1] if f["_words"] else "."
-            silence(pausas[P.tipo(ult) or "fim_frase"] - (2 * P.KEEP if c else 0))
+            ws_ = f["_words"] or ["."]
+            tp_ = P.tipo(ws_[-1]) or "fim_frase"
+            n_ = (P.frases(ws_)[-1][1] - P.frases(ws_)[-1][0]) if f["_words"] else 99
+            silence((P.alvo_fim(n_, pausas) if tp_ == "fim_frase" else pausas[tp_]) - (2 * P.KEEP if c else 0))
         if f.get("duracao_min"):
             silence(ini + float(f["duracao_min"]) - t)
         if i == len(falas) - 1:
@@ -728,7 +731,7 @@ def tabela_pausas(falas, laid, narr, relat, pausas, work, verbose=True):
     for k, tp, real in med:
         r = orig.get((dono[k], loc[k]))
         fronteira = dono[k] != dono[k + 1]
-        alvo = pausas[tp]
+        alvo = P.alvo(allw, k, pausas)
         f = next(x for x in falas if x["id"] == dono[k])
         if fronteira and f.get("pausa_depois") is not None:
             alvo = float(f["pausa_depois"])
@@ -744,6 +747,9 @@ def tabela_pausas(falas, laid, narr, relat, pausas, work, verbose=True):
     for l in linhas:
         por.setdefault(l["tipo"], []).append(l["real"])
     resumo = ", ".join(f"{tp}: n={len(v)} alvo {pausas[tp]:.2f} real méd {np.mean(v):.2f} min {np.min(v):.2f}" for tp, v in por.items())
+    frag = [l for l in linhas if l["tipo"] == "fim_frase" and abs(l["alvo"] - pausas.get("fim_frase_fragmento", -1)) < 1e-6]
+    if frag:
+        resumo += f" (dos fins de frase, {len(frag)} depois de fragmento: alvo {pausas['fim_frase_fragmento']:.2f}, real méd {np.mean([l['real'] for l in frag]):.2f})"
     print(f"[pausas] {nw} palavras em {total:.2f}s = {nw / total:.2f} pal/s; {resumo}")
     print(f"   vírgulas/; sem pausa nenhuma no motor (não forçadas): {len(sem)}" + (f" -> {'; '.join(sem)}" if sem else ""))
     if verbose:

@@ -144,9 +144,21 @@ def referencia_sintetica(voz, seed=0):
     return p, t.read_text()
 
 
-@functools.lru_cache(maxsize=4)
-def _qwen_prompt(voz, seed):
+def esticar(src, dst, tempo):
+    """Rubber Band (ffmpeg) com preservação de formantes: muda o ritmo sem mudar o timbre."""
+    import subprocess
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(src), "-af",
+                    f"rubberband=tempo={tempo}:formant=preserved:pitchq=quality:window=standard", str(dst)], check=True)
+
+
+@functools.lru_cache(maxsize=8)
+def _qwen_prompt(voz, seed, ref_tempo=1.0):
     ref, txt = referencia_sintetica(voz, seed)
+    if abs(ref_tempo - 1.0) > 1e-3:  # MESMA referência, só mais lenta (o clone imita o ritmo dela)
+        lento = ref.with_name(ref.stem + f"-tempo{ref_tempo:g}.wav")
+        if not lento.exists():
+            esticar(ref, lento, ref_tempo)
+        ref = lento
     return _qwen("base").create_voice_clone_prompt(ref_audio=str(ref), ref_text=txt)
 
 
@@ -155,9 +167,13 @@ def synth_qwen(texto, voz="narrador", velocidade=1.0, seed=0, ref_seed=0):
     consistente entre frases."""
     _seed(seed)
     m = _qwen("base")
+    kw = {}
+    if os.environ.get("VOZ_QWEN_TEMP"):
+        kw["temperature"] = float(os.environ["VOZ_QWEN_TEMP"])
+    rt = float(os.environ.get("VOZ_REF_TEMPO", "1") or 1)
     wavs, sr = m.generate_voice_clone(text=texto, language="Portuguese",
-                                      voice_clone_prompt=_qwen_prompt(voz, ref_seed),
-                                      max_new_tokens=_max_tokens(texto))
+                                      voice_clone_prompt=_qwen_prompt(voz, ref_seed, rt),
+                                      max_new_tokens=int(_max_tokens(texto) / min(rt, 1.0)), **kw)
     return np.asarray(wavs[0], dtype=np.float32), sr
 
 

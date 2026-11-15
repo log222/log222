@@ -70,13 +70,15 @@
     "sfx_vol": -10
   },
   "tempo": {
-    "_doc": "Pausas por pontuação (s de silêncio entre palavras), iguais para qualquer motor de voz. fim_frase/reticencias/dois_pontos: exatas; virgula/ponto_virgula: mínimo garantido (só alonga silêncio existente). Pausa intencional extra: 'pausa_depois' na fala.",
+    "_doc": "Pausas por pontuação (s de silêncio entre palavras), iguais para qualquer motor. fim_frase: depois de frase completa; fim_frase_fragmento: depois de frase de até fragmento_max_palavras palavras ('Crac.', 'Dia um.'). fim_frase/reticencias/dois_pontos: exatas; virgula/ponto_virgula: mínimo garantido (só alonga silêncio existente). Tabela anterior (fase 4-7): 0,40/0,30/0,30/0,15/0,15 sem fragmento. Pausa intencional extra: 'pausa_depois' na fala.",
     "pausas": {
-      "fim_frase": 0.4,
-      "reticencias": 0.3,
-      "dois_pontos": 0.3,
-      "virgula": 0.15,
-      "ponto_virgula": 0.15
+      "fim_frase": 0.55,
+      "fim_frase_fragmento": 0.38,
+      "fragmento_max_palavras": 2,
+      "reticencias": 0.45,
+      "dois_pontos": 0.45,
+      "virgula": 0.28,
+      "ponto_virgula": 0.28
     },
     "inicio": 0.15,
     "final": 0.9,

@@ -96,10 +96,11 @@ def trim(a, sr, keep=0.03, rel_db=-38.0):
 
 
 def pos(a, sr, atempo):
-    """Reamostra para 48 kHz (soxr) e aplica atempo (preserva timbre) via ffmpeg."""
+    """Reamostra para 48 kHz (soxr) e muda o ritmo com Rubber Band (formantes preservados,
+    sem mudar a altura) — melhor que atempo para desacelerar."""
     af = [f"aresample={SR}:resampler=soxr"]
     if abs(atempo - 1.0) > 1e-3:
-        af.append(f"atempo={atempo:.4f}")
+        af.append(f"rubberband=tempo={atempo:.4f}:formant=preserved:pitchq=quality:window=standard")
     r = subprocess.run(["ffmpeg", "-v", "error", "-f", "f32le", "-ar", str(sr), "-ac", "1", "-i", "-",
                         "-af", ",".join(af), "-f", "f32le", "-ar", str(SR), "-ac", "1", "-"],
                        input=a.astype(np.float32).tobytes(), capture_output=True, check=True)
@@ -147,7 +148,7 @@ def main():
     ap.add_argument("--motor", default="supertonic", choices=sorted(M.MOTORES))
     ap.add_argument("--voz", default=None, help="voz pronta (ex.: M1, F2, pm_alex, Ryan) ou nome em vozes_qwen.json")
     ap.add_argument("--velocidade", type=float, default=1.0, help="velocidade nativa do motor (Supertonic/Kokoro)")
-    ap.add_argument("--atempo", type=float, default=1.0, help="acelera depois (ffmpeg atempo, 0.9–1.15 sem mexer no timbre)")
+    ap.add_argument("--atempo", type=float, default=1.0, help="muda o ritmo depois da síntese (Rubber Band, formantes preservados): <1 desacelera")
     ap.add_argument("--pausa", type=float, default=0.32, help="pausa entre frases em narracao.wav (s); ponto pede >= 0,3 s")
     ap.add_argument("--inicio", type=float, default=0.10)
     ap.add_argument("--pron", default=str(HERE / "pronuncia.json"))
@@ -189,7 +190,8 @@ def main():
         seed = int(ph.get("seed", a.seed))  # semente por frase (JSON) — não depende da posição no lote
         key = hashlib.sha1(f"{a.motor}|{voz}|{a.velocidade:.3f}|s{seed}|{falado}|"
                            f"{os.environ.get('VOZ_CB_EXAG','')}{os.environ.get('VOZ_CB_CFG','')}"
-                           f"{os.environ.get('VOZ_ST3_PASSOS','')}".encode()).hexdigest()[:16]
+                           f"{os.environ.get('VOZ_ST3_PASSOS','')}{os.environ.get('VOZ_REF_TEMPO','')}"
+                           f"{os.environ.get('VOZ_QWEN_TEMP','')}".encode()).hexdigest()[:16]
         cp = CACHE / f"{a.motor}-{key}.npz"
         if cp.exists() and not a.sem_cache:
             z = np.load(cp)

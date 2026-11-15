@@ -36,6 +36,24 @@ def tipo(word: str):
     return None
 
 
+def alvo_fim(n_palavras, regras):
+    """pausa depois de fim de frase: menor depois de fragmento curto ("Crac.", "Dia um.") se configurado."""
+    if n_palavras <= int(regras.get("fragmento_max_palavras", 0)):
+        return float(regras.get("fim_frase_fragmento", regras["fim_frase"]))
+    return float(regras["fim_frase"])
+
+
+def alvo(words, k, regras):
+    """alvo da pausa depois da palavra k (considera fragmento para fim de frase)."""
+    tp = tipo(words[k])
+    if tp == "fim_frase":
+        j = k
+        while j > 0 and tipo(words[j - 1]) not in ("fim_frase", "reticencias"):
+            j -= 1
+        return alvo_fim(k - j + 1, regras)
+    return float(regras[tp])
+
+
 MODO = {"fim_frase": "exato", "reticencias": "exato", "dois_pontos": "exato", "virgula": "min", "ponto_virgula": "min"}
 
 
@@ -96,20 +114,20 @@ def ajustar(audio, times, words, regras, sr=T.SR, forcar=("fim_frase", "reticenc
         tp = tipo(words[k])
         if not tp:
             continue
-        alvo = float(regras[tp])
+        alvo_ = alvo(words, k, regras)
         r = _run(audio, sr, (times[k][0] + times[k][1]) / 2, (times[k + 1][0] + times[k + 1][1]) / 2)
         antes = round(r[1] - r[0], 3) if r else 0.0
         modo = MODO[tp]
         acao, delta, at = "ok", 0.0, None
         if r is None:
             if tp in forcar:                              # fim de frase sem silêncio: insere na fronteira
-                at, delta, acao = (times[k][1] + times[k + 1][0]) / 2, alvo, "forçada"
+                at, delta, acao = (times[k][1] + times[k + 1][0]) / 2, alvo_, "forçada"
             else:
                 acao = "sem pausa"
-        elif modo == "min" and antes < alvo - 0.01:
-            at, delta, acao = (r[0] + r[1]) / 2, alvo - antes, "alongada"
-        elif modo == "exato" and abs(antes - alvo) > 0.02:
-            at, delta = (r[0] + r[1]) / 2, alvo - antes
+        elif modo == "min" and antes < alvo_ - 0.01:
+            at, delta, acao = (r[0] + r[1]) / 2, alvo_ - antes, "alongada"
+        elif modo == "exato" and abs(antes - alvo_) > 0.02:
+            at, delta = (r[0] + r[1]) / 2, alvo_ - antes
             acao = "alongada" if delta > 0 else "encurtada"
             if delta < 0:   # não come mais que o silêncio (mantém 10 ms de cada lado)
                 delta = max(delta, -(antes - 0.02))
@@ -127,8 +145,8 @@ def ajustar(audio, times, words, regras, sr=T.SR, forcar=("fim_frase", "reticenc
             d = (n / sr) * (1 if delta > 0 else -1)
             for q in range(k + 1, len(times)):
                 times[q][0] += d; times[q][1] += d
-        depois = round(antes + (delta if acao != "sem pausa" else 0), 3) if acao != "forçada" else alvo
-        rel.append({"k": k, "palavra": words[k], "tipo": tp, "alvo": alvo, "antes": antes,
+        depois = round(antes + (delta if acao != "sem pausa" else 0), 3) if acao != "forçada" else alvo_
+        rel.append({"k": k, "palavra": words[k], "tipo": tp, "alvo": alvo_, "antes": antes,
                     "depois": round(depois, 3), "acao": acao})
     return audio, [tuple(t) for t in times], rel
 
