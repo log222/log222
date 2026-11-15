@@ -49,3 +49,17 @@ UTMOS22 (treinado em inglês) e DNSMOS.
 
 Atenção: o cache não sabe da descrição/referência. Se mudar uma descrição em `vozes_qwen.json`, apague a referência em
 `.cache/voz-ref/` e gere com `--sem-cache` (ou mude `--seed`).
+
+## Pontuação (critério eliminatório do usuário)
+```
+$PY tools/voz/pontuacao.py build/voz/saida -o build/voz/pontuacao.json
+```
+Silêncio em cada vírgula (localizado pelos timestamps do Parakeet), pausa entre frases, pico de F0 no fim das perguntas
+(PT-BR sobe na última tônica: "se-GUN-dos?") e afirmações que terminam subindo. Alvo: vírgula >= 120–150 ms, ponto >= 300 ms.
+Quando o motor engole uma vírgula, regere a frase com outra `seed` ou com `"falado"` trocando a vírgula por reticências
+(`--virgula "..."` faz isso no lote todo), e meça de novo.
+
+## Amostra final
+`tools/voz/finalizar.sh entrada.wav saida.m4a` normaliza para -16 LUFS e codifica AAC.
+Frases da amostra e do roteiro, com as sementes e os ajustes usados nas finalistas: `amostra_qwen_*.json`,
+`roteiro_parte01_frases.txt`, `roteiro_parte01_qwen_jovem.json`.

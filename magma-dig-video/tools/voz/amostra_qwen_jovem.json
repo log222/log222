@@ -1,0 +1,71 @@
+[
+ {
+  "texto": "E se o seu dia de trabalho durasse só dez segundos?",
+  "seed": 0
+ },
+ {
+  "texto": "No MAGMA DIG, quem marca a hora é a lanterna.",
+  "seed": 1
+ },
+ {
+  "texto": "Acendeu, é dia.",
+  "seed": 2
+ },
+ {
+  "texto": "Cada pedra que racha paga na hora.",
+  "seed": 3
+ },
+ {
+  "texto": "Apagou, é noite.",
+  "seed": 4
+ },
+ {
+  "texto": "De noite, vende, aprende e dorme.",
+  "seed": 5
+ },
+ {
+  "texto": "Trinta dias de luz cabem em cinco minutos.",
+  "seed": 6
+ },
+ {
+  "texto": "O Zeca é um tatu de capacete amarelo.",
+  "seed": 7
+ },
+ {
+  "texto": "Dia um.",
+  "seed": 8
+ },
+ {
+  "texto": "A lanterna acendeu.",
+  "seed": 9
+ },
+ {
+  "texto": "Picareta velha, um bloco por vez.",
+  "seed": 0,
+  "falado": "Picareta velha... um bloco por vez."
+ },
+ {
+  "texto": "Crac.",
+  "seed": 11
+ },
+ {
+  "texto": "Uma moeda.",
+  "seed": 2
+ },
+ {
+  "texto": "Crac.",
+  "seed": 13
+ },
+ {
+  "texto": "Duas.",
+  "seed": 14
+ },
+ {
+  "texto": "Apagou.",
+  "seed": 15
+ },
+ {
+  "texto": "Seis moedas.",
+  "seed": 2
+ }
+]
