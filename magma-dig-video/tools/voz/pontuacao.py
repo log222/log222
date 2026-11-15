@@ -52,17 +52,23 @@ def ref_words(texto):
 
 
 def silence_runs(a16, t0, t1, rel_db=-32.0):
+    return silence_where(a16, t0, t1, rel_db)[0]
+
+
+def silence_where(a16, t0, t1, rel_db=-32.0):
+    """(duração, início, fim) em s do maior trecho silencioso em [t0, t1]."""
     hop = 160
     n = len(a16) // hop
     r = np.sqrt((a16[: n * hop].reshape(n, hop).astype(np.float64) ** 2).mean(1) + 1e-12)
     db = 20 * np.log10(r)
     thr = np.percentile(db, 95) + rel_db
     i0, i1 = max(0, int(t0 * 100)), min(n, int(t1 * 100))
-    best, cur = 0, 0
+    best, cur, bend = 0, 0, i0
     for k in range(i0, i1):
         cur = cur + 1 if db[k] < thr else 0
-        best = max(best, cur)
-    return best * 0.01
+        if cur > best:
+            best, bend = cur, k + 1
+    return best * 0.01, (bend - best) * 0.01, bend * 0.01
 
 
 def f0_final(a16):
@@ -109,8 +115,9 @@ def analisar(pasta):
             else:
                 pos = dur * cum[i] / cum[-1]
                 t0, t1, how = pos - 0.35, pos + 0.35, "estimado"
-            virgulas.append({"frase": texto, "depois_de": w, "silencio_ms": int(1000 * silence_runs(a16, t0, t1)),
-                             "alinhamento": how})
+            dur_s, s0, s1 = silence_where(a16, t0, t1)
+            virgulas.append({"frase": texto, "i": f["i"], "depois_de": w, "silencio_ms": int(1000 * dur_s),
+                             "silencio_ini_s": round(s0, 2), "silencio_fim_s": round(s1, 2), "alinhamento": how})
         tipo = "pergunta" if texto.rstrip().endswith("?") else "afirmacao"
         sl, pk = f0_final(a16)
         finais.append({"frase": texto, "tipo": tipo, "f0_final_st": sl, "f0_pico_final_st": pk})
