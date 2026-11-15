@@ -66,7 +66,7 @@ def limiter(x, ceiling_db=-1.0, release=0.08):
     return x * g[:, None]
 
 
-def mixdown(voice24, events, dur, cfg, trilha=True, trilha_arquivo=None, seed=0):
+def mixdown(voice24, events, dur, cfg, trilha=True, trilha_arquivo=None, seed=0, trilha_eventos=None):
     """voice24: narração mono 24 kHz. events: [{t, nome, vol (dB), kw}].
     cfg: estilo['audio']. Retorna (stereo float32 48k, info)."""
     n = int(np.ceil(dur * SR))
@@ -92,9 +92,14 @@ def mixdown(voice24, events, dur, cfg, trilha=True, trilha_arquivo=None, seed=0)
             mus = mus[:n]
             t = np.arange(n) / SR
             mus *= (np.minimum(1, t / 0.5) * np.minimum(1, (dur - t) / 1.5))[:, None]
+            stems = {"normal": mus, "suspensa": mus}
         else:
             mm = M.make(dur, seed=seed).astype(np.float64)
-            mus = np.stack([mm, mm], axis=1)[:n]
+            ms = M.make_suspensa(dur, seed=seed).astype(np.float64)
+            stems = {"normal": np.stack([mm, mm], axis=1)[:n], "suspensa": np.stack([ms, ms], axis=1)[:n]}
+        # automação por dados (ganho/modo com rampa): "trilha some", "suspensa", "corte seco"...
+        g = M.automation(trilha_eventos or [], n)
+        mus = sum(stems[m][:n] * g[m][:len(stems[m][:n]), None] for m in stems)
         act = voice_activity(voice)
         gdb = cfg.get("trilha_db", -20) - cfg.get("ducking_db", 9) * act
         bus += mus * db(gdb)[:, None]

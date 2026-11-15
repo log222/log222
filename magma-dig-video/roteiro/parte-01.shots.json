@@ -19,7 +19,7 @@
       "id": 1,
       "bloco": "Gancho",
       "narracao": "E se o seu dia",
-      "destaques": [],
+      "destaques": ["DIA"],
       "cenario": "C7 Close de objeto sobre fundo escuro",
       "acao": "Breu total. Clique. A lanterna do capacete amarelo acende em close e o feixe corta a poeira.",
       "camera": "Close frontal da lanterna; push-in rápido",
@@ -145,7 +145,7 @@
       "id": 9,
       "bloco": "Regras do mundo",
       "narracao": "De noite, vende, aprende e dorme.",
-      "destaques": [],
+      "destaques": ["DORME"],
       "cenario": "C4 Toca (interior: parede da meta, cama, mesa)",
       "acao": "Três micro-ações em sequência dentro da Toca: moedas no balcão, Zeca olhando um mural de cartões, Zeca deitando com balão Z.",
       "camera": "Travelling lateral pela Toca, da esquerda para a direita",
@@ -223,7 +223,7 @@
       "id": 14,
       "bloco": "Protagonista e aposta",
       "narracao": "Na parede da Toca, riscou a meta:",
-      "destaques": [],
+      "destaques": ["META"],
       "cenario": "C4 Toca (interior: parede da meta, cama, mesa)",
       "acao": "Zeca com um pedaço de giz riscando a parede de pedra da Toca.",
       "camera": "Plano por cima do ombro do Zeca",
@@ -285,7 +285,7 @@
       "id": 18,
       "bloco": "Protagonista e aposta",
       "narracao": "E no fundo de tudo,",
-      "destaques": [],
+      "destaques": ["FUNDO"],
       "cenario": "C8 Profundezas / Coração de Magma",
       "acao": "Câmera atravessa camadas de rocha de cores diferentes, uma por mina, cada vez mais quentes.",
       "camera": "Descida vertical contínua, rápida",
@@ -315,7 +315,7 @@
       "id": 20,
       "bloco": "Ciência",
       "narracao": "O buraco mais fundo que a gente já cavou",
-      "destaques": [],
+      "destaques": ["BURACO"],
       "cenario": "C6 Inserto de ciência: corte da Terra",
       "acao": "Corte da crosta em linhas ciano sobre azul-petróleo; um furo fininho desce da superfície.",
       "camera": "Plano lateral, câmera desce junto com a ponta do furo",
@@ -425,7 +425,7 @@
       "id": 27,
       "bloco": "Dia 1 (como funciona)",
       "narracao": "A lanterna acendeu.",
-      "destaques": [],
+      "destaques": ["ACENDEU"],
       "cenario": "C2 Mina A, pedra cinza (Zeca em cena)",
       "acao": "Preto total; uma linha de luz horizontal abre a imagem como um olho: é o feixe acendendo.",
       "camera": "Abertura do preto com linha de luz (transição-assinatura)",
@@ -488,7 +488,8 @@
       "bloco": "Dia 1 (como funciona)",
       "narracao": "Nesse ritmo, a meta levava cento e sessenta e sete dias.",
       "destaques": [
-        "CENTO E SESSENTA E SETE"
+        "CENTO E SESSENTA E SETE",
+        "RITMO"
       ],
       "cenario": "C4 Toca (interior: parede da meta, cama, mesa)",
       "acao": "Zeca faz a conta no giz na parede: 1.000 ÷ 6 = 167. Ele para com o giz no ar.",
@@ -519,7 +520,7 @@
       "id": 33,
       "bloco": "Escolha arriscada",
       "narracao": "Noite um. Habilidades.",
-      "destaques": [],
+      "destaques": ["HABILIDADES"],
       "cenario": "C5 Painéis da Toca (Habilidades, Mercado)",
       "acao": "Painel escuro da Toca abre com a coluna de ramos, todos no nível zero.",
       "camera": "Plano frontal, painel desliza de baixo",
@@ -611,7 +612,7 @@
       "id": 39,
       "bloco": "Primeiro desafio",
       "narracao": "Crac. Uma. Crac. Duas.",
-      "destaques": [],
+      "destaques": ["DUAS"],
       "cenario": "C3 Gameplay real do trailer (ponto de vista do Zeca)",
       "acao": "Dois golpes rápidos em blocos cinza.",
       "camera": "Plano do trailer, cortes no ritmo",
@@ -689,7 +690,7 @@
       "id": 44,
       "bloco": "Primeiro desafio",
       "narracao": "E no segundo comprado,",
-      "destaques": [],
+      "destaques": ["COMPRADO"],
       "cenario": "C2 Mina A, pedra cinza (Zeca em cena)",
       "acao": "Zeca ergue a picareta velha em câmera lenta.",
       "camera": "Contra-plongée, câmera lenta",
@@ -719,7 +720,7 @@
       "id": 46,
       "bloco": "Recompensa",
       "narracao": "Um brilho laranja.",
-      "destaques": [],
+      "destaques": ["LARANJA"],
       "cenario": "C2 Mina A, pedra cinza (Zeca em cena)",
       "acao": "Luz laranja inunda o rosto do Zeca; reflexo nos olhos. Plano mais claro do vídeo.",
       "camera": "Close do rosto, push-in lento",
@@ -750,7 +751,8 @@
       "bloco": "Recompensa",
       "narracao": "Sem esse segundo, ficava no escuro.",
       "destaques": [
-        "SEGUNDO"
+        "SEGUNDO",
+        "ESCURO"
       ],
       "cenario": "C2 Mina A, pedra cinza (Zeca em cena)",
       "acao": "Mesma parede do plano anterior, agora sem lanterna: o veio laranja vai sumindo no preto.",
@@ -798,7 +800,8 @@
       "bloco": "Dilema",
       "narracao": "Hoje, o cobre paga quarenta moedas.",
       "destaques": [
-        "QUARENTA"
+        "QUARENTA",
+        "COBRE"
       ],
       "cenario": "C5 Painéis da Toca (Habilidades, Mercado)",
       "acao": "Linha do Cobre no Mercado com o valor e o botão amarelo VENDER.",
@@ -814,7 +817,8 @@
       "bloco": "Dilema",
       "narracao": "Quatro por cento da meta. Faltam vinte e oito dias.",
       "destaques": [
-        "VINTE E OITO"
+        "VINTE E OITO",
+        "QUATRO POR CENTO"
       ],
       "cenario": "C4 Toca (interior: parede da meta, cama, mesa)",
       "acao": "Parede da meta: barrinha enche 4%; dois tracinhos riscados de trinta.",

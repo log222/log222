@@ -183,10 +183,11 @@ window.GB_LOAD = window.GB_LOAD || (() => (window.__GB_P = window.__GB_P || MD.l
     if (o.escuro) { g.save(); g.fillStyle = `rgba(10,8,18,${o.escuro})`; g.fillRect(0, 0, W, H); g.restore(); }
     if (o.tinta) { g.save(); g.fillStyle = o.tinta; g.fillRect(0, 0, W, H); g.restore(); }
   };
-  /** transforma o "espaço do painel" (1080x1920) com zoom em torno de (cx,cy) e deslocamento: chama fn(g) */
+  /** espaço do painel (1080x1920): zoom z; o ponto (px,py) do painel vai para (cx,cy) da tela (padrão: zoom em torno de cx,cy); sx,sy = tremor */
   GB.noPainel = (g, cam, fn) => {
     g.save();
-    g.translate(540 + (cam.sx || 0), 960 + (cam.sy || 0)); g.scale(cam.z || 1, cam.z || 1); g.translate(-(cam.cx ?? 540), -(cam.cy ?? 960));
+    const cx = cam.cx ?? 540, cy = cam.cy ?? 960;   // ponto do painel (px,py) cai em (cx,cy) na tela
+    g.translate(cx + (cam.sx || 0), cy + (cam.sy || 0)); g.scale(cam.z || 1, cam.z || 1); g.translate(-(cam.px ?? cx), -(cam.py ?? cy));
     fn(g); g.restore();
   };
   /** posição Y (topo) do cartão de ramo i na coluna padrão */

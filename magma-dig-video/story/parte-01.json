@@ -1,12 +1,25 @@
 {
  "titulo": "MAGMA DIG · Parte 1",
  "_gerado_por": "tools/gerar_story.py a partir de roteiro/parte-01.shots.json",
+ "motor": "kokoro",
  "voz": "pm_alex",
  "velocidade": 1.0,
  "trilha": true,
  "pronuncia": {
-  "DIG": "/dˈiɡ/",
-  "Crac": "/kɾˈak/"
+  "padrao": {
+   "MAGMA DIG": "Mágma Díg",
+   "Zeca": "Zéca",
+   "Crac": "Crák",
+   "Dia um. Mina A": "Dia um... Mina Á",
+   "Cobre": "Cóbre"
+  },
+  "kokoro": {
+   "MAGMA DIG": "MAGMA /dˈiɡ/",
+   "Zeca": "Zeca",
+   "Crac": "/kɾˈak/",
+   "Dia um. Mina A": "Dia úm... Mína Á",
+   "Cobre": "Cobre"
+  }
  },
  "estilo": {
   "audio": {
@@ -22,7 +35,9 @@
      "id": "p01",
      "inicio": 0,
      "cena": "auto",
-     "destaques": [],
+     "destaques": [
+      "DIA"
+     ],
      "sfx": [
       {
        "nome": "clique",
@@ -85,7 +100,7 @@
        "offset": 0.0,
        "vol": -4,
        "kw": {
-        "dur": 1.0,
+        "dur": 0.9,
         "bpm": 240
        }
       }
@@ -101,8 +116,12 @@
       "usa_gameplay": false,
       "narracao": "só dez segundos?"
      },
-     "sfx_sem_mapa": [
-      "corte seco no silêncio da trilha"
+     "trilha": [
+      {
+       "offset": 0.9,
+       "db": -80,
+       "rampa": 0.02
+      }
      ]
     }
    ]
@@ -118,7 +137,17 @@
      "destaques": [
       "MAGMA DIG"
      ],
-     "sfx": [],
+     "sfx": [
+      {
+       "nome": "vento",
+       "offset": 0.0,
+       "vol": -6,
+       "kw": {
+        "dur": 1.8,
+        "grilos": true
+       }
+      }
+     ],
      "roteiro": {
       "id": 4,
       "bloco": "Regras do mundo",
@@ -130,9 +159,12 @@
       "usa_gameplay": false,
       "narracao": "No MAGMA DIG,"
      },
-     "sfx_sem_mapa": [
-      "vento noturno",
-      "grilos"
+     "trilha": [
+      {
+       "db": 0,
+       "rampa": 0.6,
+       "modo": "normal"
+      }
      ]
     },
     {
@@ -256,7 +288,9 @@
      "id": "p09",
      "inicio": 3,
      "cena": "auto",
-     "destaques": [],
+     "destaques": [
+      "DORME"
+     ],
      "sfx": [
       {
        "nome": "moeda",
@@ -270,6 +304,11 @@
        "nome": "ronco",
        "offset": 0.0,
        "vol": -8
+      },
+      {
+       "nome": "folha",
+       "offset": 0.3,
+       "vol": -6
       }
      ],
      "roteiro": {
@@ -282,10 +321,7 @@
       "sfx": "moedas, folha virando, ronco curto",
       "usa_gameplay": false,
       "narracao": "De noite, vende, aprende e dorme."
-     },
-     "sfx_sem_mapa": [
-      "folha virando"
-     ]
+     }
     },
     {
      "id": "p10",
@@ -398,6 +434,11 @@
        "nome": "rachar",
        "offset": 0.1,
        "vol": -10
+      },
+      {
+       "nome": "pedrinhas",
+       "offset": 0.25,
+       "vol": -8
       }
      ],
      "roteiro": {
@@ -410,10 +451,7 @@
       "sfx": "metal rangendo + poeira caindo",
       "usa_gameplay": false,
       "narracao": "Mas chegou com uma picareta velha e nenhuma moeda."
-     },
-     "sfx_sem_mapa": [
-      "poeira caindo"
-     ]
+     }
     }
    ]
   },
@@ -425,7 +463,9 @@
      "id": "p14",
      "inicio": 0,
      "cena": "auto",
-     "destaques": [],
+     "destaques": [
+      "META"
+     ],
      "sfx": [
       {
        "nome": "giz",
@@ -540,7 +580,9 @@
      "id": "p18",
      "inicio": 11,
      "cena": "auto",
-     "destaques": [],
+     "destaques": [
+      "FUNDO"
+     ],
      "sfx": [
       {
        "nome": "ronco",
@@ -596,7 +638,9 @@
      "id": "p20",
      "inicio": 0,
      "cena": "auto",
-     "destaques": [],
+     "destaques": [
+      "BURACO"
+     ],
      "sfx": [
       {
        "nome": "ronco",
@@ -711,7 +755,16 @@
      "destaques": [
       "SEIS MIL"
      ],
-     "sfx": [],
+     "sfx": [
+      {
+       "nome": "chiado",
+       "offset": 0.0,
+       "vol": -8,
+       "kw": {
+        "dur": 3.6
+       }
+      }
+     ],
      "roteiro": {
       "id": 24,
       "bloco": "Ciência",
@@ -722,10 +775,7 @@
       "sfx": "chiado de calor",
       "usa_gameplay": false,
       "narracao": "E lá no centro faz uns seis mil graus."
-     },
-     "sfx_sem_mapa": [
-      "chiado de calor"
-     ]
+     }
     }
    ]
   },
@@ -780,6 +830,11 @@
        "nome": "passos",
        "offset": 0.0,
        "vol": -6
+      },
+      {
+       "nome": "porta",
+       "offset": 0.2,
+       "vol": -6
       }
      ],
      "roteiro": {
@@ -792,16 +847,15 @@
       "sfx": "passos + porta de madeira",
       "usa_gameplay": false,
       "narracao": "Dia um. Mina A, Terra Rasa."
-     },
-     "sfx_sem_mapa": [
-      "porta de madeira"
-     ]
+     }
     },
     {
      "id": "p27",
      "inicio": 6,
      "cena": "auto",
-     "destaques": [],
+     "destaques": [
+      "ACENDEU"
+     ],
      "sfx": [
       {
        "nome": "clique",
@@ -901,10 +955,7 @@
       "sfx": "CRAC + plim, duas vezes",
       "usa_gameplay": false,
       "narracao": "Crac. Uma moeda. Crac. Duas."
-     },
-     "sfx_sem_mapa": [
-      "duas vezes"
-     ]
+     }
     }
    ]
   },
@@ -921,13 +972,14 @@
      ],
      "sfx": [
       {
-       "nome": "moeda",
-       "offset": 0.25,
-       "vol": -2
-      },
-      {
        "nome": "apagar",
        "offset": 0.1
+      },
+      {
+       "nome": "moeda",
+       "palavra": "Seis",
+       "offset": 0.0,
+       "vol": -2
       }
      ],
      "roteiro": {
@@ -947,7 +999,8 @@
      "inicio": 3,
      "cena": "auto",
      "destaques": [
-      "CENTO E SESSENTA E SETE"
+      "CENTO E SESSENTA E SETE",
+      "RITMO"
      ],
      "sfx": [
       {
@@ -1012,7 +1065,9 @@
      "id": "p33",
      "inicio": 0,
      "cena": "auto",
-     "destaques": [],
+     "destaques": [
+      "HABILIDADES"
+     ],
      "sfx": [
       {
        "nome": "whoosh",
@@ -1169,7 +1224,10 @@
       {
        "nome": "whoosh",
        "offset": 0.0,
-       "vol": -6
+       "vol": -6,
+       "kw": {
+        "eco": true
+       }
       }
      ],
      "roteiro": {
@@ -1182,10 +1240,7 @@
       "sfx": "golpe no vazio + eco",
       "usa_gameplay": false,
       "narracao": "Porque braço forte não serve de nada no escuro."
-     },
-     "sfx_sem_mapa": [
-      "eco"
-     ]
+     }
     }
    ]
   },
@@ -1227,7 +1282,9 @@
      "id": "p39",
      "inicio": 6,
      "cena": "auto",
-     "destaques": [],
+     "destaques": [
+      "DUAS"
+     ],
      "sfx": [
       {
        "nome": "picareta",
@@ -1389,7 +1446,9 @@
      "id": "p44",
      "inicio": 10,
      "cena": "auto",
-     "destaques": [],
+     "destaques": [
+      "COMPRADO"
+     ],
      "sfx": [],
      "roteiro": {
       "id": 44,
@@ -1402,9 +1461,15 @@
       "usa_gameplay": false,
       "narracao": "E no segundo comprado,"
      },
+     "trilha": [
+      {
+       "offset": 0.0,
+       "db": -80,
+       "rampa": 0.8
+      }
+     ],
      "sfx_sem_mapa": [
-      "respiração",
-      "trilha some"
+      "respiração"
      ]
     },
     {
@@ -1454,7 +1519,9 @@
      "id": "p46",
      "inicio": 0,
      "cena": "auto",
-     "destaques": [],
+     "destaques": [
+      "LARANJA"
+     ],
      "sfx": [
       {
        "nome": "ding",
@@ -1524,7 +1591,8 @@
      "inicio": 0,
      "cena": "auto",
      "destaques": [
-      "SEGUNDO"
+      "SEGUNDO",
+      "ESCURO"
      ],
      "sfx": [],
      "roteiro": {
@@ -1538,8 +1606,13 @@
       "usa_gameplay": false,
       "narracao": "Sem esse segundo, ficava no escuro."
      },
-     "sfx_sem_mapa": [
-      "trilha baixa"
+     "trilha": [
+      {
+       "offset": 0.0,
+       "db": -10,
+       "rampa": 0.6,
+       "modo": "normal"
+      }
      ]
     }
    ]
@@ -1572,7 +1645,14 @@
       "sfx": "whoosh de painel",
       "usa_gameplay": "trailer 13,5–14,5 s (Mercado; esconder o +91,1K)",
       "narracao": "Noite dois. Mercado."
-     }
+     },
+     "trilha": [
+      {
+       "db": 0,
+       "rampa": 0.6,
+       "modo": "normal"
+      }
+     ]
     },
     {
      "id": "p50",
@@ -1609,7 +1689,8 @@
      "inicio": 14,
      "cena": "auto",
      "destaques": [
-      "QUARENTA"
+      "QUARENTA",
+      "COBRE"
      ],
      "sfx": [
       {
@@ -1641,7 +1722,8 @@
      "inicio": 0,
      "cena": "auto",
      "destaques": [
-      "VINTE E OITO"
+      "VINTE E OITO",
+      "QUATRO POR CENTO"
      ],
      "sfx": [
       {
@@ -1753,8 +1835,13 @@
       "usa_gameplay": false,
       "narracao": "Vende hoje e garante os quarenta,"
      },
-     "sfx_sem_mapa": [
-      "trilha suspensa"
+     "trilha": [
+      {
+       "offset": 0.0,
+       "db": 0,
+       "rampa": 1.0,
+       "modo": "suspensa"
+      }
      ]
     },
     {
@@ -1775,11 +1862,7 @@
       "sfx": "trilha suspensa, sem resolver",
       "usa_gameplay": false,
       "narracao": "ou segura até amanhã e aposta na seta?"
-     },
-     "sfx_sem_mapa": [
-      "trilha suspensa",
-      "sem resolver"
-     ]
+     }
     }
    ]
   },
@@ -1797,11 +1880,13 @@
      "sfx": [
       {
        "nome": "clique",
-       "offset": 0.02
+       "palavra": "dois.",
+       "offset": 0.45
       },
       {
        "nome": "apagar",
-       "offset": 0.1
+       "palavra": "dois.",
+       "offset": 0.5
       }
      ],
      "roteiro": {

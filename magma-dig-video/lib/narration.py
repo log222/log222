@@ -32,11 +32,11 @@ from . import tts_engine as T
 CACHE = T.ROOT / ".cache" / "tts"
 
 
-def synth_cached(text: str, voice: str, speed: float) -> np.ndarray:
+def synth_cached(text: str, voice: str, speed: float, refresh: bool = False) -> np.ndarray:
     CACHE.mkdir(parents=True, exist_ok=True)
     h = hashlib.sha1(f"{voice}|{speed:.3f}|{text}".encode()).hexdigest()[:16]
     p = CACHE / f"{voice}-{h}.wav"
-    if p.exists():
+    if p.exists() and not refresh:
         a, _ = sf.read(p, dtype="float32")
         return a
     a = T.synth(text, voice, speed)

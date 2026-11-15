@@ -20,11 +20,11 @@ MD.plano("p32", {
         GB.tocaLuz(gg, tt, c, { janela: 0.4 });
         for (let i = 1; i < 30; i++) {
           const [lx, ly] = GB.tracoLocal(i), [wx, wy] = GB.gizMundo(lx, ly + 32), [sx, sy, z] = GB.proj(c, 0.8, wx, wy), w = wave(i);
-          if (w > 0.02) ART.glow(gg, sx, sy, 70 * z, "#FFD23F", 0.6 * w);
+          if (w > 0.06) ART.glow(gg, sx, sy, 70 * z, "#FFD23F", 0.6 * w);
         }
         // fica um brilho morno nos 29 depois da onda
         const fica = clamp((t - tVinte - 0.5) / 0.4) * 0.22;
-        if (fica > 0) for (let i = 1; i < 30; i++) { const [lx, ly] = GB.tracoLocal(i), [wx, wy] = GB.gizMundo(lx, ly + 32), [sx, sy, z] = GB.proj(c, 0.8, wx, wy); ART.glow(gg, sx, sy, 40 * z, "#FFD23F", fica); }
+        if (fica > 0) for (let r = 0; r < 3; r++) { const [wx, wy] = GB.gizMundo(0, 122 + r * 92), [sx, sy, z] = GB.proj(c, 0.8, wx, wy); gg.save(); gg.translate(sx, sy); gg.scale(1, 0.22); ART.glow(gg, 0, 0, 330 * z, "#FFD23F", fica * 1.4); gg.restore(); }
       },
     });
     // pata com giz riscando o 1º tracinho

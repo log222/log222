@@ -306,21 +306,130 @@ def passos(seed=0, n=4, intervalo=0.28, **_):
     return _norm(_room(x, 0.25, 0.12, seed), 0.7)
 
 
+def vento(seed=0, dur=3.0, grilos=True, **_):
+    """vento noturno (ruído filtrado com rajadas lentas) + grilos (opcional)."""
+    r = np.random.default_rng(seed)
+    n = int(dur * SR); t = np.arange(n) / SR
+    w = r.standard_normal(n)
+    gust = 0.55 + 0.45 * np.sin(2 * np.pi * 0.23 * t + 1.3) * np.sin(2 * np.pi * 0.07 * t + 0.4)
+    wind = (_bp(w, 180, 900) * 0.8 + _bp(w, 900, 2400) * 0.25) * gust
+    x = wind / (np.abs(wind).max() + 1e-9) * 0.6
+    if grilos:
+        for c, (f, rate, ph) in enumerate([(4300, 2.3, 0.0), (4700, 1.7, 0.5), (3900, 2.9, 0.2)]):
+            env = np.zeros(n)
+            k = ph
+            while k < dur:
+                for j in range(3):          # trinado de 3 pulsos
+                    p0 = int((k + j * 0.035) * SR); m = int(0.022 * SR)
+                    if p0 + m < n:
+                        env[p0:p0 + m] += np.hanning(m)
+                k += 1 / rate + r.uniform(-0.05, 0.05)
+            x += np.sin(2 * np.pi * f * t) * env * (0.12 - 0.03 * c)
+    fade = np.minimum(1, t / 0.4) * np.minimum(1, (dur - t) / 0.6)
+    return _norm(x * fade, 0.6)
+
+
+def folha(seed=0, **_):
+    """folha/página virando: ruído de papel com varredura rápida."""
+    r = np.random.default_rng(seed)
+    n = int(0.45 * SR); t = np.arange(n) / SR
+    env = np.exp(-((t - 0.16) / 0.07) ** 2) + 0.4 * np.exp(-((t - 0.3) / 0.03) ** 2)
+    grain = r.standard_normal(n) * (1 + 2 * (r.random(n) < 0.05))
+    x = (_bp(grain, 1500, 8000) + 0.3 * _bp(grain, 400, 1500)) * env
+    return _norm(_room(x, 0.15, 0.08, seed), 0.6)
+
+
+def porta(seed=0, **_):
+    """porta de madeira: rangido (dobradiça) + batida surda."""
+    r = np.random.default_rng(seed)
+    n = int(1.4 * SR); t = np.arange(n) / SR
+    cr = int(0.8 * SR); tc = np.arange(cr) / SR
+    f = 380 + 160 * np.sin(2 * np.pi * 0.9 * tc) + 40 * r.standard_normal(cr).cumsum() / np.sqrt(cr)
+    stick = (np.sin(2 * np.pi * np.cumsum(f) / SR * 0.25) > 0.6).astype(float)   # stick-slip
+    creak = _bp(stick * r.standard_normal(cr) + 0.4 * np.sin(2 * np.pi * np.cumsum(f) / SR), 300, 2500)
+    creak *= np.sin(np.pi * tc / 0.8) ** 0.7
+    x = np.zeros(n); x[:cr] += creak * 0.5
+    p = int(0.85 * SR); m = n - p; tm = np.arange(m) / SR
+    x[p:] += (np.sin(2 * np.pi * (85 + 40 * np.exp(-tm * 30)) * tm) * np.exp(-tm * 9) +
+              _lp(r.standard_normal(m), 900) * np.exp(-tm * 25) * 0.6)
+    return _norm(_room(x, 0.4, 0.2, seed), 0.8)
+
+
+def pedrinhas(seed=0, dur=1.2, **_):
+    """poeira e pedrinhas caindo: estalos pequenos rareando + chiado de poeira."""
+    r = np.random.default_rng(seed)
+    n = int(dur * SR); t = np.arange(n) / SR; x = np.zeros(n)
+    for _ in range(int(40 * dur)):
+        tt = r.exponential(dur / 3)
+        if tt >= dur * 0.95:
+            continue
+        p0 = int(tt * SR); m = int(r.uniform(0.004, 0.015) * SR)
+        lo = r.uniform(1500, 4000)
+        x[p0:p0 + m] += _bp(r.standard_normal(m), lo, min(lo * 3, 20000)) * np.exp(-np.arange(m) / m * 5) * r.uniform(0.2, 1)
+    x += _bp(r.standard_normal(n), 2000, 9000) * np.exp(-t * 3) * 0.05
+    return _norm(_room(x, 0.35, 0.18, seed), 0.6)
+
+
+def chiado(seed=0, dur=2.0, **_):
+    """chiado de calor (fritura/vapor) com borbulhas: profundezas, núcleo."""
+    r = np.random.default_rng(seed)
+    n = int(dur * SR); t = np.arange(n) / SR
+    hiss = _bp(r.standard_normal(n), 2500, 7000) * (0.6 + 0.4 * np.abs(MDnoise(t * 6, r)))
+    crackle = (r.random(n) < 0.0015) * r.standard_normal(n) * 3
+    bub = np.zeros(n)
+    for _ in range(int(6 * dur)):
+        p0 = int(r.uniform(0, dur - 0.1) * SR); m = int(0.05 * SR); tm = np.arange(m) / SR
+        bub[p0:p0 + m] += np.sin(2 * np.pi * r.uniform(200, 500) * (1 + 3 * tm) * tm) * np.exp(-tm * 60) * 0.5
+    low = _lp(r.standard_normal(n), 150) * 0.6
+    env = np.minimum(1, t / 0.3) * np.minimum(1, (dur - t) / 0.5)
+    return _norm((hiss * 0.5 + _bp(crackle, 1500, 6000) + bub + low) * env, 0.6)
+
+
+def MDnoise(x, r):
+    """ruído suave determinístico (interp. linear de valores aleatórios)."""
+    k = np.floor(x).astype(int); f = x - k
+    v = r.standard_normal(int(k.max()) + 2)
+    return v[k] * (1 - f) + v[k + 1] * f
+
+
+def eco(a, atraso=0.22, repeticoes=4, decai=0.45, escuro=3000):
+    """aplica eco de caverna a qualquer efeito (use "kw": {"eco": true} no sfx)."""
+    d = int(atraso * SR)
+    out = np.zeros(len(a) + d * repeticoes)
+    out[: len(a)] += a
+    y = a.astype(np.float64)
+    for i in range(1, repeticoes + 1):
+        y = _lp(y, max(600, escuro / i)) * decai
+        out[i * d: i * d + len(a)] += y
+    return _norm(_room(out, 0.8, 0.25), 0.9)
+
+
 LIB = {"picareta": picareta, "rachar": rachar, "quebrar": quebrar, "moeda": moeda, "ding": ding,
        "whoosh": whoosh, "ronco": ronco, "tictac": tictac, "sting": sting, "boom": boom, "pop": pop,
        "subida": subida, "clique": clique, "apagar": apagar, "zumbido": zumbido, "giz": giz,
-       "acorde": acorde, "coracao": coracao, "passos": passos}
+       "acorde": acorde, "coracao": coracao, "passos": passos, "vento": vento, "folha": folha, "porta": porta,
+       "pedrinhas": pedrinhas, "chiado": chiado}
 NAMES = sorted(LIB)
 
 _cache: dict = {}
 
 
+def json_key(v):
+    import json
+    return json.dumps(v, sort_keys=True) if isinstance(v, (dict, list)) else v
+
+
 def make(name: str, seed: int = 0, **kw) -> np.ndarray:
     if name not in LIB:
         raise KeyError(f"sfx desconhecido '{name}'. Disponíveis: {', '.join(NAMES)}")
-    key = (name, seed, tuple(sorted(kw.items())))
+    key = (name, seed, tuple(sorted((k, json_key(v)) for k, v in kw.items())))
     if key not in _cache:
-        _cache[key] = LIB[name](seed=seed, **kw)
+        kw = dict(kw)
+        e = kw.pop("eco", None)
+        a = LIB[name](seed=seed, **kw)
+        if e:
+            a = eco(a, **(e if isinstance(e, dict) else {}))
+        _cache[key] = a
     return _cache[key]
 
 

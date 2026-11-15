@@ -42,7 +42,7 @@ MD.plano("p52", {
         GB.tocaLuz(gg, tt, c, { janela: 0.35, lamp: 0.6 });
         for (let i = 2; i < 30; i++) {
           const [lx, ly] = GB.tracoLocal(i), [wx, wy] = GB.gizMundo(lx, ly + 32), [sx, sy, z] = GB.proj(c, 0.8, wx, wy), w = wave(i);
-          if (w > 0.02) ART.glow(gg, sx, sy, 70 * z, "#FFD23F", 0.6 * w);
+          if (w > 0.06) ART.glow(gg, sx, sy, 70 * z, "#FFD23F", 0.6 * w);
         }
         const [bx, by, z] = GB.proj(c, 0.8, ...GB.gizMundo(BX + 30, BY + BH / 2));
         const b = GB.hit(t, tMeta, 0.6);

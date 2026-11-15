@@ -41,6 +41,7 @@ from lib import mix as MX  # noqa: E402
 from lib import narration as N  # noqa: E402
 from lib import sfx as X  # noqa: E402
 from lib import tts_engine as T  # noqa: E402
+from lib import voz_externa as VX  # noqa: E402
 
 PUNCT_BREAK = re.compile(r"[.,!?;:…]$")
 FUNC = {"a", "o", "as", "os", "e", "de", "da", "do", "das", "dos", "em", "no", "na", "nos", "nas", "um", "uma",
@@ -58,6 +59,24 @@ def deep_merge(a, b):
 def nk(s):
     s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode()
     return re.sub(r"[^\w]", "", s.lower())
+
+
+def resolve_pron(story, motor):
+    """pronuncia: {"padrao": {...}, "<motor>": {...}} (seção do motor sobrescreve) ou dict plano (legado).
+    Valores /IPA/ só valem no kokoro; em outro motor são ignorados com aviso."""
+    pr = story.get("pronuncia", {})
+    if story.get("pronuncia_arquivo"):
+        pr = deep_merge(json.loads((ROOT / story["pronuncia_arquivo"]).read_text()), pr)
+    if any(isinstance(v, dict) for v in pr.values()):
+        out = dict(pr.get("padrao", {})); out.update(pr.get(motor, {}))
+    else:
+        out = dict(pr)
+    if motor != "kokoro":
+        for k in [k for k, v in out.items() if "/" in v]:
+            print(f"  AVISO: pronúncia IPA '{k}' -> '{out[k]}' ignorada no motor {motor} (IPA só no kokoro)")
+            out.pop(k)
+    out.pop("_doc", None)
+    return out
 
 
 def die(msg):
@@ -169,7 +188,8 @@ def asr_cached(audio):
     return w
 
 
-def fala_clips(falas, voice, speed, pron, rec_audio=None, rec_tempos=None, workdir=None, stats=None):
+def fala_clips(falas, voice, speed, pron, rec_audio=None, rec_tempos=None, workdir=None, stats=None,
+               motor="kokoro", atempo=1.0, regerar=(), voz_pasta=None):
     """Para cada fala: {audio(24k), palavras[(w, ini, fim)] relativos} ou None (fala muda)."""
     clips = [None] * len(falas)
     if rec_audio:
@@ -236,12 +256,30 @@ def fala_clips(falas, voice, speed, pron, rec_audio=None, rec_tempos=None, workd
         print(f"  alinhamento da gravação -> {workdir / 'alinhamento' / 'tempos.json'} (edite e use --narracao-tempos se precisar)")
         return clips
     use_asr = AL.available()
+    ext = {}
+    com_texto = [f for f in falas if f["_words"]]
+    if voz_pasta:
+        ext = VX.ler_pasta(voz_pasta, com_texto)
+    elif motor != "kokoro":
+        # externo: gera em lote só o que falta no cache (por fala: velocidade/take podem variar)
+        grupos = {}
+        for f in com_texto:
+            falado = " ".join(w for w in T.apply_pronunciation(f["_words"], pron) if w)
+            grupos.setdefault(float(f.get("velocidade", speed)), []).append(
+                {"id": f["id"], "falado": falado, "take": int(f.get("take", 0))})
+        for vel, its in grupos.items():
+            ext.update(VX.gerar(its, motor, voice, vel, atempo, regerar=set(regerar)))
     for i, f in enumerate(falas):
         words = f["_words"]
         if not words:
             continue
         spoken = T.apply_pronunciation(words, pron)
-        a = N.synth_cached(" ".join(w for w in spoken if w), voice, float(f.get("velocidade", speed)))
+        if f["id"] in ext:
+            a = ext[f["id"]]
+        else:
+            if f["id"] in regerar:
+                N.synth_cached(" ".join(w for w in spoken if w), voice, float(f.get("velocidade", speed)), refresh=True)
+            a = N.synth_cached(" ".join(w for w in spoken if w), voice, float(f.get("velocidade", speed)))
         if use_asr:
             wt = AL.hybrid_times(a, words, spoken, asr=asr_cached(a), stats=stats)
         else:
@@ -412,6 +450,29 @@ def build_captions(falas, planos, laid, pstart, pend, st):
 
 
 # ---------------------------------------------------------------- efeitos
+def build_trilha(planos, laid, pstart, pend):
+    """deixas de trilha por plano: "trilha": [{"db": -60, "rampa": 0.4, "modo": "normal"|"suspensa",
+    "offset": s, "palavra": "x", "n": 0, "no_fim": true}] -> eventos absolutos para lib.music.automation."""
+    ev = []
+    for k, pl in enumerate(planos):
+        fw = laid[pl["_fala"]]["words"]
+        for c in pl.get("trilha", []):
+            if c.get("no_fim"):
+                base = pend[k]
+            elif c.get("palavra"):
+                hits = [w for w in fw if w["ini"] >= pstart[k] and nk(w["w"]) == nk(c["palavra"])] or \
+                       [w for w in fw if nk(w["w"]) == nk(c["palavra"])]
+                if not hits:
+                    die(f"plano {pl['id']}: deixa de trilha referencia palavra '{c['palavra']}' ausente")
+                base = hits[min(len(hits) - 1, int(c.get("n", 0)))]["ini"]
+            else:
+                base = pstart[k]
+            ev.append({"t": round(base + float(c.get("offset", 0)), 3), "db": c.get("db"), "modo": c.get("modo"),
+                       "rampa": float(c.get("rampa", 0.3)), "plano": pl["id"]})
+            ev[-1] = {k2: v for k2, v in ev[-1].items() if v is not None}
+    return ev
+
+
 def build_sfx(falas, planos, laid, pstart, st):
     events, marks = [], [dict() for _ in planos]
     td = st["transicao_padrao"]
@@ -510,7 +571,9 @@ def contact_sheet(items, out_png, cols=6, thumb_w=270):
         x, y = pad + c * (tw + pad), pad + r * (th + lab_h + pad)
         sheet.paste(im.resize((tw, th), Image.LANCZOS), (x, y + lab_h))
         d.text((x + 4, y + 5), f"{int(t // 60):d}:{t % 60:05.2f}  {lab}", fill=(255, 210, 31), font=font)
-    sheet.save(out_png)
+    tmp = Path(out_png).with_name(f'.{Path(out_png).stem}.tmp{os.getpid()}.png')
+    sheet.save(tmp)
+    os.replace(tmp, out_png)
 
 
 def ffprobe(path):
@@ -536,7 +599,10 @@ def main():
     ap.add_argument("--trecho", help="intervalo em segundos, ex.: 3.5-8")
     ap.add_argument("--sem-trilha", action="store_true")
     ap.add_argument("--trilha", help="arquivo de música para usar no lugar da trilha sintetizada")
-    ap.add_argument("--voz", choices=T.ALL_VOICES)
+    ap.add_argument("--motor", help="motor de voz: kokoro (interno) | supertonic | qwen | qwen-design | chatterbox | ...")
+    ap.add_argument("--voz", help="voz do motor (kokoro: pm_alex...; supertonic: M1..F5; qwen/chatterbox: vozes_qwen.json)")
+    ap.add_argument("--regerar", help="ids de falas para regerar a voz ignorando o cache (mesmo take)")
+    ap.add_argument("--voz-pasta", help="usa uma pasta já gerada por tools/voz/falar.py (casa falas pelo texto)")
     ap.add_argument("--velocidade", type=float)
     ap.add_argument("--narracao-audio", help="WAV/M4A gravado pelo usuário (substitui o TTS)")
     ap.add_argument("--narracao-tempos", help="JSON de tempos para o áudio gravado (senão: alinhamento automático)")
@@ -570,7 +636,8 @@ def main():
     if lock is None:
         work = work.with_name(work.name + f"-{os.getpid()}")
         lock = FS.lock_dir(work)
-        print(f"  (pasta em uso por outra execução; usando {work})")
+        out = out.with_name(f"{out.stem}-{os.getpid()}{out.suffix}")
+        print(f"  (pasta em uso por outra execução; usando {work} e saída {out.name})")
     work.mkdir(parents=True, exist_ok=True)
     st = deep_merge(json.loads((ROOT / "config" / "estilo.json").read_text()), story.get("estilo"))
     for sec in list(st.values()):
@@ -579,18 +646,21 @@ def main():
     st.pop("_doc", None)
     V = st["video"]
     fps, W, H = V["fps"], V["largura"], V["altura"]
-    voice = a.voz or story.get("voz", "pm_alex")
+    motor = a.motor or story.get("motor", "kokoro")
+    voice = a.voz or story.get("voz") or {"kokoro": "pm_alex", "supertonic": "M1"}.get(motor, "narrador-jovem")
     speed = a.velocidade or float(story.get("velocidade", 1.0))
-    pron = dict(story.get("pronuncia", {}))
-    if story.get("pronuncia_arquivo"):
-        pron = {**json.loads((ROOT / story["pronuncia_arquivo"]).read_text()), **pron}
+    atempo = float(story.get("atempo", 1.0))
+    pron = resolve_pron(story, motor)
     falas, planos = normalize(story, st, ROOT / "scenes")
 
     # 1) narração
     os.environ.setdefault("OMP_NUM_THREADS", "4")
     stats = {}
-    clips = fala_clips(falas, voice, speed, pron, a.narracao_audio, a.narracao_tempos, work, stats)
-    meta = {"fonte": "gravado", "origem": a.narracao_audio} if a.narracao_audio else {"fonte": "tts", "voz": voice, "velocidade": speed}
+    clips = fala_clips(falas, voice, speed, pron, a.narracao_audio, a.narracao_tempos, work, stats, motor=motor,
+                       atempo=atempo, regerar=(a.regerar or "").split(",") if a.regerar else (), voz_pasta=a.voz_pasta)
+    meta = {"fonte": "gravado", "origem": a.narracao_audio} if a.narracao_audio else \
+        {"fonte": "tts", "motor": motor, "voz": voice, "velocidade": speed, "atempo": atempo}
+    print(f"[voz] motor={motor} voz={voice} velocidade={speed} atempo={atempo}" + (f" pasta={a.voz_pasta}" if a.voz_pasta else ""))
     laid, narr = layout(falas, clips, st["tempo"], meta, work)
     nframes = int(round(laid[-1]["fim"] * fps))
     total = nframes / fps
@@ -599,6 +669,7 @@ def main():
     # 2) legenda, efeitos, timeline
     caps = build_captions(falas, planos, laid, pstart, pend, st)
     events, marks = build_sfx(falas, planos, laid, pstart, st)
+    trilha_ev = build_trilha(planos, laid, pstart, pend)
     beats = []
     for k, pl in enumerate(planos):
         a0 = pstart[k]
@@ -613,7 +684,7 @@ def main():
           "debug_zona_segura": bool(a.zona_segura), "fontes_extra": story.get("fontes", []), "beats": beats}
     tl_path = work / "timeline.json"
     FS.write_text(tl_path, json.dumps(tl, ensure_ascii=False, indent=1))
-    FS.write_text(work / "sfx.json", json.dumps(events, ensure_ascii=False, indent=1))
+    FS.write_text(work / "sfx.json", json.dumps({"sfx": events, "trilha": trilha_ev}, ensure_ascii=False, indent=1))
 
     nw = sum(len(lf["words"]) for lf in laid)
     speech = sum(len(c["audio"]) for c in clips if c) / T.SR
@@ -621,7 +692,7 @@ def main():
     nwb = np.array([len(c["palavras"]) for c in caps]) if caps else np.zeros(1)
     ndest = sum(any(w["enfase"] for w in c["palavras"]) for c in caps)
     print(f"[timeline] {len(falas)} falas, {len(planos)} planos, {total:.2f}s, {nframes} quadros, {nw} palavras = "
-          f"{nw / total:.2f} pal/s NO TOTAL ({nw / max(speech, 1e-6):.2f} só fala), {len(events)} sfx")
+          f"{nw / total:.2f} pal/s NO TOTAL ({nw / max(speech, 1e-6):.2f} só fala), {len(events)} sfx, {len(trilha_ev)} deixas de trilha")
     print(f"   planos: média {durs.mean():.2f}s, mediana {np.median(durs):.2f}s, min {durs.min():.2f}s, max {durs.max():.2f}s")
     print(f"   legenda: {len(caps)} blocos, {nwb.mean():.2f} pal/bloco, 1 bloco a cada {total / max(1, len(caps)):.2f}s, "
           f"{100 * ndest / max(1, len(caps)):.0f}% com destaque")
@@ -636,7 +707,8 @@ def main():
     # 3) áudio
     trilha = not a.sem_trilha and story.get("trilha", True) is not False
     tfile = a.trilha or (story["trilha"] if isinstance(story.get("trilha"), str) else None)
-    mixed, info = MX.mixdown(narr, events, total, st["audio"], trilha=trilha, trilha_arquivo=tfile)
+    mixed, info = MX.mixdown(narr, events, total, st["audio"], trilha=trilha, trilha_arquivo=tfile,
+                             trilha_eventos=trilha_ev)
     FS.write_wav(work / "mix.wav", mixed, MX.SR)
     print(f"[áudio] {info['lufs']} LUFS, pico {info['pico_dbtp']} dBTP, trilha={'sim' if trilha else 'não'}")
     if a.so_audio:

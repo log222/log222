@@ -72,3 +72,38 @@ def make(dur: float, bpm: float = 92, seed: int = 0) -> np.ndarray:
     out *= np.minimum(1, t / 1.0) * np.minimum(1, (dur - t) / 1.5)
     m = np.abs(out).max()
     return (out / m * 0.8).astype(np.float32) if m else out.astype(np.float32)
+
+
+def make_suspensa(dur: float, seed: int = 0) -> np.ndarray:
+    """camada 'suspensa': acorde sus2 sustentado sem resolver (A sus2 com 9ª e 4ª), tremolo lento,
+    sem bateria nem arpejo. Mesmo nível de pico da trilha normal."""
+    r = np.random.default_rng(seed + 7)
+    n = int(dur * SR) + SR
+    t = np.arange(n) / SR
+    x = np.zeros(n)
+    for f in [110.0, 164.81, 246.94, 293.66, 329.63]:   # A2 E3 B3 D4 E4
+        for det in (-0.5, 0.5):
+            x += 2 * ((t * (f + det) + r.uniform()) % 1) - 1
+    x = _lp(x, 900) * 0.06
+    x *= 0.8 + 0.2 * np.sin(2 * np.pi * 0.35 * t)
+    hi = np.sin(2 * np.pi * 1318.5 * t) * (0.5 + 0.5 * np.sin(2 * np.pi * 5 * t)) * 0.01   # agudo "pendurado"
+    out = (x + hi)[: int(dur * SR)]
+    m = np.abs(out).max()
+    return (out / m * 0.8).astype(np.float32) if m else out.astype(np.float32)
+
+
+def automation(events, n, modos=("normal", "suspensa")):
+    """events: [{t, db, rampa, modo}] (ordem qualquer). Devolve {modo: ganho linear por amostra}.
+    Estado inicial: modo normal, 0 dB. Cada evento faz rampa linear (em amplitude) do estado atual
+    para o novo, começando em t e terminando em t + rampa."""
+    st = {"db": 0.0, "modo": "normal"}
+    amp = lambda s, m: (10 ** (s["db"] / 20) if s["db"] > -79 else 0.0) if s["modo"] == m else 0.0
+    pts = {m: [(0.0, amp(st, m))] for m in modos}
+    for e in sorted(events, key=lambda e: e["t"]):
+        new = {"db": float(e.get("db", st["db"])), "modo": e.get("modo", st["modo"])}
+        t0, t1 = max(0.0, e["t"]), max(0.0, e["t"]) + max(0.005, float(e.get("rampa", 0.3)))
+        for m in modos:
+            pts[m] += [(t0, amp(st, m)), (t1, amp(new, m))]
+        st = new
+    tt = np.arange(n) / SR
+    return {m: np.interp(tt, [p[0] for p in v], [p[1] for p in v]) for m, v in pts.items()}

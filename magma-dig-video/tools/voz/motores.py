@@ -89,7 +89,9 @@ def _qwen(kind):
     import torch
     from qwen_tts import Qwen3TTSModel
     torch.set_num_threads(NTHREADS)
-    return Qwen3TTSModel.from_pretrained(QWEN_REPOS[kind], device_map="cpu", dtype=torch.float32)
+    # bf16 por padrão: o 1.7B em fp32 passa de 8 GB de RAM e foi morto por OOM nesta máquina
+    dt = {"fp32": torch.float32, "bf16": torch.bfloat16}[os.environ.get("VOZ_QWEN_DTYPE", "bf16")]
+    return Qwen3TTSModel.from_pretrained(QWEN_REPOS[kind], device_map="cpu", dtype=dt)
 
 
 def _seed(seed):

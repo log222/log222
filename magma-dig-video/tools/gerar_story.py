@@ -21,6 +21,32 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 
+# Efeitos FIXADOS à mão (substituem o mapeamento automático daquele plano). Pedidos do animador:
+SFX_FIXO = {
+    3: [{"nome": "tictac", "offset": 0.0, "vol": -4, "kw": {"dur": 0.9, "bpm": 240}}],          # para seco no zero
+    30: [{"nome": "apagar", "offset": 0.1}, {"nome": "moeda", "palavra": "Seis", "offset": 0.0, "vol": -2}],
+    57: [{"nome": "clique", "palavra": "dois.", "offset": 0.45}, {"nome": "apagar", "palavra": "dois.", "offset": 0.5}],
+}
+# Automação da trilha por deixa do roteiro (texto do campo sfx). Deixa persiste até a próxima deixa;
+# "baixa"/"corte seco" voltam ao normal no 1º plano de outro bloco; "some" dura até a próxima deixa
+# (silêncio de suspense p44 -> "Cobre." -> p48 "trilha baixa"); "suspensa" vai até o fim.
+TRILHA_DEIXAS = [
+    ("corte seco no silêncio da trilha", {"offset": 0.9, "db": -80, "rampa": 0.02}),   # p03: zero do cronômetro
+    ("trilha some", {"offset": 0.0, "db": -80, "rampa": 0.8}),
+    ("trilha baixa", {"offset": 0.0, "db": -10, "rampa": 0.6, "modo": "normal"}),
+    ("trilha suspensa", {"offset": 0.0, "db": 0, "rampa": 1.0, "modo": "suspensa"}),
+]
+RESTAURA = {"db": 0, "rampa": 0.6, "modo": "normal"}
+
+# Pronúncia por motor (só o áudio). "padrao" vale para todos; a seção do motor sobrescreve.
+# Escolhas testadas com ASR de volta (Whisper + Parakeet), ver relatório da fase 3.
+PRONUNCIA = {
+    "padrao": {"MAGMA DIG": "Mágma Díg", "Zeca": "Zéca", "Crac": "Crák",
+               "Dia um. Mina A": "Dia um... Mina Á", "Cobre": "Cóbre"},
+    "kokoro": {"MAGMA DIG": "MAGMA /dˈiɡ/", "Zeca": "Zeca", "Crac": "/kɾˈak/",
+               "Dia um. Mina A": "Dia úm... Mína Á", "Cobre": "Cobre"},
+}
+
 PAUSAS = {47: 0.5}          # plano -> pausa depois da fala (s)
 SEPARAR_ANTES = {47, 57}     # planos que começam uma fala própria (isolar para a pausa / fechamento)
 
@@ -98,12 +124,28 @@ def sfx_for(p):
         add("passos", "passos", offset=0.0, vol=-6)
     if "areia" in txt or "rangendo" in txt:
         add("rachar", "areia/metal", offset=0.1, vol=-10)
+    if "vento" in txt or "grilo" in txt:
+        add("vento", "vento", offset=0.0, vol=-6, kw={"dur": round(p["dur_estimada_s"] + 0.8, 1), "grilos": "grilo" in txt})
+    if "folha" in txt or "página" in txt:
+        add("folha", "folha", offset=0.3, vol=-6)
+    if "porta" in txt:
+        add("porta", "porta", offset=0.2, vol=-6)
+    if "poeira" in txt or "pedrinha" in txt:
+        add("pedrinhas", "poeira", offset=0.25, vol=-8)
+    if "chiado" in txt:
+        add("chiado", "chiado", offset=0.0, vol=-8, kw={"dur": round(p["dur_estimada_s"] + 0.5, 1)})
+    if "eco" in txt:
+        for e in ev:
+            if e["nome"] == "whoosh":
+                e.setdefault("kw", {})["eco"] = True
     if "brilho" in txt or "faísca" in txt:
         add("ding", "brilho", offset=0.15 if "faísca" in txt else 0.0, vol=-8, kw={"pitch": 1.5})
     sem = [x.strip() for x in re.split(r"[+,]", p["sfx"]) if x.strip() and not any(
         u in x.lower() for u in ["crac", "plim", "moeda", "clique", "interruptor", "apag", "falhando", "zumbido",
                                  "estabiliza", "tique", "whoosh", "golpe", "giz", "acorde", "nota", "batida",
-                                 "coração", "rumor", "broca", "ronco", "passo", "passinh", "areia", "rangendo", "brilho", "faísca"])]
+                                 "coração", "rumor", "broca", "ronco", "passo", "passinh", "areia", "rangendo", "brilho", "faísca",
+                                 "vento", "grilo", "folha", "página", "porta", "poeira", "chiado", "eco", "trilha",
+                                 "duas vezes", "sem resolver"])]
     return ev, sem
 
 
@@ -113,6 +155,8 @@ def main():
     ap.add_argument("-o", "--out", required=True)
     ap.add_argument("--velocidade", type=float, default=1.0)
     ap.add_argument("--max-palavras", type=int, default=20)
+    ap.add_argument("--motor", default="kokoro", help="kokoro (interno) | supertonic | qwen | chatterbox ...")
+    ap.add_argument("--voz", default=None)
     a = ap.parse_args()
     d = json.loads(Path(a.shots).read_text())
     planos = d["planos"]
@@ -138,6 +182,7 @@ def main():
         falas.append(cur)
 
     out_falas, sem_mapa = [], []
+    estado = {"trilha": None, "bloco": None}
     for fi, ps in enumerate(falas):
         texto = " ".join(p["narracao"].strip() for p in ps)
         f = {"id": f"f{fi + 1:02d}", "texto": texto, "planos": []}
@@ -146,9 +191,22 @@ def main():
         idx = 0
         for p in ps:
             ev, sem = sfx_for(p)
+            if p["id"] in SFX_FIXO:
+                ev = json.loads(json.dumps(SFX_FIXO[p["id"]]))
             pl = {"id": f"p{p['id']:02d}", "inicio": idx, "cena": "auto",
                   "destaques": p.get("destaques", []), "sfx": ev,
                   "roteiro": {k: p[k] for k in ("id", "bloco", "cenario", "acao", "camera", "ui", "sfx", "usa_gameplay", "narracao")}}
+            # trilha
+            cues = [dict(c) for k, c in TRILHA_DEIXAS if k in p["sfx"].lower()]
+            if cues and estado["trilha"] and cues[-1].get("modo") == estado["trilha"].get("modo") == "suspensa":
+                cues = []                               # já está suspensa: não reinicia
+            if cues:
+                pl["trilha"] = cues[-1:]
+                estado["trilha"] = cues[-1]; estado["bloco"] = p["bloco"]
+            elif (estado["trilha"] and estado["trilha"].get("modo") != "suspensa" and estado["trilha"].get("db") != -80
+                  or estado["trilha"] and estado["trilha"].get("rampa") == 0.02) and p["bloco"] != estado["bloco"]:
+                pl["trilha"] = [dict(RESTAURA)]
+                estado["trilha"] = None
             if sem:
                 pl["sfx_sem_mapa"] = sem
                 sem_mapa.append((p["id"], sem))
@@ -158,8 +216,9 @@ def main():
     story = {
         "titulo": d.get("titulo", ""),
         "_gerado_por": "tools/gerar_story.py a partir de " + a.shots,
-        "voz": "pm_alex", "velocidade": a.velocidade, "trilha": True,
-        "pronuncia": {"DIG": "/dˈiɡ/", "Crac": "/kɾˈak/"},
+        "motor": a.motor, "voz": a.voz or {"kokoro": "pm_alex", "supertonic": "M1"}.get(a.motor, "narrador-jovem"),
+        "velocidade": a.velocidade, "trilha": True,
+        "pronuncia": PRONUNCIA,
         "estilo": {"audio": {"sfx_db": -10.0}},
         "falas": out_falas,
     }
@@ -168,6 +227,7 @@ def main():
     print(f"{len(out_falas)} falas, {len(planos)} planos, {nw} palavras -> {a.out}")
     for f in out_falas:
         print(f"  {f['id']} ({len(words(f['texto']))} pal, planos {[p['id'] for p in f['planos']]}): {f['texto']}")
+    print("deixas de trilha:", [(pl["id"], pl["trilha"]) for f in out_falas for pl in f["planos"] if pl.get("trilha")])
     if sem_mapa:
         print("sfx do roteiro sem efeito correspondente (ignorados):")
         for i, s in sem_mapa:
