@@ -10,7 +10,8 @@
   "texto": "Acendeu, é dia."
  },
  {
-  "texto": "Cada pedra que racha paga na hora."
+  "texto": "Cada pedra que racha paga na hora.",
+  "seed": 5
  },
  {
   "texto": "Apagou, é noite."
@@ -19,7 +20,8 @@
   "texto": "De noite, vende, aprende e dorme."
  },
  {
-  "texto": "Trinta dias de luz cabem em cinco minutos."
+  "texto": "Trinta dias de luz cabem em cinco minutos.",
+  "seed": 5
  },
  {
   "texto": "O Zeca é um tatu de capacete amarelo."
@@ -30,7 +32,8 @@
   "seed": 2
  },
  {
-  "texto": "Mas chegou com uma picareta velha e nenhuma moeda."
+  "texto": "Mas chegou com uma picareta velha e nenhuma moeda.",
+  "seed": 5
  },
  {
   "texto": "Na parede da Toca, riscou a meta: mil moedas em trinta dias."
@@ -45,7 +48,8 @@
   "texto": "O buraco mais fundo que a gente já cavou tem doze quilômetros."
  },
  {
-  "texto": "Levou quase vinte anos."
+  "texto": "Levou quase vinte anos.",
+  "seed": 5
  },
  {
   "texto": "O centro da Terra fica mais de quinhentas vezes mais fundo."
@@ -57,7 +61,8 @@
   "texto": "Tipo a superfície do Sol."
  },
  {
-  "texto": "Dia um."
+  "texto": "Dia um.",
+  "seed": 5
  },
  {
   "texto": "Mina A, Terra Rasa.",
@@ -80,25 +85,30 @@
   "texto": "Crac."
  },
  {
-  "texto": "Duas."
+  "texto": "Duas.",
+  "seed": 6
  },
  {
   "texto": "Apagou."
  },
  {
-  "texto": "Seis moedas."
+  "texto": "Seis moedas.",
+  "seed": 5
  },
  {
   "texto": "Nesse ritmo, a meta levava cento e sessenta e sete dias."
  },
  {
-  "texto": "Ele tinha vinte e nove."
+  "texto": "Ele tinha vinte e nove.",
+  "seed": 6
  },
  {
-  "texto": "Noite um."
+  "texto": "Noite um.",
+  "seed": 5
  },
  {
-  "texto": "Habilidades."
+  "texto": "Habilidades.",
+  "seed": 5
  },
  {
   "texto": "Mina, Força, Valor, Tempo, Poderes, Forja, Ajudantes."
@@ -107,7 +117,8 @@
   "texto": "Todo minerador começa por Força."
  },
  {
-  "texto": "O Zeca botou tudo em Tempo."
+  "texto": "O Zeca botou tudo em Tempo.",
+  "seed": 5
  },
  {
   "texto": "Porque braço forte não serve de nada no escuro."
@@ -129,7 +140,8 @@
   "texto": "Crac."
  },
  {
-  "texto": "Duas."
+  "texto": "Duas.",
+  "seed": 6
  },
  {
   "texto": "Cinco segundos."
@@ -164,7 +176,8 @@
   "falado": "Sem esse segundo... ficava no escuro."
  },
  {
-  "texto": "Noite dois."
+  "texto": "Noite dois.",
+  "seed": 5
  },
  {
   "texto": "Mercado."
@@ -176,7 +189,8 @@
   "texto": "Hoje, o cobre paga quarenta moedas."
  },
  {
-  "texto": "Quatro por cento da meta."
+  "texto": "Quatro por cento da meta.",
+  "seed": 6
  },
  {
   "texto": "Faltam vinte e oito dias."
@@ -188,10 +202,11 @@
   "texto": "Mas seta não é promessa."
  },
  {
-  "texto": "Vende hoje e garante os quarenta, ou segura até amanhã e aposta na seta?"
+  "texto": "Vende hoje e garante os quarenta, ou segura até amanhã e aposta na seta?",
+  "seed": 5
  },
  {
   "texto": "Curte pra parte dois.",
-  "seed": 1
+  "seed": 5
  }
 ]

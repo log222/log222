@@ -48,4 +48,5 @@ print(hf_hub_download("balacoon/utmos", "utmos.jit", local_dir=".cache/voz-model
 EOF
 # ASR para medir (Whisper-small + Parakeet): vem do setup.sh do pipeline (.cache/asr)
 [[ -d .cache/asr ]] || echo "aviso: rode ./setup.sh para baixar o ASR (.cache/asr) usado por medir.py"
+mkdir -p .cache/voz-ref && cp -n tools/voz/ref/*.wav tools/voz/ref/*.txt .cache/voz-ref/ 2>/dev/null || true   # voz definitiva (não regerar)
 echo ok

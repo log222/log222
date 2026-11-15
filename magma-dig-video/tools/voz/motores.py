@@ -133,6 +133,11 @@ def referencia_sintetica(voz, seed=0):
     REF_DIR.mkdir(parents=True, exist_ok=True)
     p = REF_DIR / f"qwen-design-{voz}-s{seed}.wav"
     t = p.with_suffix(".txt")
+    versionada = HERE / "ref" / p.name  # referências definitivas ficam no git (tools/voz/ref/)
+    if not p.exists() and versionada.exists():
+        import shutil
+        shutil.copy(versionada, p)
+        shutil.copy(versionada.with_suffix(".txt"), t)
     if not p.exists():
         cfg = QWEN_DESIGN.get(voz, {})
         texto = cfg.get("texto_ref", "Olha só que coisa: hoje a gente vai descobrir um jogo diferente. "
