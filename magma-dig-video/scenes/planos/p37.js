@@ -32,7 +32,9 @@ MD.plano("p37", {
     }
     // Zeca: só os olhos no breu (aparece quando o golpe começa)
     const zk = ART.prog(t, tN, tN + 0.3);
-    if (zk > 0) ART.withLayer(g, cam, 1, gg => { gg.save(); gg.globalAlpha = zk; ART.zeca.drawEscuro(gg, ART.zeca.pose("parado", t, { x: 770, y: 1320, s: 0.8, turn: -0.4, alvo: [300, 1100], eyes: t > imp ? "espanto" : "aberto" }), 0.97); gg.restore(); });
+    if (zk > 0) ART.withLayer(g, cam, 1, gg => { gg.save(); gg.globalAlpha = zk; ART.zeca.drawEscuro(gg, ART.zeca.pose("parado", t, Object.assign({ x: 770, y: 1320, s: 0.8, turn: -0.4, eyes: t > imp && t < tE ? "espanto" : "aberto" }, t < tE ? { alvo: [300, 1100] } : { look: [Math.sin((t - tE) * 3.1) * 0.9, -0.2 + 0.4 * Math.sin((t - tE) * 1.7)], blinkSeed: 0.9 })), 0.97); gg.restore(); });
+    // última brasa da faísca morrendo devagar até o corte
+    if (R && R.ponta && t >= imp) { const k = 1 - ART.prog(t, imp, D); ART.glow(g, R.ponta[0], R.ponta[1], 40 + 30 * Math.sin(t * 9), "#FFB070", 0.35 * k); }
     ART.post(g, ctx.frame, { vinheta: 0.65 });
   },
 });
