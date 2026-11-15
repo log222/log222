@@ -67,7 +67,7 @@
   "tempo": {
     "_doc": "Ritmo medido da referência: ~2,95 palavras/s no total, nenhuma pausa > 0,55 s. pausa_fala = silêncio entre unidades de narração (além das pausas internas do TTS). Pausas intencionais: 'pausa_depois' na fala.",
     "inicio": 0.12,
-    "pausa_fala": 0.1,
+    "pausa_fala": 0.12,
     "final": 0.9,
     "corte_antecipado": 0.04,
     "entrada_beat": 0.12,

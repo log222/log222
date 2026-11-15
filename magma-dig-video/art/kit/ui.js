@@ -94,7 +94,7 @@
    *  o = {valor, max (10), s, fantasma (valor de ontem p/ barra fantasma), icone ('sol'|'lua'), pausa, a} */
   UI.cronometro = (g, x, y, o = {}) => {
     const s = o.s || 1, v = Math.max(0, o.valor ?? 10), mx = o.max || 10, fr = clamp(v / (o.escala || mx));
-    const w = 300 * s, h = 150 * s;
+    const w = (o.icone ? 350 : 300) * s, h = 150 * s;
     g.save(); g.globalAlpha *= o.a ?? 1;
     const alerta = v <= (o.alerta ?? 1.0) && v > 0.001;
     UI.cartao(g, x - w / 2, y - h / 2, w, h, { r: 30 * s, cor: "rgba(20,18,31,.88)", borda: alerta ? "#E63748" : "rgba(255,255,255,.14)", bw: 3 * s });
@@ -102,9 +102,9 @@
     g.font = F(96 * s, 1000); g.textAlign = "center"; g.textBaseline = "middle";
     g.fillStyle = alerta ? "#FF5A66" : "#FFFFFF";
     g.shadowColor = "rgba(0,0,0,.5)"; g.shadowBlur = 8 * s; g.shadowOffsetY = 3 * s;
-    g.fillText(txt, x + (o.icone ? 22 * s : 0), y - 14 * s);
+    g.fillText(txt, x + (o.icone ? 36 * s : 0), y - 14 * s);
     g.shadowColor = "transparent";
-    if (o.icone) UI.pix(g, o.icone, x - w / 2 + 44 * s, y - 14 * s, 44 * s);
+    if (o.icone) UI.pix(g, o.icone, x - w / 2 + 50 * s, y - 14 * s, 50 * s);
     // barra
     const bx = x - w / 2 + 28 * s, bw = w - 56 * s, by = y + 40 * s, bh = 14 * s;
     ART.rr(g, bx, by, bw, bh, bh / 2); g.fillStyle = "rgba(255,255,255,.12)"; g.fill();

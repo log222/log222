@@ -1,0 +1,1822 @@
+{
+ "titulo": "MAGMA DIG · Parte 1",
+ "_gerado_por": "tools/gerar_story.py a partir de roteiro/parte-01.shots.json",
+ "voz": "pm_alex",
+ "velocidade": 1.1,
+ "trilha": true,
+ "pronuncia": {
+  "DIG": "/dˈiɡ/",
+  "Crac": "/kɾˈak/"
+ },
+ "estilo": {
+  "audio": {
+   "sfx_db": -10.0
+  }
+ },
+ "falas": [
+  {
+   "id": "f01",
+   "texto": "E se o seu dia de trabalho durasse só dez segundos?",
+   "planos": [
+    {
+     "id": "p01",
+     "inicio": 0,
+     "cena": "auto",
+     "destaques": [],
+     "sfx": [
+      {
+       "nome": "clique",
+       "offset": 0.02
+      },
+      {
+       "nome": "zumbido",
+       "offset": 0.05,
+       "vol": -10
+      }
+     ],
+     "roteiro": {
+      "id": 1,
+      "bloco": "Gancho",
+      "cenario": "C7 Close de objeto sobre fundo escuro",
+      "acao": "Breu total. Clique. A lanterna do capacete amarelo acende em close e o feixe corta a poeira.",
+      "camera": "Close frontal da lanterna; push-in rápido",
+      "ui": "nenhuma",
+      "sfx": "clique de interruptor + zumbido de lâmpada",
+      "usa_gameplay": false,
+      "narracao": "E se o seu dia"
+     }
+    },
+    {
+     "id": "p02",
+     "inicio": 5,
+     "cena": "auto",
+     "destaques": [
+      "TRABALHO"
+     ],
+     "sfx": [
+      {
+       "nome": "picareta",
+       "offset": 0.05,
+       "seed": 0
+      }
+     ],
+     "roteiro": {
+      "id": 2,
+      "bloco": "Gancho",
+      "cenario": "C3 Gameplay real do trailer (ponto de vista do Zeca)",
+      "acao": "Picareta batendo no primeiro bloco cinza, em 1ª pessoa.",
+      "camera": "Plano do trailer recortado em 9:16, leve zoom",
+      "ui": "cronômetro desenhado por cima do original: 10,0 começando a cair",
+      "sfx": "CRAC curto",
+      "usa_gameplay": "trailer 0,5–1,5 s (mina de pedra)",
+      "narracao": "de trabalho durasse"
+     }
+    },
+    {
+     "id": "p03",
+     "inicio": 8,
+     "cena": "auto",
+     "destaques": [
+      "SEGUNDOS"
+     ],
+     "sfx": [
+      {
+       "nome": "tictac",
+       "offset": 0.0,
+       "vol": -4,
+       "kw": {
+        "dur": 1.0,
+        "bpm": 240
+       }
+      }
+     ],
+     "roteiro": {
+      "id": 3,
+      "bloco": "Gancho",
+      "cenario": "C7 Close de objeto sobre fundo escuro",
+      "acao": "Cronômetro gigante despenca de 10,0 a 0,0 em menos de um segundo; a barra amarela esvazia e a tela apaga.",
+      "camera": "Close do número, tremida no zero",
+      "ui": "cronômetro 10,0 → 0,0 + barra amarela",
+      "sfx": "tique-taque acelerado + corte seco no silêncio da trilha",
+      "usa_gameplay": false,
+      "narracao": "só dez segundos?"
+     },
+     "sfx_sem_mapa": [
+      "corte seco no silêncio da trilha"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "f02",
+   "texto": "No MAGMA DIG, quem marca a hora é a lanterna. Acendeu, é dia. Cada pedra que racha paga na hora.",
+   "planos": [
+    {
+     "id": "p04",
+     "inicio": 0,
+     "cena": "auto",
+     "destaques": [
+      "MAGMA DIG"
+     ],
+     "sfx": [],
+     "roteiro": {
+      "id": 4,
+      "bloco": "Regras do mundo",
+      "cenario": "C1 Vila à noite / boca da mina",
+      "acao": "Vila de noite, cerca de madeira em volta da boca da mina; placa de madeira com MAGMA DIG pendurada balança.",
+      "camera": "Plano geral, deriva lateral lenta com parallax",
+      "ui": "placa com o nome do jogo (desenhada no cenário)",
+      "sfx": "vento noturno, grilos",
+      "usa_gameplay": false,
+      "narracao": "No MAGMA DIG,"
+     },
+     "sfx_sem_mapa": [
+      "vento noturno",
+      "grilos"
+     ]
+    },
+    {
+     "id": "p05",
+     "inicio": 3,
+     "cena": "auto",
+     "destaques": [
+      "LANTERNA"
+     ],
+     "sfx": [
+      {
+       "nome": "zumbido",
+       "offset": 0.05,
+       "vol": -10
+      }
+     ],
+     "roteiro": {
+      "id": 5,
+      "bloco": "Regras do mundo",
+      "cenario": "C2 Mina A, pedra cinza (Zeca em cena)",
+      "acao": "Zeca de frente na entrada da mina; o feixe da lanterna funciona como ponteiro de relógio na parede.",
+      "camera": "Plano médio, push-in até o rosto",
+      "ui": "nenhuma",
+      "sfx": "zumbido da lâmpada",
+      "usa_gameplay": false,
+      "narracao": "quem marca a hora é a lanterna."
+     }
+    },
+    {
+     "id": "p06",
+     "inicio": 10,
+     "cena": "auto",
+     "destaques": [
+      "DIA"
+     ],
+     "sfx": [
+      {
+       "nome": "acorde",
+       "offset": 0.05,
+       "vol": -6,
+       "kw": {
+        "tipo": "claro"
+       }
+      }
+     ],
+     "roteiro": {
+      "id": 6,
+      "bloco": "Regras do mundo",
+      "cenario": "C2 Mina A, pedra cinza (Zeca em cena)",
+      "acao": "Feixe ilumina a parede de blocos cinza low-poly; poeira dourada no ar.",
+      "camera": "Plano geral da parede, câmera sobe devagar",
+      "ui": "ícone de sol pequeno ao lado do cronômetro",
+      "sfx": "acorde claro da trilha",
+      "usa_gameplay": false,
+      "narracao": "Acendeu, é dia."
+     }
+    },
+    {
+     "id": "p07",
+     "inicio": 13,
+     "cena": "auto",
+     "destaques": [
+      "PAGA"
+     ],
+     "sfx": [
+      {
+       "nome": "picareta",
+       "offset": 0.05,
+       "seed": 0
+      },
+      {
+       "nome": "moeda",
+       "offset": 0.25,
+       "vol": -2
+      }
+     ],
+     "roteiro": {
+      "id": 7,
+      "bloco": "Regras do mundo",
+      "cenario": "C3 Gameplay real do trailer (ponto de vista do Zeca)",
+      "acao": "Bloco racha com CRAC! amarelo, pedrinha voa em arco até a mochila.",
+      "camera": "Plano do trailer, zoom no CRAC",
+      "ui": "CRAC! do jogo + moeda +1 desenhada voando para o contador",
+      "sfx": "CRAC + plim de moeda",
+      "usa_gameplay": "trailer 1,5–3,0 s",
+      "narracao": "Cada pedra que racha paga na hora."
+     }
+    }
+   ]
+  },
+  {
+   "id": "f03",
+   "texto": "Apagou, é noite. De noite, vende, aprende e dorme. Trinta dias de luz cabem em cinco minutos.",
+   "planos": [
+    {
+     "id": "p08",
+     "inicio": 0,
+     "cena": "auto",
+     "destaques": [
+      "NOITE"
+     ],
+     "sfx": [
+      {
+       "nome": "apagar",
+       "offset": 0.1
+      }
+     ],
+     "roteiro": {
+      "id": 8,
+      "bloco": "Regras do mundo",
+      "cenario": "C2 Mina A, pedra cinza (Zeca em cena)",
+      "acao": "A lanterna pisca duas vezes e apaga; no escuro só sobram os olhos brilhantes do Zeca.",
+      "camera": "Close do rosto, câmera parada com leve respiração",
+      "ui": "cronômetro em 0,0",
+      "sfx": "estalo de lâmpada apagando",
+      "usa_gameplay": false,
+      "narracao": "Apagou, é noite."
+     }
+    },
+    {
+     "id": "p09",
+     "inicio": 3,
+     "cena": "auto",
+     "destaques": [],
+     "sfx": [
+      {
+       "nome": "moeda",
+       "offset": 0.1,
+       "vol": -4,
+       "kw": {
+        "pitch": 1.1
+       }
+      },
+      {
+       "nome": "ronco",
+       "offset": 0.0,
+       "vol": -8
+      }
+     ],
+     "roteiro": {
+      "id": 9,
+      "bloco": "Regras do mundo",
+      "cenario": "C4 Toca (interior: parede da meta, cama, mesa)",
+      "acao": "Três micro-ações em sequência dentro da Toca: moedas no balcão, Zeca olhando um mural de cartões, Zeca deitando com balão Z.",
+      "camera": "Travelling lateral pela Toca, da esquerda para a direita",
+      "ui": "balão Z do retrato dormindo (zeca.png)",
+      "sfx": "moedas, folha virando, ronco curto",
+      "usa_gameplay": false,
+      "narracao": "De noite, vende, aprende e dorme."
+     },
+     "sfx_sem_mapa": [
+      "folha virando"
+     ]
+    },
+    {
+     "id": "p10",
+     "inicio": 9,
+     "cena": "auto",
+     "destaques": [
+      "CINCO"
+     ],
+     "sfx": [
+      {
+       "nome": "moeda",
+       "offset": 2.29,
+       "vol": -2
+      },
+      {
+       "nome": "tictac",
+       "offset": 0.0,
+       "vol": -4,
+       "kw": {
+        "dur": 2.7,
+        "bpm": 240
+       }
+      }
+     ],
+     "roteiro": {
+      "id": 10,
+      "bloco": "Regras do mundo",
+      "cenario": "C7 Close de objeto sobre fundo escuro",
+      "acao": "Calendário de 30 quadradinhos se preenche em segundos; vira um relógio marcando 5:00.",
+      "camera": "Close frontal, morph do calendário no relógio",
+      "ui": "grade 30 dias + relógio 5:00",
+      "sfx": "tique-taque rápido terminando em plim",
+      "usa_gameplay": false,
+      "narracao": "Trinta dias de luz cabem em cinco minutos."
+     }
+    }
+   ]
+  },
+  {
+   "id": "f04",
+   "texto": "O Zeca é um tatu de capacete amarelo. Cavar, tatu já nasce sabendo.",
+   "planos": [
+    {
+     "id": "p11",
+     "inicio": 0,
+     "cena": "auto",
+     "destaques": [
+      "ZECA"
+     ],
+     "sfx": [
+      {
+       "nome": "passos",
+       "offset": 0.0,
+       "vol": -6
+      }
+     ],
+     "roteiro": {
+      "id": 11,
+      "bloco": "Protagonista e aposta",
+      "cenario": "C1 Vila à noite / boca da mina",
+      "acao": "Zeca entra em quadro na boca da mina, para e olha a câmera; carapaça listrada, orelhinhas rosadas.",
+      "camera": "Plano médio, câmera baixa, push-in leve",
+      "ui": "nenhuma",
+      "sfx": "passinhos na terra",
+      "usa_gameplay": false,
+      "narracao": "O Zeca é um tatu de capacete amarelo."
+     }
+    },
+    {
+     "id": "p12",
+     "inicio": 8,
+     "cena": "auto",
+     "destaques": [
+      "TATU"
+     ],
+     "sfx": [
+      {
+       "nome": "rachar",
+       "offset": 0.1,
+       "vol": -10
+      }
+     ],
+     "roteiro": {
+      "id": 12,
+      "bloco": "Protagonista e aposta",
+      "cenario": "C6 Inserto de ciência: corte da Terra",
+      "acao": "Silhueta de um tatu de verdade em linhas ciano; destaque nas garras da frente cavando a terra.",
+      "camera": "Plano lateral, linhas se desenhando",
+      "ui": "etiqueta: GARRAS DE CAVAR",
+      "sfx": "areia raspando",
+      "usa_gameplay": false,
+      "narracao": "Cavar, tatu já nasce sabendo."
+     }
+    }
+   ]
+  },
+  {
+   "id": "f05",
+   "texto": "Mas chegou com uma picareta velha e nenhuma moeda.",
+   "planos": [
+    {
+     "id": "p13",
+     "inicio": 0,
+     "cena": "auto",
+     "destaques": [
+      "VELHA"
+     ],
+     "sfx": [
+      {
+       "nome": "rachar",
+       "offset": 0.1,
+       "vol": -10
+      }
+     ],
+     "roteiro": {
+      "id": 13,
+      "bloco": "Protagonista e aposta",
+      "cenario": "C7 Close de objeto sobre fundo escuro",
+      "acao": "Picareta cinza com cabo rachado girando devagar; corta para saquinho de moedas virado do avesso, só poeira.",
+      "camera": "Close em giro de 3/4, corte interno no meio da frase",
+      "ui": "contador de moedas: 0",
+      "sfx": "metal rangendo + poeira caindo",
+      "usa_gameplay": false,
+      "narracao": "Mas chegou com uma picareta velha e nenhuma moeda."
+     },
+     "sfx_sem_mapa": [
+      "poeira caindo"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "f06",
+   "texto": "Na parede da Toca, riscou a meta: mil moedas em trinta dias.",
+   "planos": [
+    {
+     "id": "p14",
+     "inicio": 0,
+     "cena": "auto",
+     "destaques": [],
+     "sfx": [
+      {
+       "nome": "giz",
+       "offset": 0.05,
+       "vol": -4
+      }
+     ],
+     "roteiro": {
+      "id": 14,
+      "bloco": "Protagonista e aposta",
+      "cenario": "C4 Toca (interior: parede da meta, cama, mesa)",
+      "acao": "Zeca com um pedaço de giz riscando a parede de pedra da Toca.",
+      "camera": "Plano por cima do ombro do Zeca",
+      "ui": "nenhuma",
+      "sfx": "giz arranhando",
+      "usa_gameplay": false,
+      "narracao": "Na parede da Toca, riscou a meta:"
+     }
+    },
+    {
+     "id": "p15",
+     "inicio": 7,
+     "cena": "auto",
+     "destaques": [
+      "MIL"
+     ],
+     "sfx": [
+      {
+       "nome": "giz",
+       "offset": 0.05,
+       "vol": -4
+      },
+      {
+       "nome": "acorde",
+       "offset": 0.05,
+       "vol": -6,
+       "kw": {
+        "tipo": "grave"
+       }
+      }
+     ],
+     "roteiro": {
+      "id": 15,
+      "bloco": "Protagonista e aposta",
+      "cenario": "C4 Toca (interior: parede da meta, cama, mesa)",
+      "acao": "Close da parede: 1.000 escrito grande e trinta tracinhos embaixo.",
+      "camera": "Close frontal, push-in no número",
+      "ui": "estreia o cartão fixo da série: SALDO 0 / META 1.000 · DIA 1 DE 30",
+      "sfx": "giz + batida grave",
+      "usa_gameplay": false,
+      "narracao": "mil moedas em trinta dias."
+     }
+    }
+   ]
+  },
+  {
+   "id": "f07",
+   "texto": "O preço pra subir de rank e abrir a próxima mina. E no fundo de tudo, o Coração de Magma.",
+   "planos": [
+    {
+     "id": "p16",
+     "inicio": 0,
+     "cena": "auto",
+     "destaques": [
+      "RANK"
+     ],
+     "sfx": [
+      {
+       "nome": "clique",
+       "offset": 0.02
+      }
+     ],
+     "roteiro": {
+      "id": 16,
+      "bloco": "Protagonista e aposta",
+      "cenario": "C3 Gameplay real do trailer (ponto de vista do Zeca)",
+      "acao": "Botão amarelo SUBIR DE RANK do painel do Mercado.",
+      "camera": "Recorte da screenshot shot_4 só no botão (esconder o 10,4BI e o rank E), push-in",
+      "ui": "botão SUBIR DE RANK",
+      "sfx": "clique de botão",
+      "usa_gameplay": "screenshot shot_4 (recorte do botão)",
+      "narracao": "O preço pra subir de rank"
+     }
+    },
+    {
+     "id": "p17",
+     "inicio": 6,
+     "cena": "auto",
+     "destaques": [
+      "PRÓXIMA"
+     ],
+     "sfx": [
+      {
+       "nome": "whoosh",
+       "offset": 0.0,
+       "vol": -6
+      }
+     ],
+     "roteiro": {
+      "id": 17,
+      "bloco": "Protagonista e aposta",
+      "cenario": "C3 Gameplay real do trailer (ponto de vista do Zeca)",
+      "acao": "Mapa da Jornada: trilha em S, câmera vai do nó A ao nó B, Pinheiral Nevado.",
+      "camera": "Plano do trailer, pan vertical do A ao B",
+      "ui": "Mapa da Jornada do jogo",
+      "sfx": "whoosh curto",
+      "usa_gameplay": "trailer 19,5–22 s (Mapa da Jornada)",
+      "narracao": "e abrir a próxima mina."
+     }
+    },
+    {
+     "id": "p18",
+     "inicio": 11,
+     "cena": "auto",
+     "destaques": [],
+     "sfx": [
+      {
+       "nome": "ronco",
+       "offset": 0.0,
+       "vol": -8
+      }
+     ],
+     "roteiro": {
+      "id": 18,
+      "bloco": "Protagonista e aposta",
+      "cenario": "C8 Profundezas / Coração de Magma",
+      "acao": "Câmera atravessa camadas de rocha de cores diferentes, uma por mina, cada vez mais quentes.",
+      "camera": "Descida vertical contínua, rápida",
+      "ui": "letras A a I passando na lateral",
+      "sfx": "rumor grave crescendo",
+      "usa_gameplay": false,
+      "narracao": "E no fundo de tudo,"
+     }
+    },
+    {
+     "id": "p19",
+     "inicio": 16,
+     "cena": "auto",
+     "destaques": [
+      "CORAÇÃO"
+     ],
+     "sfx": [
+      {
+       "nome": "coracao",
+       "offset": 0.0,
+       "vol": -2
+      }
+     ],
+     "roteiro": {
+      "id": 19,
+      "bloco": "Protagonista e aposta",
+      "cenario": "C8 Profundezas / Coração de Magma",
+      "acao": "Silhueta gigante pulsando laranja no fundo do escuro; só o contorno, sem revelar o chefe.",
+      "camera": "Plano geral, câmera parada, pulsação de luz",
+      "ui": "nenhuma",
+      "sfx": "batida de coração grave",
+      "usa_gameplay": false,
+      "narracao": "o Coração de Magma."
+     }
+    }
+   ]
+  },
+  {
+   "id": "f08",
+   "texto": "O buraco mais fundo que a gente já cavou tem doze quilômetros. Levou quase vinte anos.",
+   "planos": [
+    {
+     "id": "p20",
+     "inicio": 0,
+     "cena": "auto",
+     "destaques": [],
+     "sfx": [
+      {
+       "nome": "ronco",
+       "offset": 0.0,
+       "vol": -8
+      }
+     ],
+     "roteiro": {
+      "id": 20,
+      "bloco": "Ciência",
+      "cenario": "C6 Inserto de ciência: corte da Terra",
+      "acao": "Corte da crosta em linhas ciano sobre azul-petróleo; um furo fininho desce da superfície.",
+      "camera": "Plano lateral, câmera desce junto com a ponta do furo",
+      "ui": "etiqueta: POÇO DE KOLA · RÚSSIA",
+      "sfx": "broca distante",
+      "usa_gameplay": false,
+      "narracao": "O buraco mais fundo que a gente já cavou"
+     }
+    },
+    {
+     "id": "p21",
+     "inicio": 9,
+     "cena": "auto",
+     "destaques": [
+      "DOZE"
+     ],
+     "sfx": [
+      {
+       "nome": "moeda",
+       "offset": 0.25,
+       "vol": -2
+      }
+     ],
+     "roteiro": {
+      "id": 21,
+      "bloco": "Ciência",
+      "cenario": "C6 Inserto de ciência: corte da Terra",
+      "acao": "O furo para; aparece a régua ao lado.",
+      "camera": "Câmera parada, número entra com fade",
+      "ui": "12 KM em amarelo",
+      "sfx": "plim",
+      "usa_gameplay": false,
+      "narracao": "tem doze quilômetros."
+     }
+    },
+    {
+     "id": "p22",
+     "inicio": 12,
+     "cena": "auto",
+     "destaques": [
+      "VINTE"
+     ],
+     "sfx": [
+      {
+       "nome": "tictac",
+       "offset": 0.0,
+       "vol": -4,
+       "kw": {
+        "dur": 0.6,
+        "bpm": 200
+       }
+      }
+     ],
+     "roteiro": {
+      "id": 22,
+      "bloco": "Ciência",
+      "cenario": "C6 Inserto de ciência: corte da Terra",
+      "acao": "Contador de anos corre de 1970 a 1989 ao lado do furo.",
+      "camera": "Câmera parada, contador girando",
+      "ui": "1970 → 1989",
+      "sfx": "tique de contador",
+      "usa_gameplay": false,
+      "narracao": "Levou quase vinte anos."
+     }
+    }
+   ]
+  },
+  {
+   "id": "f09",
+   "texto": "O centro da Terra fica mais de quinhentas vezes mais fundo. E lá no centro faz uns seis mil graus.",
+   "planos": [
+    {
+     "id": "p23",
+     "inicio": 0,
+     "cena": "auto",
+     "destaques": [
+      "QUINHENTAS"
+     ],
+     "sfx": [
+      {
+       "nome": "whoosh",
+       "offset": 0.0,
+       "vol": -6
+      }
+     ],
+     "roteiro": {
+      "id": 23,
+      "bloco": "Ciência",
+      "cenario": "C6 Inserto de ciência: corte da Terra",
+      "acao": "Zoom-out enorme: o furo de Kola vira um risquinho na casca de um planeta inteiro; uma seta desce até o centro.",
+      "camera": "Zoom-out contínuo de 2 s + seta",
+      "ui": "seta 6.371 KM até o centro; risquinho 12 KM",
+      "sfx": "whoosh longo descendo",
+      "usa_gameplay": false,
+      "narracao": "O centro da Terra fica mais de quinhentas vezes mais fundo."
+     }
+    },
+    {
+     "id": "p24",
+     "inicio": 11,
+     "cena": "auto",
+     "destaques": [
+      "SEIS MIL"
+     ],
+     "sfx": [],
+     "roteiro": {
+      "id": 24,
+      "bloco": "Ciência",
+      "cenario": "C6 Inserto de ciência: corte da Terra",
+      "acao": "O núcleo acende em laranja-branco; termômetro sobe.",
+      "camera": "Push-in no núcleo",
+      "ui": "≈ 6.000 °C",
+      "sfx": "chiado de calor",
+      "usa_gameplay": false,
+      "narracao": "E lá no centro faz uns seis mil graus."
+     },
+     "sfx_sem_mapa": [
+      "chiado de calor"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "f10",
+   "texto": "Tipo a superfície do Sol.",
+   "planos": [
+    {
+     "id": "p25",
+     "inicio": 0,
+     "cena": "auto",
+     "destaques": [
+      "SOL"
+     ],
+     "sfx": [
+      {
+       "nome": "acorde",
+       "offset": 0.05,
+       "vol": -6,
+       "kw": {
+        "tipo": "quente"
+       }
+      }
+     ],
+     "roteiro": {
+      "id": 25,
+      "bloco": "Ciência",
+      "cenario": "C6 Inserto de ciência: corte da Terra",
+      "acao": "Tela dividida: núcleo da Terra à esquerda, disco do Sol à direita, mesma cor.",
+      "camera": "Câmera parada, os dois brilham juntos",
+      "ui": "nenhuma",
+      "sfx": "acorde quente",
+      "usa_gameplay": false,
+      "narracao": "Tipo a superfície do Sol."
+     }
+    }
+   ]
+  },
+  {
+   "id": "f11",
+   "texto": "Dia um. Mina A, Terra Rasa. A lanterna acendeu. Picareta velha, um bloco por vez. Crac. Uma moeda. Crac. Duas.",
+   "planos": [
+    {
+     "id": "p26",
+     "inicio": 0,
+     "cena": "auto",
+     "destaques": [
+      "UM"
+     ],
+     "sfx": [
+      {
+       "nome": "passos",
+       "offset": 0.0,
+       "vol": -6
+      }
+     ],
+     "roteiro": {
+      "id": 26,
+      "bloco": "Dia 1 (como funciona)",
+      "cenario": "C1 Vila à noite / boca da mina",
+      "acao": "Placa de madeira na entrada: A · TERRA RASA. Zeca passa por baixo dela e entra.",
+      "camera": "Plano médio, câmera acompanha o Zeca",
+      "ui": "cartão fixo: DIA 1 DE 30",
+      "sfx": "passos + porta de madeira",
+      "usa_gameplay": false,
+      "narracao": "Dia um. Mina A, Terra Rasa."
+     },
+     "sfx_sem_mapa": [
+      "porta de madeira"
+     ]
+    },
+    {
+     "id": "p27",
+     "inicio": 6,
+     "cena": "auto",
+     "destaques": [],
+     "sfx": [
+      {
+       "nome": "clique",
+       "offset": 0.02
+      },
+      {
+       "nome": "zumbido",
+       "offset": 0.05,
+       "vol": -10
+      }
+     ],
+     "roteiro": {
+      "id": 27,
+      "bloco": "Dia 1 (como funciona)",
+      "cenario": "C2 Mina A, pedra cinza (Zeca em cena)",
+      "acao": "Preto total; uma linha de luz horizontal abre a imagem como um olho: é o feixe acendendo.",
+      "camera": "Abertura do preto com linha de luz (transição-assinatura)",
+      "ui": "nenhuma",
+      "sfx": "clique + zumbido",
+      "usa_gameplay": false,
+      "narracao": "A lanterna acendeu."
+     }
+    },
+    {
+     "id": "p28",
+     "inicio": 9,
+     "cena": "auto",
+     "destaques": [
+      "UM"
+     ],
+     "sfx": [
+      {
+       "nome": "picareta",
+       "offset": 0.05,
+       "seed": 0
+      },
+      {
+       "nome": "picareta",
+       "offset": 0.4,
+       "seed": 1
+      }
+     ],
+     "roteiro": {
+      "id": 28,
+      "bloco": "Dia 1 (como funciona)",
+      "cenario": "C3 Gameplay real do trailer (ponto de vista do Zeca)",
+      "acao": "Golpes lentos, um bloco cinza de cada vez.",
+      "camera": "Plano do trailer, sem zoom",
+      "ui": "cronômetro desenhado 10,0 caindo (cobrir o 13,2 original)",
+      "sfx": "CRAC, CRAC",
+      "usa_gameplay": "trailer 0–5 s (mina de pedra, um bloco por vez)",
+      "narracao": "Picareta velha, um bloco por vez."
+     }
+    },
+    {
+     "id": "p29",
+     "inicio": 15,
+     "cena": "auto",
+     "destaques": [
+      "MOEDA"
+     ],
+     "sfx": [
+      {
+       "nome": "picareta",
+       "palavra": "Crac",
+       "n": 0,
+       "offset": 0.0
+      },
+      {
+       "nome": "picareta",
+       "palavra": "Crac",
+       "n": 1,
+       "offset": 0.0
+      },
+      {
+       "nome": "moeda",
+       "palavra": "Crac",
+       "n": 0,
+       "offset": 0.3,
+       "vol": -2
+      },
+      {
+       "nome": "moeda",
+       "palavra": "Crac",
+       "n": 1,
+       "offset": 0.3,
+       "vol": -2
+      }
+     ],
+     "roteiro": {
+      "id": 29,
+      "bloco": "Dia 1 (como funciona)",
+      "cenario": "C2 Mina A, pedra cinza (Zeca em cena)",
+      "acao": "Zeca em 3ª pessoa dá dois golpes; a cada golpe um CRAC! amarelo e uma moeda pula pro contador.",
+      "camera": "Plano médio lateral, dois cortes internos no ritmo dos golpes",
+      "ui": "CRAC! + contador 1 → 2",
+      "sfx": "CRAC + plim, duas vezes",
+      "usa_gameplay": false,
+      "narracao": "Crac. Uma moeda. Crac. Duas."
+     },
+     "sfx_sem_mapa": [
+      "duas vezes"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "f12",
+   "texto": "Apagou. Seis moedas. Nesse ritmo, a meta levava cento e sessenta e sete dias. Ele tinha vinte e nove.",
+   "planos": [
+    {
+     "id": "p30",
+     "inicio": 0,
+     "cena": "auto",
+     "destaques": [
+      "SEIS"
+     ],
+     "sfx": [
+      {
+       "nome": "moeda",
+       "offset": 0.25,
+       "vol": -2
+      },
+      {
+       "nome": "apagar",
+       "offset": 0.1
+      }
+     ],
+     "roteiro": {
+      "id": 30,
+      "bloco": "Dia 1 (como funciona)",
+      "cenario": "C7 Close de objeto sobre fundo escuro",
+      "acao": "Tudo preto; só o contador amarelo flutuando no escuro.",
+      "camera": "Close do número",
+      "ui": "contador 6",
+      "sfx": "lâmpada apaga + plim seco",
+      "usa_gameplay": false,
+      "narracao": "Apagou. Seis moedas."
+     }
+    },
+    {
+     "id": "p31",
+     "inicio": 3,
+     "cena": "auto",
+     "destaques": [
+      "CENTO E SESSENTA E SETE"
+     ],
+     "sfx": [
+      {
+       "nome": "giz",
+       "offset": 0.05,
+       "vol": -4
+      },
+      {
+       "nome": "acorde",
+       "offset": 0.05,
+       "vol": -6,
+       "kw": {
+        "tipo": "grave"
+       }
+      }
+     ],
+     "roteiro": {
+      "id": 31,
+      "bloco": "Dia 1 (como funciona)",
+      "cenario": "C4 Toca (interior: parede da meta, cama, mesa)",
+      "acao": "Zeca faz a conta no giz na parede: 1.000 ÷ 6 = 167. Ele para com o giz no ar.",
+      "camera": "Plano por cima do ombro, push-in no resultado",
+      "ui": "conta em giz",
+      "sfx": "giz arranhando + nota grave",
+      "usa_gameplay": false,
+      "narracao": "Nesse ritmo, a meta levava cento e sessenta e sete dias."
+     }
+    },
+    {
+     "id": "p32",
+     "inicio": 14,
+     "cena": "auto",
+     "destaques": [
+      "VINTE E NOVE"
+     ],
+     "sfx": [
+      {
+       "nome": "giz",
+       "offset": 0.05,
+       "vol": -4
+      }
+     ],
+     "roteiro": {
+      "id": 32,
+      "bloco": "Dia 1 (como funciona)",
+      "cenario": "C4 Toca (interior: parede da meta, cama, mesa)",
+      "acao": "Close dos trinta tracinhos: o primeiro é riscado.",
+      "camera": "Close, câmera parada",
+      "ui": "cartão fixo: DIA 1 DE 30 → restam 29",
+      "sfx": "risco de giz",
+      "usa_gameplay": false,
+      "narracao": "Ele tinha vinte e nove."
+     }
+    }
+   ]
+  },
+  {
+   "id": "f13",
+   "texto": "Noite um. Habilidades. Mina, Força, Valor, Tempo, Poderes, Forja, Ajudantes. Todo minerador começa por Força.",
+   "planos": [
+    {
+     "id": "p33",
+     "inicio": 0,
+     "cena": "auto",
+     "destaques": [],
+     "sfx": [
+      {
+       "nome": "whoosh",
+       "offset": 0.0,
+       "vol": -6
+      }
+     ],
+     "roteiro": {
+      "id": 33,
+      "bloco": "Escolha arriscada",
+      "cenario": "C5 Painéis da Toca (Habilidades, Mercado)",
+      "acao": "Painel escuro da Toca abre com a coluna de ramos, todos no nível zero.",
+      "camera": "Plano frontal, painel desliza de baixo",
+      "ui": "título HABILIDADES em amarelo; ramos com 0",
+      "sfx": "whoosh de painel",
+      "usa_gameplay": false,
+      "narracao": "Noite um. Habilidades."
+     }
+    },
+    {
+     "id": "p34",
+     "inicio": 3,
+     "cena": "auto",
+     "destaques": [],
+     "sfx": [
+      {
+       "nome": "clique",
+       "palavra": "Mina",
+       "offset": 0.0,
+       "vol": -6,
+       "seed": 0
+      },
+      {
+       "nome": "clique",
+       "palavra": "Força",
+       "offset": 0.0,
+       "vol": -6,
+       "seed": 1
+      },
+      {
+       "nome": "clique",
+       "palavra": "Valor",
+       "offset": 0.0,
+       "vol": -6,
+       "seed": 2
+      },
+      {
+       "nome": "clique",
+       "palavra": "Tempo",
+       "offset": 0.0,
+       "vol": -6,
+       "seed": 3
+      },
+      {
+       "nome": "clique",
+       "palavra": "Poderes",
+       "offset": 0.0,
+       "vol": -6,
+       "seed": 4
+      },
+      {
+       "nome": "clique",
+       "palavra": "Forja",
+       "offset": 0.0,
+       "vol": -6,
+       "seed": 5
+      },
+      {
+       "nome": "clique",
+       "palavra": "Ajudantes",
+       "offset": 0.0,
+       "vol": -6,
+       "seed": 6
+      }
+     ],
+     "roteiro": {
+      "id": 34,
+      "bloco": "Escolha arriscada",
+      "cenario": "C5 Painéis da Toca (Habilidades, Mercado)",
+      "acao": "Os sete ramos acendem um por vez, cada um com sua cor, ritmo de metralhadora.",
+      "camera": "Cortes internos a cada ~0,4 s, um cartão por palavra",
+      "ui": "sete cartões de ramo",
+      "sfx": "clique a cada nome",
+      "usa_gameplay": "opcional: shot_9 coluna RAMOS, mas mostra níveis cheios; preferir redesenhar",
+      "narracao": "Mina, Força, Valor, Tempo, Poderes, Forja, Ajudantes."
+     }
+    },
+    {
+     "id": "p35",
+     "inicio": 10,
+     "cena": "auto",
+     "destaques": [
+      "FORÇA"
+     ],
+     "sfx": [
+      {
+       "nome": "boom",
+       "offset": 0.1,
+       "vol": -8
+      }
+     ],
+     "roteiro": {
+      "id": 35,
+      "bloco": "Escolha arriscada",
+      "cenario": "C5 Painéis da Toca (Habilidades, Mercado)",
+      "acao": "Cartão vermelho FORÇA pulsando; atrás dele, sombras de picaretas enormes.",
+      "camera": "Push-in no cartão",
+      "ui": "cartão FORÇA vermelho",
+      "sfx": "batida pesada",
+      "usa_gameplay": false,
+      "narracao": "Todo minerador começa por Força."
+     }
+    }
+   ]
+  },
+  {
+   "id": "f14",
+   "texto": "O Zeca botou tudo em Tempo. Porque braço forte não serve de nada no escuro.",
+   "planos": [
+    {
+     "id": "p36",
+     "inicio": 0,
+     "cena": "auto",
+     "destaques": [
+      "TEMPO"
+     ],
+     "sfx": [
+      {
+       "nome": "moeda",
+       "offset": 0.25,
+       "vol": -2
+      }
+     ],
+     "roteiro": {
+      "id": 36,
+      "bloco": "Escolha arriscada",
+      "cenario": "C5 Painéis da Toca (Habilidades, Mercado)",
+      "acao": "A patinha do Zeca empurra as seis moedas para o cartão TEMPO; a bolinha de nível acende.",
+      "camera": "Plano detalhe da pata, câmera segue as moedas",
+      "ui": "cartão TEMPO, nível 0 → 1, saldo 6 → 0",
+      "sfx": "moedas deslizando + plim",
+      "usa_gameplay": false,
+      "narracao": "O Zeca botou tudo em Tempo."
+     }
+    },
+    {
+     "id": "p37",
+     "inicio": 6,
+     "cena": "auto",
+     "destaques": [
+      "ESCURO"
+     ],
+     "sfx": [
+      {
+       "nome": "whoosh",
+       "offset": 0.0,
+       "vol": -6
+      }
+     ],
+     "roteiro": {
+      "id": 37,
+      "bloco": "Escolha arriscada",
+      "cenario": "C2 Mina A, pedra cinza (Zeca em cena)",
+      "acao": "No breu, um braço musculoso com picareta enorme golpeia e não acerta nada; só um CRAC! perdido no vazio.",
+      "camera": "Plano geral escuro, lanterna apagada, câmera parada",
+      "ui": "CRAC! cinza, apagado",
+      "sfx": "golpe no vazio + eco",
+      "usa_gameplay": false,
+      "narracao": "Porque braço forte não serve de nada no escuro."
+     },
+     "sfx_sem_mapa": [
+      "eco"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "f15",
+   "texto": "Dia dois. Onze segundos de luz. Crac. Uma. Crac. Duas. Cinco segundos. Quatro pedras. Um segundo. Sete.",
+   "planos": [
+    {
+     "id": "p38",
+     "inicio": 0,
+     "cena": "auto",
+     "destaques": [
+      "ONZE"
+     ],
+     "sfx": [
+      {
+       "nome": "clique",
+       "offset": 0.02
+      },
+      {
+       "nome": "zumbido",
+       "offset": 0.05,
+       "vol": -10
+      }
+     ],
+     "roteiro": {
+      "id": 38,
+      "bloco": "Primeiro desafio",
+      "cenario": "C7 Close de objeto sobre fundo escuro",
+      "acao": "Cronômetro mostra 11,0; a barra amarela está maior, com o fantasma da barra de ontem atrás.",
+      "camera": "Close, leve push-in",
+      "ui": "cronômetro 11,0 + barra fantasma 10,0 + DIA 2 DE 30",
+      "sfx": "clique + zumbido",
+      "usa_gameplay": false,
+      "narracao": "Dia dois. Onze segundos de luz."
+     }
+    },
+    {
+     "id": "p39",
+     "inicio": 6,
+     "cena": "auto",
+     "destaques": [],
+     "sfx": [
+      {
+       "nome": "picareta",
+       "palavra": "Crac",
+       "n": 0,
+       "offset": 0.0
+      },
+      {
+       "nome": "picareta",
+       "palavra": "Crac",
+       "n": 1,
+       "offset": 0.0
+      }
+     ],
+     "roteiro": {
+      "id": 39,
+      "bloco": "Primeiro desafio",
+      "cenario": "C3 Gameplay real do trailer (ponto de vista do Zeca)",
+      "acao": "Dois golpes rápidos em blocos cinza.",
+      "camera": "Plano do trailer, cortes no ritmo",
+      "ui": "CRAC! + contador 1 → 2",
+      "sfx": "CRAC, CRAC",
+      "usa_gameplay": "trailer 0–3 s",
+      "narracao": "Crac. Uma. Crac. Duas."
+     }
+    },
+    {
+     "id": "p40",
+     "inicio": 10,
+     "cena": "auto",
+     "destaques": [
+      "QUATRO"
+     ],
+     "sfx": [
+      {
+       "nome": "picareta",
+       "offset": 0.05,
+       "seed": 0
+      },
+      {
+       "nome": "picareta",
+       "offset": 0.27,
+       "seed": 1
+      },
+      {
+       "nome": "picareta",
+       "offset": 0.49,
+       "seed": 2
+      },
+      {
+       "nome": "picareta",
+       "offset": 0.71,
+       "seed": 3
+      }
+     ],
+     "roteiro": {
+      "id": 40,
+      "bloco": "Primeiro desafio",
+      "cenario": "C2 Mina A, pedra cinza (Zeca em cena)",
+      "acao": "Zeca golpeando sem parar, faíscas, pedrinhas voando.",
+      "camera": "Plano médio, câmera na mão tremendo de leve",
+      "ui": "cronômetro 5,0 + contador 4",
+      "sfx": "CRAC acelerado",
+      "usa_gameplay": false,
+      "narracao": "Cinco segundos. Quatro pedras."
+     }
+    },
+    {
+     "id": "p41",
+     "inicio": 14,
+     "cena": "auto",
+     "destaques": [
+      "SETE"
+     ],
+     "sfx": [
+      {
+       "nome": "tictac",
+       "offset": 0.0,
+       "vol": -4,
+       "kw": {
+        "dur": 0.6,
+        "bpm": 200
+       }
+      }
+     ],
+     "roteiro": {
+      "id": 41,
+      "bloco": "Primeiro desafio",
+      "cenario": "C3 Gameplay real do trailer (ponto de vista do Zeca)",
+      "acao": "Golpes em sequência, cronômetro quase zerado.",
+      "camera": "Plano do trailer, zoom no cronômetro",
+      "ui": "cronômetro 1,0 em vermelho + contador 7",
+      "sfx": "tique alto",
+      "usa_gameplay": "trailer 3–5 s (cronômetro caindo)",
+      "narracao": "Um segundo. Sete."
+     }
+    }
+   ]
+  },
+  {
+   "id": "f16",
+   "texto": "Ontem, a luz apagava aqui. Mas hoje tinha mais um. E no segundo comprado, a picareta bateu numa parede diferente.",
+   "planos": [
+    {
+     "id": "p42",
+     "inicio": 0,
+     "cena": "auto",
+     "destaques": [
+      "ONTEM"
+     ],
+     "sfx": [
+      {
+       "nome": "apagar",
+       "offset": 0.3
+      }
+     ],
+     "roteiro": {
+      "id": 42,
+      "bloco": "Primeiro desafio",
+      "cenario": "C2 Mina A, pedra cinza (Zeca em cena)",
+      "acao": "A imagem preta de ontem aparece em transparência por cima da cena; a lanterna treme.",
+      "camera": "Close do Zeca, câmera parada, dupla exposição",
+      "ui": "nenhuma",
+      "sfx": "lâmpada falhando",
+      "usa_gameplay": false,
+      "narracao": "Ontem, a luz apagava aqui."
+     }
+    },
+    {
+     "id": "p43",
+     "inicio": 5,
+     "cena": "auto",
+     "destaques": [
+      "MAIS"
+     ],
+     "sfx": [
+      {
+       "nome": "zumbido",
+       "offset": 0.0,
+       "vol": -8,
+       "kw": {
+        "dur": 1.0
+       }
+      }
+     ],
+     "roteiro": {
+      "id": 43,
+      "bloco": "Primeiro desafio",
+      "cenario": "C7 Close de objeto sobre fundo escuro",
+      "acao": "A lanterna firma e brilha; pequena ampulheta dourada (o ramo Tempo) acende no canto.",
+      "camera": "Close da lanterna, push-in",
+      "ui": "ícone de ampulheta do ramo Tempo",
+      "sfx": "zumbido estabiliza",
+      "usa_gameplay": false,
+      "narracao": "Mas hoje tinha mais um."
+     }
+    },
+    {
+     "id": "p44",
+     "inicio": 10,
+     "cena": "auto",
+     "destaques": [],
+     "sfx": [],
+     "roteiro": {
+      "id": 44,
+      "bloco": "Primeiro desafio",
+      "cenario": "C2 Mina A, pedra cinza (Zeca em cena)",
+      "acao": "Zeca ergue a picareta velha em câmera lenta.",
+      "camera": "Contra-plongée, câmera lenta",
+      "ui": "cronômetro 0,9",
+      "sfx": "respiração + trilha some",
+      "usa_gameplay": false,
+      "narracao": "E no segundo comprado,"
+     },
+     "sfx_sem_mapa": [
+      "respiração",
+      "trilha some"
+     ]
+    },
+    {
+     "id": "p45",
+     "inicio": 14,
+     "cena": "auto",
+     "destaques": [
+      "DIFERENTE"
+     ],
+     "sfx": [
+      {
+       "nome": "picareta",
+       "offset": 0.05,
+       "seed": 0,
+       "kw": {
+        "pitch": 0.75
+       }
+      },
+      {
+       "nome": "ding",
+       "offset": 0.15,
+       "vol": -8,
+       "kw": {
+        "pitch": 1.5
+       }
+      }
+     ],
+     "roteiro": {
+      "id": 45,
+      "bloco": "Primeiro desafio",
+      "cenario": "C2 Mina A, pedra cinza (Zeca em cena)",
+      "acao": "Impacto; a parede racha e aparecem veios laranja por dentro.",
+      "camera": "Close do impacto, tremor de câmera",
+      "ui": "CRAC! maior",
+      "sfx": "CRAC grave + faísca",
+      "usa_gameplay": false,
+      "narracao": "a picareta bateu numa parede diferente."
+     }
+    }
+   ]
+  },
+  {
+   "id": "f17",
+   "texto": "Um brilho laranja.",
+   "planos": [
+    {
+     "id": "p46",
+     "inicio": 0,
+     "cena": "auto",
+     "destaques": [],
+     "sfx": [
+      {
+       "nome": "ding",
+       "offset": 0.0,
+       "vol": -8,
+       "kw": {
+        "pitch": 1.5
+       }
+      }
+     ],
+     "roteiro": {
+      "id": 46,
+      "bloco": "Recompensa",
+      "cenario": "C2 Mina A, pedra cinza (Zeca em cena)",
+      "acao": "Luz laranja inunda o rosto do Zeca; reflexo nos olhos. Plano mais claro do vídeo.",
+      "camera": "Close do rosto, push-in lento",
+      "ui": "nenhuma",
+      "sfx": "brilho cintilante",
+      "usa_gameplay": false,
+      "narracao": "Um brilho laranja."
+     }
+    }
+   ]
+  },
+  {
+   "id": "f18",
+   "texto": "Cobre.",
+   "planos": [
+    {
+     "id": "p47",
+     "inicio": 0,
+     "cena": "auto",
+     "destaques": [
+      "COBRE."
+     ],
+     "sfx": [
+      {
+       "nome": "acorde",
+       "offset": 0.05,
+       "vol": -6,
+       "kw": {
+        "tipo": "recompensa"
+       }
+      }
+     ],
+     "roteiro": {
+      "id": 47,
+      "bloco": "Recompensa",
+      "cenario": "C7 Close de objeto sobre fundo escuro",
+      "acao": "Pepita de cobre girando num holofote, com cartão de minério.",
+      "camera": "Close, giro 360",
+      "ui": "cartão: COBRE",
+      "sfx": "acorde de recompensa",
+      "usa_gameplay": false,
+      "narracao": "Cobre."
+     }
+    }
+   ],
+   "pausa_depois": 0.5
+  },
+  {
+   "id": "f19",
+   "texto": "Sem esse segundo, ficava no escuro.",
+   "planos": [
+    {
+     "id": "p48",
+     "inicio": 0,
+     "cena": "auto",
+     "destaques": [
+      "SEGUNDO"
+     ],
+     "sfx": [],
+     "roteiro": {
+      "id": 48,
+      "bloco": "Recompensa",
+      "cenario": "C2 Mina A, pedra cinza (Zeca em cena)",
+      "acao": "Mesma parede do plano anterior, agora sem lanterna: o veio laranja vai sumindo no preto.",
+      "camera": "Plano parado, escurecimento lento",
+      "ui": "nenhuma",
+      "sfx": "trilha baixa",
+      "usa_gameplay": false,
+      "narracao": "Sem esse segundo, ficava no escuro."
+     },
+     "sfx_sem_mapa": [
+      "trilha baixa"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "f20",
+   "texto": "Noite dois. Mercado. O preço muda todo dia e mostra a tendência de amanhã. Hoje, o cobre paga quarenta moedas.",
+   "planos": [
+    {
+     "id": "p49",
+     "inicio": 0,
+     "cena": "auto",
+     "destaques": [
+      "MERCADO"
+     ],
+     "sfx": [
+      {
+       "nome": "whoosh",
+       "offset": 0.0,
+       "vol": -6
+      }
+     ],
+     "roteiro": {
+      "id": 49,
+      "bloco": "Dilema",
+      "cenario": "C3 Gameplay real do trailer (ponto de vista do Zeca)",
+      "acao": "Tela do Mercado do jogo aparece por um instante antes de virar o painel redesenhado.",
+      "camera": "Plano do trailer, push-in rápido, dissolve curto para o C5",
+      "ui": "título MERCADO",
+      "sfx": "whoosh de painel",
+      "usa_gameplay": "trailer 13,5–14,5 s (Mercado; esconder o +91,1K)",
+      "narracao": "Noite dois. Mercado."
+     }
+    },
+    {
+     "id": "p50",
+     "inicio": 3,
+     "cena": "auto",
+     "destaques": [
+      "AMANHÃ"
+     ],
+     "sfx": [
+      {
+       "nome": "tictac",
+       "offset": 0.0,
+       "vol": -4,
+       "kw": {
+        "dur": 0.6,
+        "bpm": 200
+       }
+      }
+     ],
+     "roteiro": {
+      "id": 50,
+      "bloco": "Dilema",
+      "cenario": "C5 Painéis da Toca (Habilidades, Mercado)",
+      "acao": "Gráfico de sete barras sobe e desce; a barra vazada de amanhã acende por último.",
+      "camera": "Close do gráfico, câmera desliza da esquerda para a direita",
+      "ui": "gráfico de 7 dias + barra vazada de amanhã",
+      "sfx": "tiques de barra",
+      "usa_gameplay": false,
+      "narracao": "O preço muda todo dia e mostra a tendência de amanhã."
+     }
+    },
+    {
+     "id": "p51",
+     "inicio": 14,
+     "cena": "auto",
+     "destaques": [
+      "QUARENTA"
+     ],
+     "sfx": [
+      {
+       "nome": "moeda",
+       "offset": 0.25,
+       "vol": -2
+      }
+     ],
+     "roteiro": {
+      "id": 51,
+      "bloco": "Dilema",
+      "cenario": "C5 Painéis da Toca (Habilidades, Mercado)",
+      "acao": "Linha do Cobre no Mercado com o valor e o botão amarelo VENDER.",
+      "camera": "Plano frontal, push-in no valor",
+      "ui": "linha COBRE · 40 + botão VENDER",
+      "sfx": "plim",
+      "usa_gameplay": false,
+      "narracao": "Hoje, o cobre paga quarenta moedas."
+     }
+    }
+   ]
+  },
+  {
+   "id": "f21",
+   "texto": "Quatro por cento da meta. Faltam vinte e oito dias. E a seta de amanhã aponta pra cima.",
+   "planos": [
+    {
+     "id": "p52",
+     "inicio": 0,
+     "cena": "auto",
+     "destaques": [
+      "VINTE E OITO"
+     ],
+     "sfx": [
+      {
+       "nome": "giz",
+       "offset": 0.05,
+       "vol": -4
+      },
+      {
+       "nome": "acorde",
+       "offset": 0.05,
+       "vol": -6,
+       "kw": {
+        "tipo": "grave"
+       }
+      }
+     ],
+     "roteiro": {
+      "id": 52,
+      "bloco": "Dilema",
+      "cenario": "C4 Toca (interior: parede da meta, cama, mesa)",
+      "acao": "Parede da meta: barrinha enche 4%; dois tracinhos riscados de trinta.",
+      "camera": "Close da parede, câmera parada",
+      "ui": "cartão fixo: 4% DA META · DIA 2 DE 30",
+      "sfx": "giz + nota grave",
+      "usa_gameplay": false,
+      "narracao": "Quatro por cento da meta. Faltam vinte e oito dias."
+     }
+    },
+    {
+     "id": "p53",
+     "inicio": 10,
+     "cena": "auto",
+     "destaques": [
+      "CIMA"
+     ],
+     "sfx": [
+      {
+       "nome": "acorde",
+       "offset": 0.05,
+       "vol": -6,
+       "kw": {
+        "tipo": "subindo"
+       }
+      }
+     ],
+     "roteiro": {
+      "id": 53,
+      "bloco": "Dilema",
+      "cenario": "C5 Painéis da Toca (Habilidades, Mercado)",
+      "acao": "Seta verde de tendência sobe ao lado do Cobre.",
+      "camera": "Close da seta",
+      "ui": "seta verde ↑",
+      "sfx": "acorde subindo",
+      "usa_gameplay": false,
+      "narracao": "E a seta de amanhã aponta pra cima."
+     }
+    }
+   ]
+  },
+  {
+   "id": "f22",
+   "texto": "Mas seta não é promessa. Vende hoje e garante os quarenta, ou segura até amanhã e aposta na seta?",
+   "planos": [
+    {
+     "id": "p54",
+     "inicio": 0,
+     "cena": "auto",
+     "destaques": [
+      "PROMESSA"
+     ],
+     "sfx": [
+      {
+       "nome": "acorde",
+       "offset": 0.05,
+       "vol": -6,
+       "kw": {
+        "tipo": "dissonante"
+       }
+      }
+     ],
+     "roteiro": {
+      "id": 54,
+      "bloco": "Dilema",
+      "cenario": "C5 Painéis da Toca (Habilidades, Mercado)",
+      "acao": "A seta treme; por trás dela aparece a sombra de uma seta vermelha para baixo.",
+      "camera": "Câmera parada, leve tremor",
+      "ui": "seta verde + sombra vermelha",
+      "sfx": "nota dissonante",
+      "usa_gameplay": false,
+      "narracao": "Mas seta não é promessa."
+     }
+    },
+    {
+     "id": "p55",
+     "inicio": 5,
+     "cena": "auto",
+     "destaques": [
+      "VENDE"
+     ],
+     "sfx": [],
+     "roteiro": {
+      "id": 55,
+      "bloco": "Dilema",
+      "cenario": "C5 Painéis da Toca (Habilidades, Mercado)",
+      "acao": "A patinha do Zeca paira sobre o botão amarelo VENDER, sem apertar.",
+      "camera": "Plano detalhe, push-in lento",
+      "ui": "botão VENDER · 40",
+      "sfx": "trilha suspensa",
+      "usa_gameplay": false,
+      "narracao": "Vende hoje e garante os quarenta,"
+     },
+     "sfx_sem_mapa": [
+      "trilha suspensa"
+     ]
+    },
+    {
+     "id": "p56",
+     "inicio": 11,
+     "cena": "auto",
+     "destaques": [
+      "SEGURA"
+     ],
+     "sfx": [],
+     "roteiro": {
+      "id": 56,
+      "bloco": "Dilema",
+      "cenario": "C4 Toca (interior: parede da meta, cama, mesa)",
+      "acao": "Zeca na cama abraçado à pepita de cobre, olhando a seta desenhada na parede.",
+      "camera": "Plano médio, câmera parada, luz laranja da pepita",
+      "ui": "nenhuma",
+      "sfx": "trilha suspensa, sem resolver",
+      "usa_gameplay": false,
+      "narracao": "ou segura até amanhã e aposta na seta?"
+     },
+     "sfx_sem_mapa": [
+      "trilha suspensa",
+      "sem resolver"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "f23",
+   "texto": "Curte pra parte dois.",
+   "planos": [
+    {
+     "id": "p57",
+     "inicio": 0,
+     "cena": "auto",
+     "destaques": [
+      "PARTE"
+     ],
+     "sfx": [
+      {
+       "nome": "clique",
+       "offset": 0.02
+      },
+      {
+       "nome": "apagar",
+       "offset": 0.1
+      }
+     ],
+     "roteiro": {
+      "id": 57,
+      "bloco": "Chamada",
+      "cenario": "C7 Close de objeto sobre fundo escuro",
+      "acao": "Mesma lanterna do plano 1, em close; ela apaga.",
+      "camera": "Repete o enquadramento do plano 1",
+      "ui": "nenhuma",
+      "sfx": "clique de lanterna apagando",
+      "usa_gameplay": false,
+      "narracao": "Curte pra parte dois."
+     }
+    }
+   ]
+  }
+ ]
+}

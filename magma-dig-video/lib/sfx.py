@@ -298,7 +298,7 @@ def passos(seed=0, n=4, intervalo=0.28, **_):
     r = np.random.default_rng(seed)
     N = int((n * intervalo + 0.3) * SR); x = np.zeros(N)
     for i in range(n):
-        p = int((i * intervalo + r.uniform(-0.02, 0.02)) * SR) + 100; m = int(0.09 * SR)
+        p = max(0, int((i * intervalo + r.uniform(-0.02, 0.02)) * SR)) + 100; m = int(0.09 * SR)
         tt = np.arange(m) / SR
         y = _bp(r.standard_normal(m), 300, 3500) * np.exp(-tt * 45) * r.uniform(0.6, 1)
         y += np.sin(2 * np.pi * 90 * tt) * np.exp(-tt * 40) * 0.5

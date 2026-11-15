@@ -8,7 +8,7 @@ ART.boards.teste = (() => {
   const BX = 0.15, BZ = 2.9;                               // bloco
   const front = () => [ART.proj(BX, 1, BZ), ART.proj(BX + 1, 1, BZ), ART.proj(BX + 1, 0, BZ), ART.proj(BX, 0, BZ)];
   const zecaPose = t => {
-    const base = { x: 372, y: 1182, s: 1.62, turn: 0.82, lamp: 1, cone: 0.7, coneAng: 12, rim: "#FFC88A", rimA: 0.5 };
+    const base = { x: 372, y: 1182, s: 1.62, turn: 0.82, lamp: 1, cone: 0.38, coneAng: 14, coneLen: 600, rim: "#FFC88A", rimA: 0.5 };
     if (t < T0) return Z.pose("parado", t, { ...base, eyes: "determinado", brows: "bravo", tool: "picareta", aF: 40, eF: 10, aB: 26, eB: 14 });
     const dig = Z.pose("cavando", t, base, { periodo: PER, t0: T0 });
     if (t < BURST + 0.25) return dig;
@@ -19,7 +19,7 @@ ART.boards.teste = (() => {
     dur: 7,
     render(g, t, frame) {
       const cena = ART.cenas.mina({ luz: 1 });
-      const cam = ART.camera(t, { push: [1.0, 1.13], dur: 7, drift: [40, -30], hits: [...HITS.slice(0, 3), BURST, BURST + 0.05], hitAmp: 13, cy: 1050 });
+      const cam = ART.camera(t, { push: [1.0, 1.16], dur: 7, drift: [50, -20], hits: [...HITS.slice(0, 3), BURST, BURST + 0.05], hitAmp: 13, cy: 1050 });
       const hitsDone = HITS.filter(h => t >= h).length;
       const stage = hitsDone === 0 ? 0 : Math.min(3, (hitsDone - 1) + ART.prog(t, HITS[hitsDone - 1], HITS[hitsDone - 1] + 0.08) * 1);
       const nOres = 7;
@@ -55,7 +55,7 @@ ART.boards.teste = (() => {
       // HUD: cronômetro + contador
       const v = Math.max(0, 10 - Math.max(0, t - 0.3));
       const intro = ART.prog(t, 0.05, 0.35, "outBack");
-      g.save(); g.translate(790, 340); g.scale(intro, intro); UI.cronometro(g, 0, 0, { valor: v, icone: "sol", s: 0.95 }); g.restore();
+      g.save(); g.translate(790, 340); g.scale(intro, intro); UI.cronometro(g, 0, 0, { valor: v, icone: "sol", s: 0.9 }); g.restore();
       const lastArr = coins > 0 ? BURST + 0.05 + (coins - 1) * 0.07 + 1.0 : -9;
       g.save(); g.translate(260, 340); g.scale(intro, intro); UI.contador(g, 0, 0, { valor: hitsDone >= 3 ? 3 + coins : hitsDone, icone: "moeda", pulso: Math.max(ART.pulse(t, lastArr, 0.25), ...HITS.slice(0, 3).map(h => ART.pulse(t, h + 0.05, 0.25))) }); g.restore();
       for (let i = 0; i < 3; i++) UI.flutua(g, 300, 420, t, HITS[i] + 0.05, { texto: "+1", s: 0.7 });
