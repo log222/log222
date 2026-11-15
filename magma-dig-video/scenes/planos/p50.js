@@ -20,7 +20,8 @@ MD.plano("p50", {
     const kLinha = ART.map(t, tMostra - 0.05, tTend + 0.4, 0, 1, "inOutSine");
     const kAm = ART.ease.outBack(clamp((t - tAm + 0.05) / 0.25)), brilho = GB.hit(t, tAm, 0.9) + (t > tAm ? 0.35 : 0);
     GB.noPainel(g, cam, gg => {
-      // painel de vidro + cabeçalho do cobre
+      // título do Mercado (emenda com o fim do p49) + painel de vidro + cabeçalho do cobre
+      u.titulo(gg, 540, 345, "MERCADO", { s: 0.95 });
       u.cartao(gg, 80, 430, 920, 850, { r: 44, cor: "rgba(24,21,38,.78)", borda: "rgba(255,255,255,.12)" });
       ART.rr(gg, 110, 470, 120, 120, 26); gg.fillStyle = "rgba(255,255,255,.07)"; gg.fill(); u.pix(gg, "cobre", 170, 530, 80);
       gg.font = '1000 72px "Nunito"'; gg.fillStyle = "#F4EEDC"; gg.textAlign = "left"; gg.textBaseline = "middle"; gg.fillText("Cobre", 260, 512);

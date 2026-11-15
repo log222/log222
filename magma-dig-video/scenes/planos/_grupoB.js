@@ -204,4 +204,19 @@ window.GB_LOAD = window.GB_LOAD || (() => (window.__GB_P = window.__GB_P || MD.l
       g.restore();
     });
   };
+
+  /** os 30 tracinhos da parede (mesma geometria do ART.giz do kit), sem o META/1.000 — para closes em que o número
+   *  ficaria cortado na borda. Desenhe dentro do espaço local do giz (translate PAREDE + scale s). riscados fracionário. */
+  GB.tracinhos = (g, o = {}) => {
+    const ART = A(), n = o.n ?? 30, rr = ART.rng(77);
+    g.save(); g.lineCap = "round";
+    for (let i = 0; i < n; i++) {
+      const row = Math.floor(i / 10), col = i % 10, tx = -270 + col * 60 + (rr() - 0.5) * 6, ty = 90 + row * 92;
+      g.save(); g.strokeStyle = "rgba(244,240,230,.92)"; g.shadowColor = "rgba(255,255,255,.35)"; g.shadowBlur = 6; g.lineWidth = 9;
+      g.beginPath(); g.moveTo(tx, ty); g.lineTo(tx + (rr() - 0.5) * 6, ty + 64); g.stroke(); g.restore();
+      const rk = clamp((o.riscados ?? 0) - i);
+      if (rk > 0) { g.save(); g.strokeStyle = "#FF6B4A"; g.lineWidth = 8; g.beginPath(); g.moveTo(tx - 20, ty + 56); g.lineTo(tx - 20 + 44 * rk, ty + 56 - 52 * rk); g.stroke(); g.restore(); }
+    }
+    g.restore();
+  };
 })();

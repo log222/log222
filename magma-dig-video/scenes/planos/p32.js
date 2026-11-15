@@ -10,12 +10,13 @@ MD.plano("p32", {
     const ART = window.ART, GB = window.GB, { clamp } = GB, dur = ctx.dur;
     const tGiz = GB.mark(ctx, "giz", 0.05), tVinte = GB.wt(ctx, "vinte", 0.68), tNove = GB.wt(ctx, "nove", 1.35);
     const rk = ART.map(t, tGiz + 0.02, tGiz + 0.34, 0, 1, "inOutSine");
-    const cena = GB.toca({ prog: 1, tracos: 30, riscados: rk });
+    const cena = GB.toca({ prog: 0, tracos: 0 });   // close: só os tracinhos (o 1.000 ficaria espremido sob o cartão)
     const cam = ART.camera(t, { push: [2.25, 2.4], dur, ease: "linear" });
     GB.mira(cam, 0.8, ...GB.gizMundo(ART.map(t, 0, dur, -14, 10), 175), 540, 1000);
     const wave = i => GB.hit(t, tVinte + 0.04 + (i % 10) * 0.035 + Math.floor(i / 10) * 0.06, 0.55);
     GB.palco(g, t, cam, cena, null, {
       frame: ctx.frame, legenda: false,
+      meio: gg => ART.withLayer(gg, cam, 0.8, w => { w.save(); w.translate(GB.PAREDE.x, GB.PAREDE.y); w.scale(GB.PAREDE.s, GB.PAREDE.s); GB.tracinhos(w, { riscados: rk }); w.restore(); }),
       luz: (gg, tt, c) => {
         GB.tocaLuz(gg, tt, c, { janela: 0.4 });
         for (let i = 1; i < 30; i++) {

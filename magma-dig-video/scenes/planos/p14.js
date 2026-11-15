@@ -10,29 +10,23 @@ MD.plano("p14", {
     const ART = window.ART, GB = window.GB, { clamp } = GB, dur = ctx.dur;
     const tRis = GB.wt(ctx, "riscou", 1.05);
     const cena = GB.toca({ prog: 0, tracos: 0 });
-    // escrita: META (0,05 → 0,72), volta da pata, "1.000" começando no "riscou"
-    const kMetaF = tt => ART.map(tt, 0.05, 0.72, 0, 1, "inOutSine");
-    const k1F = tt => ART.map(tt, tRis - 0.12, tRis + 0.22, 0, 0.24, "outCubic") + ART.map(tt, tRis + 0.25, dur + 0.25, 0, 0.36);
-    // ponta do giz em coordenadas locais do giz (contínua no tempo)
+    // escrita: o "1.000" grande (o "1" num traço forte no "riscou"); o META entra no close do p15.
+    // Câmera FIXA na parede: o que já foi escrito fica sempre à esquerda da pata, livre; o Zeca vai à direita.
     const W1 = 680 * 0.92; // largura aprox. do "1.000" (Lilita 230 px)
+    const k1F = tt => ART.map(tt, tRis - 0.14, tRis + 0.2, 0, 0.2, "outCubic") + ART.map(tt, tRis + 0.24, Math.max(dur, tRis + 0.6) + 0.2, 0, 0.5);
     const tipF = tt => {
-      const km = kMetaF(tt), k1 = k1F(tt);
-      const meta = [-100 + 200 * km, -258 + 14 * Math.sin(tt * 16)];
-      const um = [-W1 / 2 + W1 * k1, -110 + 60 * Math.sin(tt * 10)];
-      const v = ART.ease.inOutCubic(clamp((tt - 0.72) / (tRis - 0.12 - 0.72)));
-      return [ART.lerp(meta[0], um[0], v), ART.lerp(meta[1], um[1], v)];
+      const k1 = k1F(tt), x = -W1 / 2 + W1 * k1, y = -110 + 70 * Math.sin(tt * 10);
+      const chega = ART.ease.inOutSine(clamp(tt / Math.max(0.2, tRis - 0.14)));  // a pata chega ao ponto de partida
+      return [ART.lerp(-W1 / 2 + 160, x, chega), ART.lerp(-300, y, chega)];
     };
-    const cam = ART.camera(t, { push: [1.95, 2.08], dur, ease: "linear" });
-    // câmera acompanha a ponta do giz (média móvel): o Zeca fica no lugar e a parede desliza
-    let ax = 0, ay = 0; for (let i = 0; i < 8; i++) { const q = tipF(t - i * 0.05); ax += q[0] / 8; ay += q[1] / 8; }
-    const [mx, my] = GB.gizMundo(ax, ay);
-    GB.mira(cam, 0.8, mx, 600, 500 + (ax - mx) * 0, 640);
-    cam.x = (mx - 540 - (500 - 540) / (1 + (cam.zoom - 1) * 0.8)) / 0.8;
+    const D = Math.max(dur, tRis + 0.6);
+    const cam = { zoom: ART.map(t, 0, D, 1.62, 1.7), x: 0, y: 0, sx: 0, sy: 0 };
+    GB.mira(cam, 0.8, 500, 636, 470 + ART.map(t, 0, D, 10, -10), 700);
+    const tp = tipF(t), [mx, my] = GB.gizMundo(tp[0], tp[1]);
     GB.palco(g, t, cam, cena, null, {
       frame: ctx.frame, legenda: false,
       meio: (gg) => ART.withLayer(gg, cam, 0.8, w => {
         w.save(); w.translate(GB.PAREDE.x, GB.PAREDE.y); w.scale(GB.PAREDE.s, GB.PAREDE.s);
-        GB.gizTexto(w, "META", 0, -252, { size: 64, k: kMetaF(t), align: "center", spacing: 6 });
         GB.gizTexto(w, "1.000", 0, -80, { size: 230, k: k1F(t), align: "center" });
         w.restore();
       }),
@@ -45,13 +39,22 @@ MD.plano("p14", {
     // corpo segue a ponta do giz com atraso (média móvel, função pura de t)
     const [sx, sy] = GB.proj(cam, 0.8, mx, my);
     const forte = GB.hit(t, tRis, 0.45);
-    const base = { s: 6.2, turn: -0.3, lamp: 0.25, rim: "#FFB070", rimA: 0.75, lean: -3 - 7 * forte, sq: 1 + 0.03 * forte };
+    const base = { s: 3.3, turn: -0.42, lamp: 0.25, cone: 0, rim: "#FFB070", rimA: 0.75, lean: -3 - 7 * forte, sq: 1 + 0.03 * forte };
     const p = ART.zeca.pose("riscando", t, Object.assign({ x: 0, y: 0 }, base));
     if (!this._dry) this._dry = ART.canvas(4, 4).getContext("2d");
     this._dry.setTransform(1, 0, 0, 1, 0, 0);
     const A0 = ART.zeca.draw(this._dry, p);
     const mao = A0.mao || { x: 0, y: -700 };
-    p.x = sx - mao.x - 10; p.y = sy - mao.y + 40;
+    const [, syC] = GB.proj(cam, 0.8, ...GB.gizMundo(0, -80));
+    p.x = sx - mao.x - 10; p.y = syC - mao.y + 30;   // pés fixos na prancha; só anda de lado
+    p.shadow = 0;
+    // andaime de madeira (prancha comprida com pés): a meta fica alta na parede, ele escreve de cima dela
+    {
+      const fy = p.y, sc = p.s / 3.3;
+      ART.madeira(g, -40, fy - 6 * sc, 1160, 40 * sc, { cor: "#8A5A34", seed: 4 });
+      for (const lx of [150, 560, 960]) ART.madeira(g, lx - 18 * sc, fy + 30 * sc, 36 * sc, 1920 - fy, { cor: "#5E3A24", vert: true, seed: lx });
+      ART.madeira(g, 120, fy + 300 * sc, 880, 26 * sc, { cor: "#5E3A24", seed: 7 });
+    }
     ART.zeca.draw(g, p);
     // a parte de baixo do Zeca (mais perto, fora da luz) escurece para a faixa da legenda
     g.save(); g.fillStyle = ART.lg(g, 0, 1080, 0, 1650, [[0, "rgba(10,6,16,0)"], [0.6, "rgba(10,6,16,.7)"], [1, "rgba(10,6,16,.95)"]]); g.fillRect(0, 1080, 1080, 840); g.restore();

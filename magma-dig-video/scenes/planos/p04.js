@@ -19,7 +19,7 @@ MD.plano("p04", {
     ART.palco(g, t, cam, cena, gg => {
       // Zeca de costas andando pela trilha, pequeno
       const k = clamp(t / D);
-      ART.zeca.draw(gg, ART.zeca.pose("andando", t, { x: 590 + 10 * k, y: 1335 - 40 * k, s: 1.3 - 0.08 * k, turn: 0.1, costas: 1, lamp: 1, rim: "#B58CFF", rimA: 0.7 }, { periodo: 0.5 }));
+      ART.zeca.draw(gg, ART.zeca.pose("andando", t, { x: 590 + 10 * k, y: 1335 - 40 * k, s: 1.3 - 0.08 * k, turn: 0.1, costas: 1, lamp: 1, cone: 0, rim: "#B58CFF", rimA: 0.7 }, { periodo: 0.5 }));
     }, { frame: ctx.frame, legendaK: 0.32 });
     // brilho correndo pela placa (camada d = 0.85) + poeira caindo
     if (brilho > 0 && brilho < 1) {

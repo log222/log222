@@ -563,7 +563,7 @@ def build_trilha(planos, laid, pstart, pend):
     return ev
 
 
-def build_sfx(falas, planos, laid, pstart, st):
+def build_sfx(falas, planos, laid, pstart, st, pend=None):
     events, marks = [], [dict() for _ in planos]
     td = st["transicao_padrao"]
     for k, pl in enumerate(planos):
@@ -577,9 +577,14 @@ def build_sfx(falas, planos, laid, pstart, st):
                 if not hits:
                     die(f"plano {pl['id']}: sfx '{s['nome']}' referencia palavra '{s['palavra']}' que não está na fala")
                 base = hits[min(len(hits) - 1, int(s.get("n", 0)))]["ini"]
+            if s.get("no_fim") and pend is not None:      # relativo ao fim do plano (offset negativo)
+                base = pend[k]
             t = base + float(s.get("offset", 0))
+            kw = dict(s.get("kw", {}))
+            if kw.get("dur") == "plano" and pend is not None:   # dura até o corte (acompanha o plano esticado)
+                kw["dur"] = round(max(0.3, pend[k] - t), 2)
             events.append({"t": t, "nome": s["nome"], "vol": float(s.get("vol", 0)), "seed": int(s.get("seed", k)),
-                           "kw": s.get("kw", {}), "plano": pl["id"]})
+                           "kw": kw, "plano": pl["id"]})
             marks[k].setdefault(s["nome"], []).append(round(t - a, 3))
         tr = pl["transicao"]
         if k > 0 and tr.get("sfx"):
@@ -818,7 +823,7 @@ def main():
 
     # 2) legenda, efeitos, timeline
     caps = build_captions(falas, planos, laid, pstart, pend, st)
-    events, marks = build_sfx(falas, planos, laid, pstart, st)
+    events, marks = build_sfx(falas, planos, laid, pstart, st, pend)
     trilha_ev = build_trilha(planos, laid, pstart, pend)
     beats = []
     for k, pl in enumerate(planos):
@@ -921,7 +926,7 @@ def main():
         p.unlink()
     t0 = time.time()
     segs, rstats = run_render(tl_path, f0, f1, segdir, scale, a.workers,
-                              crf=23 if a.rascunho else 16, preset="ultrafast" if a.rascunho else "medium", label="w",
+                              crf=23 if a.rascunho else 16, preset="ultrafast" if a.rascunho else V.get("preset", "medium"), label="w",
                              bitrate=None if (a.rascunho or a.qualidade_max) else V.get("bitrate", "8M"),
                              maxrate=V.get("bitrate_max", "10M"))
     dt = time.time() - t0

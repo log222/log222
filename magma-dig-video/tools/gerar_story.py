@@ -97,7 +97,7 @@ def sfx_for(p):
             for n in range(len(cracs)):
                 add("moeda", "plim", palavra="Crac", n=n, offset=0.3, vol=-2)
         elif "terminando em plim" in txt:
-            add("moeda", "plim", offset=round(max(0.3, p["dur_estimada_s"] * 0.85), 2), vol=-2)
+            add("moeda", "plim", no_fim=True, offset=-0.35, vol=-2)
         else:
             add("moeda", "plim", offset=0.25 if not cracs else 0.35, vol=-2)
     if "moedas" in txt and "plim" not in txt:
@@ -114,7 +114,7 @@ def sfx_for(p):
     if "estabiliza" in txt:
         add("zumbido", "zumbido", offset=0.0, vol=-8, kw={"dur": 1.0})
     if "tique-taque" in txt:
-        add("tictac", "tique", offset=0.0, vol=-4, kw={"dur": round(max(0.6, p["dur_estimada_s"]), 1), "bpm": 240 if "acelerado" in txt or "rápido" in txt else 120})
+        add("tictac", "tique", offset=0.0, vol=-4, kw={"dur": "plano", "bpm": 240 if "acelerado" in txt or "rápido" in txt else 120})
     elif "tique" in txt:
         add("tictac", "tique", offset=0.0, vol=-4, kw={"dur": 0.6, "bpm": 200})
     if "whoosh" in txt or "golpe no vazio" in txt:
@@ -137,7 +137,7 @@ def sfx_for(p):
     if "areia" in txt or "rangendo" in txt:
         add("rachar", "areia/metal", offset=0.1, vol=-10)
     if "vento" in txt or "grilo" in txt:
-        add("vento", "vento", offset=0.0, vol=-6, kw={"dur": round(p["dur_estimada_s"] + 0.8, 1), "grilos": "grilo" in txt})
+        add("vento", "vento", offset=0.0, vol=-6, kw={"dur": "plano", "grilos": "grilo" in txt})
     if "folha" in txt or "página" in txt:
         add("folha", "folha", offset=0.3, vol=-6)
     if "porta" in txt:
@@ -145,7 +145,7 @@ def sfx_for(p):
     if "poeira" in txt or "pedrinha" in txt:
         add("pedrinhas", "poeira", offset=0.25, vol=-8)
     if "chiado" in txt:
-        add("chiado", "chiado", offset=0.0, vol=-8, kw={"dur": round(p["dur_estimada_s"] + 0.5, 1)})
+        add("chiado", "chiado", offset=0.0, vol=-8, kw={"dur": "plano"})
     if "eco" in txt:
         for e in ev:
             if e["nome"] == "whoosh":

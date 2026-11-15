@@ -11,13 +11,13 @@ MD.plano("p52", {
     const ART = window.ART, GB = window.GB, { clamp } = GB, dur = ctx.dur;
     const tQ = GB.wt(ctx, "quatro", 0.04), tMeta = GB.wt(ctx, "meta", 0.97), tFal = GB.wt(ctx, "faltam", 1.47), tVinte = GB.wt(ctx, "vinte", 2.01), tOito = GB.wt(ctx, "oito", 2.35);
     const rk = 1 + ART.map(t, tFal + 0.02, tFal + 0.3, 0, 1, "inOutSine");
-    const cena = GB.toca({ prog: 1, tracos: 30, riscados: rk });
+    const cena = GB.toca({ prog: 0, tracos: 0 });   // close: só os tracinhos + barra (o 1.000 ficaria cortado/espremido)
     if (cena.fundo.length === 5) cena.fundo = cena.fundo.filter((L, i) => i !== 3 && i !== 4); // close: sem mesa/cama na frente da barra
     const cam = ART.camera(t, { push: [2.12, 2.24], dur, ease: "linear" });
     GB.mira(cam, 0.8, ...GB.gizMundo(ART.map(t, 0, dur, 14, -6), 250), 540, 766);
     // barrinha de giz da meta (abaixo dos tracinhos, acima da mesa): 4% em cobre
-    const kBox = ART.map(t, tQ - 0.02, tQ + 0.3, 0, 1, "outCubic");
-    const kFill = ART.map(t, tQ + 0.25, tMeta + 0.1, 0, 0.04, "outCubic");
+    const kBox = ART.map(t, -0.1, 0.18, 0.35, 1, "outCubic");
+    const kFill = ART.map(t, -0.05, Math.max(0.15, tQ + 0.1), 0.01, 0.04, "outCubic");   // já é 4% no "quatro"
     const BX = -280, BY = 352, BW = 560, BH = 38;
     const wave = i => GB.hit(t, tVinte + 0.04 + (i % 10) * 0.035 + Math.floor(i / 10) * 0.06, 0.55);
     // pepita (luz laranja) — posição na tela calculada antes para iluminar a parede
@@ -26,6 +26,7 @@ MD.plano("p52", {
       frame: ctx.frame, legenda: false,
       meio: gg => ART.withLayer(gg, cam, 0.8, w => {
         w.save(); w.translate(GB.PAREDE.x, GB.PAREDE.y); w.scale(GB.PAREDE.s, GB.PAREDE.s);
+        GB.tracinhos(w, { riscados: rk });
         if (kBox > 0) {
           // contorno de giz desenhado em volta
           w.save(); w.strokeStyle = "rgba(244,240,230,.92)"; w.lineWidth = 7; w.shadowColor = "rgba(255,255,255,.35)"; w.shadowBlur = 6;
@@ -34,7 +35,7 @@ MD.plano("p52", {
         if (kFill > 0.001) {
           w.save(); ART.rr(w, BX + 7, BY + 7, Math.max(16, (BW - 14) * kFill / 0.04 * 0.04 * 1), BH - 14, 8);
           w.fillStyle = "#F08A3E"; w.shadowColor = "#FF8A3C"; w.shadowBlur = 18; w.fill(); w.restore();
-          GB.gizTexto(w, Math.round(kFill * 100) + "%", -110, BY + BH + 98, { align: "center", size: 140, cor: "rgba(255,170,90,.98)", glow: "rgba(255,140,60,.7)", blur: 12 });
+          GB.gizTexto(w, "4%", -110, BY + BH + 98, { align: "center", size: 140, cor: "rgba(255,170,90,.98)", glow: "rgba(255,140,60,.7)", blur: 12 });
         }
         w.restore();
       }),
@@ -60,6 +61,6 @@ MD.plano("p52", {
     g.save(); g.fillStyle = ART.lg(g, 0, 1250, 0, 1920, [[0, "rgba(10,6,16,0)"], [0.5, "rgba(10,6,16,.55)"], [1, "rgba(10,6,16,.9)"]]); g.fillRect(0, 1250, 1080, 670); g.restore();
     ART.faixaLegenda(g, 0.4);
     // cartão fixo: saldo 7, cobre na mochila = 4% → RESTAM 28
-    GB.cartao(g, 540, 330, { saldo: 7, dia: 2, s: 0.86, cobre: kFill, rotulo: t >= tVinte - 0.05 ? "RESTAM 28" : kFill > 0.001 ? "COBRE " + Math.round(kFill * 100) + "%" : null, pulso: GB.hit(t, tVinte, 0.5) + GB.hit(t, tMeta, 0.5) * 0.6 });
+    GB.cartao(g, 540, 330, { saldo: 7, dia: 2, s: 0.86, cobre: kFill, rotulo: t >= tVinte - 0.05 ? "RESTAM 28" : kFill > 0.001 ? "COBRE 4%" : null, pulso: GB.hit(t, tVinte, 0.5) + GB.hit(t, tMeta, 0.5) * 0.6 });
   },
 });

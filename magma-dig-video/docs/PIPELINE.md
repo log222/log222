@@ -28,6 +28,7 @@ $PY make_video.py story/parte-01.json --so-audio          # só narração/timel
 $PY tools/verificar_narracao.py build/parte-01             # ASR de volta: palavras mal pronunciadas
 $PY tools/medir_alinhamento.py story/parte-01.json          # erro do tempo de palavra onde há verdade conhecida
 ```
+Codificação final: x264 ≈ 8 Mbps (`video.bitrate`, teto `bitrate_max`), `+faststart`; `--qualidade-max` = crf 16 sem teto.
 Flags: `--sem-trilha`, `--trilha musica.mp3`, `--motor`, `--voz`, `--velocidade`, `--regerar f12`, `--voz-pasta DIR`,
 `--narracao-audio/--narracao-tempos`, `--workers`.
 
@@ -48,8 +49,8 @@ que começa numa palavra da fala. Planos são contíguos: cada um vai do seu cor
   "voz": "pm_alex",           // kokoro: pm_alex/pm_santa/pf_dora; supertonic: M1..M5/F1..F5; qwen/chatterbox: vozes_qwen.json
   "velocidade": 1.0, "atempo": 1.0,
   "pronuncia": {              // só áudio. "padrao" vale para todos; a seção do motor sobrescreve; /IPA/ só no kokoro
-    "padrao": {"Crac": "Crák", "Dia um. Mina A": "Dia um... Mina Á", "Cobre": "Cóbre"},
-    "kokoro": {"MAGMA DIG": "MAGMA /dˈiɡ/", "Crac": "/kɾˈak/"}},
+    "padrao": {"MAGMA DIG": "Magma Díg"},             // só o nome do jogo; português comum na grafia normal
+    "kokoro": {"MAGMA DIG": "MAGMA /dˈiɡ/"}},
   "trilha": true,                                      // true | false | "musica.mp3"
   "estilo": {"audio": {"sfx_db": -10}},                // overrides de config/estilo.json (merge profundo)
   "falas": [
@@ -83,7 +84,8 @@ que começa numa palavra da fala. Planos são contíguos: cada um vai do seu cor
 - `sfx`: `offset` relativo ao início do plano, ou a uma `palavra` falada (procura no plano, depois na fala; `n` = ocorrência).
   Efeitos (`lib/sfx.py`): picareta, rachar, quebrar, moeda, ding, whoosh, ronco, tictac, sting, boom, pop, subida,
   clique, apagar, zumbido, giz, acorde (`kw.tipo`: claro|quente|recompensa|subindo|grave|dissonante), coracao, passos.
-  vento (`kw.dur`, `kw.grilos`), folha, porta, pedrinhas, chiado (`kw.dur`). Qualquer efeito aceita `"kw": {"eco": true}`
+  `"kw": {"dur": "plano"}` faz o efeito durar até o corte (acompanha o plano esticado); `"no_fim": true` mede o
+  `offset` a partir do fim do plano. vento (`kw.dur`, `kw.grilos`), folha, porta, pedrinhas, chiado (`kw.dur`). Qualquer efeito aceita `"kw": {"eco": true}`
   (ou `{"eco": {"atraso": 0.22, "repeticoes": 4, "decai": 0.45}}`) para eco de caverna. Ouça todos: `$PY -m lib.sfx build/sfx`.
 - `trilha` (automação por dados): lista de deixas `{"db", "modo": "normal"|"suspensa", "rampa" (s), e o tempo:
   "offset" desde o corte, ou "palavra"+"offset", ou "no_fim": true}`. Cada deixa faz rampa do estado atual para o novo e
@@ -94,16 +96,23 @@ que começa numa palavra da fala. Planos são contíguos: cada um vai do seu cor
   "MAGMA DIG") vira um bloco de legenda inteiro.
 - Formato antigo (`"beats": [...]`, 1 beat = 1 fala = 1 plano) continua aceito (`story/demo.json`).
 
-### Ritmo (config/estilo.json → tempo)
-`inicio` 0,12 s, `pausa_fala` 0,12 s entre falas, `final` 0,9 s; pausas entre frases DENTRO da fala vêm do Kokoro
-(~0,2–0,33 s). Pausa intencional só por dado (`pausa_depois`). Parte 1 com `pm_alex` 1,0: **2,97 pal/s no total**,
-maior silêncio 0,56 s (o "Cobre.", plano 47 = 1,13 s), o resto ≤ 0,33 s.
+### Ritmo e pausas por pontuação (config/estilo.json → tempo.pausas)
+Velocidade natural (1,0, sem `atempo`); a duração sai da fala. A voz é sintetizada FRASE a FRASE (qualquer motor), o
+silêncio do motor nas pontas é aparado (`lib/pausas.py`) e substituído pelo valor da pontuação:
+`fim_frase` (. ? !) 0,40 s e `reticencias` 0,30 s exatos; `dois_pontos` 0,30 s (ajusta o silêncio que o motor fez);
+`virgula`/`ponto_virgula` mínimo 0,15 s: só alonga o silêncio existente (com fade, no meio do trecho não vozeado);
+se o motor não fez pausa nenhuma ali, não força e a vírgula aparece como "sem pausa" no relatório.
+O mesmo vale para narração gravada (`--narracao-audio`), onde os fins de frase também são normalizados.
+Pausa intencional extra: `"pausa_depois"` na fala (o "Cobre." usa 0,6 s).
+`--so-audio` (ou `--pausas`) imprime a tabela alvo × motor × real de cada vírgula/ponto e as palavras/s; salva
+`build/<…>/pausas.json`. Parte 1: Kokoro pm_alex 136,1 s (2,35 pal/s); Supertonic M1 120,5 s (2,66 pal/s).
 
 ### Legenda (config/estilo.json → legenda, estilo medido da referência)
 Anton caixa-alta branca, 72 px (maiúsculas ≈ 62 px), contorno 4 px #161408 + sombra suave, sem karaokê
 (`destacar_ativa: false`), destaque #EBBA40 só por dados, fade-in 0,1 s, uma linha (encolhe se passar de 700 px),
 centro y = 1400 (`legenda_pos`: `baixo` 1400 | `meio` 1250 | `alto` 390 | `centro` 960 | `{"centro_y": …}`).
-Blocos: até 3 unidades e 22 caracteres; quebra em pontuação, em pausa > 0,35 s, no corte de plano, e após ~0,85 s
+Blocos: até 3 unidades e 22 caracteres; duração mínima de exibição `dur_min_bloco` 0,35 s (bloco mais curto se
+junta ao vizinho, de preferência no mesmo plano e dentro do limite de caracteres; nunca dois blocos ao mesmo tempo); quebra em pontuação, em pausa > 0,35 s, no corte de plano, e após ~0,85 s
 com ≥ 2 palavras; não termina bloco em artigo/preposição. Pontuação é mantida.
 Zona segura: nada importante em y < 250, y > 1500, x > 960. Bloco em 1400 ocupa ~1369–1431 (+ sombra) → folga de ~65 px.
 

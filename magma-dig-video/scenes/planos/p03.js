@@ -6,7 +6,7 @@ MD.plano("p03", {
   render(g, t, ctx) {
     const ART = window.ART, GC = window.GC, D = ctx.dur || 1.17;
     const tDez = GC.wt(ctx, "dez", 0.2), tSeg = GC.wt(ctx, "segundos", 0.52);
-    const t0 = tDez + 0.02, t1 = Math.min(D - 0.2, tSeg + 0.42);           // 10,0 -> 0,0
+    const t0 = tDez + 0.02, t1 = Math.min(D - 0.2, Math.max(tSeg + 0.42, D - 0.32));   // zero perto do fim do plano, qualquer que seja a duração           // 10,0 -> 0,0
     const k = ART.prog(t, t0, t1);
     const v = 10 * (1 - Math.pow(k, 1.35));                                // acelera de leve
     const zero = t >= t1;

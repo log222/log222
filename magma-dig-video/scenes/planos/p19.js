@@ -8,7 +8,8 @@ MD.plano("p19", {
     const tb = GC.mark(ctx, "coracao", 0);
     const tCor = GC.wt(ctx, "Coração", 0.2);
     // batidas: tum-tum no som, e de novo ~0,85 s depois
-    const beat = Math.max(ART.pulse(t, tb, 0.28), 0.7 * ART.pulse(t, tb + 0.22, 0.26), ART.pulse(t, tb + 0.85, 0.28), 0.7 * ART.pulse(t, tb + 1.07, 0.26));
+    let beat = 0;   // tum-tum a cada 0,85 s, do som até o fim do plano (qualquer duração)
+    for (let b0 = tb; b0 < D; b0 += 0.85) beat = Math.max(beat, ART.pulse(t, b0, 0.28), 0.7 * ART.pulse(t, b0 + 0.22, 0.26));
     const z = ART.map(t, 0, D, 1.0, 1.07, "outSine") * (1 + 0.012 * beat);
     g.save(); GC.cam(g, z, 540, 820);
     ART.coracaoMagma(g, 0, { x: 540, y: 800, s: 0.92, pulso: 0.45 + 1.1 * beat, revela: 0.08 + 0.3 * beat + 0.1 * ART.prog(t, tCor, D) });

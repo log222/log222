@@ -135,7 +135,7 @@
        "offset": 0.0,
        "vol": -6,
        "kw": {
-        "dur": 1.8,
+        "dur": "plano",
         "grilos": true
        }
       }
@@ -326,7 +326,8 @@
      "sfx": [
       {
        "nome": "moeda",
-       "offset": 2.29,
+       "no_fim": true,
+       "offset": -0.35,
        "vol": -2
       },
       {
@@ -334,7 +335,7 @@
        "offset": 0.0,
        "vol": -4,
        "kw": {
-        "dur": 2.7,
+        "dur": "plano",
         "bpm": 240
        }
       }
@@ -754,7 +755,7 @@
        "offset": 0.0,
        "vol": -8,
        "kw": {
-        "dur": 3.6
+        "dur": "plano"
        }
       }
      ],

@@ -356,16 +356,25 @@
   ART.obj.bracoForte = (g, t, o = {}) => {
     const x = o.x ?? 1080, y = o.y ?? 700, s = o.s ?? 1, u = t - (o.t0 ?? 0.3);
     const rot = ART.kf(u, [[-0.5, -70], [0, -88, "outCubic"], [0.16, 28, "inQuart"], [0.45, 38, "outCubic"], [1.2, 34]]);
-    const rim = o.rim || "#8E7BD8", body = "#15121F";
+    const rim = o.rim || "#8E7BD8", body = o.cor || "#2B2442";
     g.save(); g.translate(x, y); g.scale(-s, s);
     if (u > 0.04 && u < 0.5) { g.save(); g.globalAlpha = 0.3 * (1 - (u - 0.04) / 0.46); g.strokeStyle = "#C9BFFF"; g.lineWidth = 90; g.lineCap = "round"; g.beginPath(); g.arc(0, 0, 820, ART.deg(-80), ART.deg(rot), false); g.stroke(); g.restore(); }
     g.rotate(ART.deg(rot));
-    const arm = new Path2D("M-120,-110 C40,-190 260,-170 360,-90 C420,-40 460,-70 520,-60 C600,-50 640,-10 640,40 C640,90 600,110 540,110 C470,110 430,80 360,100 C240,140 60,160 -60,120 C-160,90 -200,-60 -120,-110 Z");
-    g.save(); g.translate(640, 30); g.rotate(ART.deg(90)); g.scale(4, 4); ART.drawPick(g, "ferro", 230); g.restore();
-    g.fillStyle = body; g.fill(arm);
-    g.save(); g.clip(arm); g.strokeStyle = rim; g.globalAlpha = 0.85; g.lineWidth = 18; g.translate(0, -9); g.stroke(arm); g.restore();
-    g.strokeStyle = "rgba(142,123,216,.3)"; g.lineWidth = 7; g.beginPath(); g.moveTo(80, -125); g.quadraticCurveTo(200, -60, 330, -100); g.stroke();
-    ART.circ(g, 610, 30, 74); g.fillStyle = body; g.fill(); g.save(); ART.circ(g, 610, 30, 74); g.clip(); g.strokeStyle = rim; g.lineWidth = 14; g.translate(0, -7); ART.circ(g, 610, 30, 74); g.stroke(); g.restore();
+    // braço de verdade: deltoide, bíceps alto, cotovelo, antebraço afunilando, punho fechado
+    const sup = new Path2D("M-140,-120 C-60,-190 60,-200 140,-175 C210,-215 300,-150 345,-70 L360,70 C250,120 80,130 -20,135 C-120,135 -190,40 -140,-120 Z");
+    const ante = new Path2D("M320,-80 C390,-120 470,-80 545,-48 L560,60 C480,85 400,100 330,95 Z");
+    const punho = new Path2D("M530,-62 C580,-80 650,-70 668,-30 C690,20 680,80 640,98 C590,112 545,100 530,70 Z");
+    g.save(); g.translate(610, 18); g.rotate(ART.deg(90)); g.scale(4, 4); ART.drawPick(g, "ferro", 230); g.restore();
+    for (const pth of [sup, ante, punho]) { g.fillStyle = body; g.fill(pth); }
+    // volumes e luz de recorte
+    const rimDe = (pth, w) => { g.save(); g.clip(pth); g.strokeStyle = rim; g.globalAlpha = 0.9; g.lineWidth = w; g.translate(0, -w / 2); g.stroke(pth); g.restore(); };
+    rimDe(sup, 18); rimDe(ante, 14); rimDe(punho, 12);
+    g.save(); g.clip(sup); ART.ell(g, 150, -110, 150, 58, -0.05); g.fillStyle = "rgba(185,168,255,.18)"; g.fill(); ART.ell(g, -40, -60, 90, 70); g.fillStyle = "rgba(185,168,255,.10)"; g.fill(); g.restore();
+    g.save(); g.clip(ante); ART.ell(g, 410, -45, 90, 30, 0.1); g.fillStyle = "rgba(185,168,255,.14)"; g.fill(); g.restore();
+    g.strokeStyle = "rgba(10,6,20,.6)"; g.lineWidth = 8; g.lineCap = "round";
+    g.beginPath(); g.moveTo(335, -50); g.quadraticCurveTo(350, 10, 335, 90); g.stroke();           // dobra do cotovelo
+    for (const yy of [-30, 10, 50]) { g.beginPath(); g.moveTo(600, yy); g.lineTo(660, yy + 6); g.stroke(); } // dedos
+    g.strokeStyle = "rgba(185,168,255,.35)"; g.lineWidth = 5; g.beginPath(); g.moveTo(40, -150); g.quadraticCurveTo(160, -185, 280, -140); g.stroke(); // veia/realce
     g.restore();
     // a picareta no breu: escurece tudo menos o recorte
     g.save(); g.fillStyle = `rgba(6,4,12,${o.breu ?? 0.35})`; g.fillRect(0, 0, ART.W, ART.H); g.restore();

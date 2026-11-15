@@ -6,7 +6,7 @@ MD.plano("p02", {
     const D = ctx.dur || 1.12, h = GA.m(ctx, "picareta", 0, 0.05);
     const sh = ART.camera(t, { hits: [h], hitAmp: 12, push: [1, 1] });
     g.save(); g.translate(sh.sx, sh.sy);
-    const v = ART.gameplay.cheio(g, t, { de: 0.55, ate: 0.55 + D, dur: D, foco: [640, 340], zoom: [1.05, 1.18], cronometro: { valor: 10 } });
+    const v = ART.gameplay.cheio(g, t, { de: 0.55, ate: 1.75, dur: D, foco: [640, 340], zoom: [1.05, 1.18], cronometro: { valor: 10 } });
     g.restore();
     const p = v.map(640, 300);
     ART.ui.crac(g, p[0] + 70, p[1] - 40, t, h, { s: 1.2, rot: -6 });

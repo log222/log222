@@ -10,7 +10,7 @@ MD.plano("p56", {
   render(g, t, ctx) {
     const ART = window.ART, GB = window.GB, { clamp } = GB, dur = ctx.dur;
     const tSeg = GB.wt(ctx, "segura", 0.2), tAm = GB.wt(ctx, "amanha", 0.92), tAp = GB.wt(ctx, "aposta", 1.4), tSeta = GB.wt(ctx, "seta", 2.04);
-    const cena = GB.toca({ prog: 1, tracos: 30, riscados: 2 }, { lamp: 0.25 });
+    const cena = GB.toca({ prog: 0, tracos: 0 }, { lamp: 0.25 });   // só tracinhos + seta (o 1.000 ficaria cortado no topo)
     const cam = ART.camera(t, { push: [2.3, 2.45], dur, ease: "linear" });
     GB.mira(cam, 1, ART.map(t, 0, dur, 868, 880), 955, 540, 820);
     // seta de giz na parede (à direita dos tracinhos, acima da cama)
@@ -20,6 +20,7 @@ MD.plano("p56", {
       frame: ctx.frame, legenda: false,
       meio: gg => ART.withLayer(gg, cam, 0.8, w => {
         w.save(); w.translate(GB.PAREDE.x, GB.PAREDE.y); w.scale(GB.PAREDE.s, GB.PAREDE.s);
+        GB.tracinhos(w, { riscados: 2 });
         GB.gizSeta(w, SX, SY, SH, 1, { lw: 12, cor: "rgba(170,240,160,.95)", glow: "rgba(120,230,120,.6)" });
         GB.gizTexto(w, "?", SX + 70, SY - SH + 40, { size: 110, cor: "rgba(244,240,230,.9)" });
         w.restore();

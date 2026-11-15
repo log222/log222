@@ -4,7 +4,7 @@ MD.plano("p49", {
   async setup(ctx) { if (!window.GA) await MD.loadScript("../scenes/planos/_grupoA.js"); await ART.gameplay.preload(13.6, 15.4); return {}; },
   render(g, t, ctx) {
     const D = ctx.dur || 1.41, tM = GA.w(ctx, "mercado", 0, D * 0.6);
-    ART.gameplay.cheio(g, t, { de: 13.6, ate: 13.6 + D, dur: D, topo: 100, base: 560, foco: [440, 320], zoom: [1.0, 1.15], borrar: 9, escurecer: 0.45, selo: "IMAGEM REAL DO JOGO" });
+    ART.gameplay.cheio(g, t, { de: 13.6, ate: 15.0, dur: D, topo: 100, base: 560, foco: [440, 320], zoom: [1.0, 1.15], borrar: 9, escurecer: 0.45, selo: "IMAGEM REAL DO JOGO" });
     ART.ui.titulo(g, 540, 420, "MERCADO", { s: 1.1 });
     const k = ART.prog(t, tM - 0.1, Math.min(D, tM + 0.35), "inOutSine");
     if (k > 0) {

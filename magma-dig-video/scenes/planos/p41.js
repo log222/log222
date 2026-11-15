@@ -5,7 +5,7 @@ MD.plano("p41", {
   render(g, t, ctx) {
     const D = ctx.dur || 1.23, tU = GA.w(ctx, "um", 0, 0.04), tS = GA.w(ctx, "sete", 0, D * 0.6);
     const val = t >= tU ? 1.0 : ART.lerp(1.8, 1.0, ART.clamp(t / Math.max(0.05, tU)));
-    ART.gameplay.cheio(g, t, { de: 3.0, ate: 3.0 + D, dur: D, foco: [720, 350], zoom: [1.2, 1.35], tom: "rgba(80,10,20,.12)" });
+    ART.gameplay.cheio(g, t, { de: 3.0, ate: 4.5, dur: D, foco: [720, 350], zoom: [1.2, 1.35], tom: "rgba(80,10,20,.12)" });
     const z = ART.prog(t, 0, Math.min(0.5, D * 0.5), "inOutCubic");
     ART.ui.cronometro(g, ART.lerp(790, 540, z), ART.lerp(370, 640, z), { valor: val, escala: 11, fantasma: 10, icone: "sol", s: ART.lerp(0.9, 1.9, z), alerta: 1.0 });
     GA.hud(g, t, { y: 370, moedas: t >= tS ? 7 : 6, pulso: ART.pulse(t, tS, 0.3) });

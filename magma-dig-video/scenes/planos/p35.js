@@ -17,11 +17,18 @@ MD.plano("p35", {
     ART.glow(g, 540, 720, 1100 * z, "#E63748", 0.5 + 0.3 * hitF + 0.2 * hitB);
     // sombras de picaretas (muitos mineradores): caem no boom e balançam
     const cai = ART.ease.outBack(clamp((t - tBoom + 0.04) / 0.22));
-    const PIC = [[-380, 660, -32, 0.95], [380, 660, 32, 0.95], [-200, 530, -16, 1.05], [200, 530, 16, 1.05], [0, 450, 0, 1.12]];
-    PIC.forEach(([dx, head, ang, sc], i) => {
-      const sw = Math.sin(t * 7 + i * 0.9) * 5 + 6 * hitF * Math.sin(i * 2 + 1);
-      const L = 430 * sc * z, gy = head * z + 0.8 * L + (1 - cai) * 900 + (1 - z) * 400;
-      GB.silPicareta(g, 540 + dx * z + sh, gy, ang + sw, L, i < 2 ? "#1A070B" : "#0A0306", 0.95 * clamp(cai * 1.5));
+    // 3 picaretas grandes e reconhecíveis, em contraluz (sprite cacheado: picareta do kit escurecida + borda vermelha)
+    const spr = ART.cache("p35:pic", 520, 1100, gg => {
+      gg.translate(260, 860); gg.scale(7.2, 7.2); ART.drawPick(gg, "ferro", 118);
+      gg.setTransform(1, 0, 0, 1, 0, 0); gg.globalCompositeOperation = "source-atop";
+      gg.fillStyle = ART.lg(gg, 0, 0, 520, 0, [[0, "rgba(120,20,30,.55)"], [0.35, "rgba(14,4,8,.9)"], [1, "rgba(10,3,6,.95)"]]); gg.fillRect(0, 0, 520, 1100);
+    });
+    const PIC = [[150, 1430, -36, 0.9], [-150, 1430, 36, 0.9], [0, 1600, 0, 1.08]];
+    PIC.forEach(([dx, gy0, ang, sc], i) => {
+      const sw = Math.sin(t * 6 + i * 1.3) * 4 + 5 * hitF * Math.sin(i * 2 + 1);
+      const gy = gy0 + (1 - cai) * 900;
+      g.save(); g.globalAlpha = clamp(cai * 1.5); g.translate(540 + dx * z + sh, gy); g.rotate(ART.deg(ang + sw)); g.scale(sc * z, sc * z);
+      g.drawImage(spr, -260, -860 - 240); g.restore();
     });
     // poeira/brasa subindo
     ART.dust(g, t, { count: 26, seed: 31, color: "#FF8A7A", size: [2, 4.5], alpha: 0.45, y: 300, h: 1100, speed: 30 });

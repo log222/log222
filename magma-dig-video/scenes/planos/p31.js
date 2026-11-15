@@ -63,7 +63,7 @@ MD.plano("p31", {
     const escreve = ART.zeca.pose("apontando", t, {
       turn: -0.62, segura: "giz", eyes: "determinado", mouth: "neutro", look: [-0.6, -0.2], headTilt: -4,
       aF: 96 + Math.sin(t * 14) * 6, eF: -6 + Math.cos(t * 14) * 8, lF: Math.sin(t * 16) * 14 * clamp(mover), lB: -Math.sin(t * 16) * 14 * clamp(mover),
-      rim: "#FFB070", rimA: 0.6, lamp: 0.35,
+      rim: "#FFB070", rimA: 0.6, lamp: 0.35, cone: 0,
     });
     const congela = Object.assign({}, escreve, {
       aF: 112, eF: 14, lean: -7, headTurn: 0, camera: 1, eyes: t > tDias + 0.1 ? "preocupado" : "espanto", mouth: "o", brows: "preocupado", segura: "giz",

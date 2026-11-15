@@ -18,7 +18,7 @@ MD.plano("p26", {
     const zy = ART.lerp(1330, 1172, ART.ease.inOutSine(k)), zs = ART.lerp(1.25, 0.68, ART.ease.inOutSine(k));
     const dentro = clamp((t - (dur - 0.5)) / 0.45); // entrando no escuro
     ART.palco(g, t, cam, cena, gg => {
-      const p = ART.zeca.pose("andando", t, { x: 612 + 6 * Math.sin(t * 6), y: zy, s: zs, turn: 0.06, costas: 1, lamp: 1, rim: "#B58CFF", rimA: 0.8 }, { periodo: 0.44 });
+      const p = ART.zeca.pose("andando", t, { x: 612 + 6 * Math.sin(t * 6), y: zy, s: zs, turn: 0.06, costas: 1, lamp: 1, cone: 0, rim: "#B58CFF", rimA: 0.8 }, { periodo: 0.44 });
       if (dentro > 0) ART.zeca.drawEscuro(gg, p, dentro);
       else ART.zeca.draw(gg, p);
     }, { frame: ctx.frame, legendaK: 0.4 });

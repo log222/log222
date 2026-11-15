@@ -11,7 +11,7 @@ MD.plano("p37", {
     // contraluz: um halo frio atrás do braço recorta a silhueta
     const fade = 1 - 0.6 * ART.prog(t, tE, tE + 0.4);
     ART.withLayer(g, cam, 0.6, gg => { ART.glow(gg, 760, 700, 760, "#5A4AA8", 0.55 * fade, "source-over"); ART.glow(gg, 860, 560, 360, "#8E7BD8", 0.35 * fade, "source-over"); });
-    ART.withLayer(g, cam, 1, gg => ART.obj.bracoForte(gg, t, { t0: golpe, x: 1020, y: 880, s: 0.62, rim: ART.mix("#2A2340", "#B9A8FF", fade), breu: 0 }));
+    ART.withLayer(g, cam, 1, gg => ART.obj.bracoForte(gg, t, { t0: golpe, x: 960, y: 940, s: 0.88, rim: ART.mix("#2A2340", "#B9A8FF", fade), breu: 0 }));
     ART.ui.crac(g, 330, 1080, t, imp, { apagado: true, s: 1.15, dur: 1.4, rot: 8 });
     ART.withLayer(g, cam, 1, gg => ART.zeca.drawEscuro(gg, ART.zeca.pose("parado", t, { x: 210, y: 1270, s: 1.15, turn: 0.4, alvo: [700, 800], eyes: t > imp ? "espanto" : "aberto" }), 0.96));
     ART.post(g, ctx.frame, { vinheta: 0.7 });

@@ -16,7 +16,7 @@ MD.plano("p01", {
     GC.breu(g, t, { x: LX, y: LY, c0: ART.mix("#07060B", "#1C1626", on), c1: "#030206" });
     GC.cam(g, z, CX, CY, sh.x, sh.y);
     // Zeca de frente, em close: capacete enorme, rosto no breu iluminado só pelo vazamento da lanterna
-    const pose = ART.zeca.pose("parado", t + 3, { x: 540, y: LY + 201 * S, s: S, turn: 0, camera: 1, look: [0, 0.05], eyes: t < 0.22 ? "meio" : "aberto", mouth: "neutro", blink: 0, headTilt: -2 });
+    const pose = ART.zeca.pose("parado", t + 3, { x: 540, y: LY + 201 * S, s: S, turn: 0, camera: 1, look: [0, 0.05], eyes: "aberto", mouth: "neutro", blink: 0, headTilt: -2 });
     const anc = GC.zecaNoEscuro(g, pose, { escuro: ART.lerp(1, 0.8, on), raio: 1000, rimK: on, apagado: 0.97 * (1 - Math.min(1, on * 3)) });
     g.restore();
     // a lâmpada (desenhada por cima, em px de tela, acompanhando a câmera)

@@ -5,7 +5,9 @@
     "altura": 1920,
     "fps": 30,
     "bitrate": "8M",
-    "bitrate_max": "10M"
+    "bitrate_max": "10M",
+    "preset": "medium",
+    "_doc": "saída final: x264 ABR bitrate (≈8 Mbps, teto bitrate_max), +faststart; --qualidade-max = crf 16 sem teto; --rascunho = 540x960 crf 23 ultrafast. preset 'veryfast' se o encode virar gargalo."
   },
   "zona_segura": {
     "topo": 250,

@@ -86,5 +86,21 @@ Como: brilho/feixe/cone/vinheta viram sprites cacheados (nada de `filter: blur` 
 são mescladas e recortadas na faixa útil (`camadaEstatica(..., {y0, y1})`), gradação de cor da cena vai junto com vinheta e faixa da legenda num só desenho
 (`cena.tom`). Dica para quem compõe: evite `g.filter` e `shadowBlur` dentro do `render`; desenhe em `ART.cache` uma vez.
 
+## Rodada de correção (v2) — o que mudou e quem precisa reconferir
+- **`ART.pata`**: o antebraço visível agora termina esfumado a ~250 px de tela da palma (parâmetro novo `braco`, em px; ex.: `braco: 400`).
+  Assinatura igual. **Reconferir:** p10, p13, p16, p32, p47, p52, p55 (a pata pode precisar entrar mais perto da borda).
+- **Parede da meta (`ART.giz`)**: removido o ícone "◎" que ficava colado no 1.000. **Reconferir:** p14, p15, p31, p32, p52.
+- **Lanterna (regra única)**: `lamp > 0` agora sempre vem com feixe (`cone` padrão 0,5 quando não é passado; `cone: 0` desliga);
+  halo e lente bem mais fortes; de frente aparece uma estrela de luz. Na mina, com cronômetro acima de zero: lanterna acesa; perto de 1,0 pisca
+  (`ART.zeca.falha`); em 0,0 apaga. **Reconferir:** todo plano com o Zeca e `lamp` (o feixe aparece onde antes não aparecia; passe `cone: 0` se não quiser).
+- **Picareta/braço erguidos** (braço da frente com `aF > 125`) passam por trás da cabeça: não cobrem mais o rosto. Afeta `cavando`, `comemorando`, `riscando`.
+  **Reconferir:** p03 (picareta sobre o rosto) e qualquer plano com `comemorando`.
+- **`ART.aberturaOlho`**: a "pálpebra" some por inteiro no fim (antes parava num losango).
+- **`ART.gameplay.cheio(g, t, {de, ate, dur, img, foco, zoom, topo, base, tapar, borrar, escurecer, cronometro, selo, tom})`**: imagem do jogo em tela
+  cheia na faixa y≈300–1250, bordas esfumadas, cronômetro desenhado por cima, selo "IMAGEM REAL DO JOGO". O `visor` continua existindo; o selo padrão dele
+  agora é "imagem real do jogo" (sem inglês).
+- **`ART.obj.bracoForte`**: redesenhado como braço de verdade (deltoide, bíceps, cotovelo, punho) e mais claro (`cor`, `rim`).
+- Tabela canônica do cronômetro e do contador: ver mensagem do orquestrador (vale para todos os grupos).
+
 ## Zonas
 Legenda: faixa y≈1300–1500 (centro 1400) mantida escura e sem detalhe (`ART.LEGENDA`, `ART.faixaLegenda`). Nada essencial em y<250, y>1500, x>960.

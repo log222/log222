@@ -4,7 +4,7 @@ MD.plano("p07", {
   async setup(ctx) { if (!window.GA) await MD.loadScript("../scenes/planos/_grupoA.js"); await ART.gameplay.preload(1.5, 3.8); return {}; },
   render(g, t, ctx) {
     const D = ctx.dur || 1.99, h = GA.m(ctx, "picareta", 0, 0.05), tP = GA.w(ctx, "paga", 0, D * 0.5);
-    const v = ART.gameplay.cheio(g, t, { de: 1.5, ate: 1.5 + D, dur: D, foco: [630, 320], zoom: [1.1, 1.75], cronometro: { valor: GA.cron(t, D, 9.5, 8.5) } });
+    const v = ART.gameplay.cheio(g, t, { de: 1.5, ate: 3.4, dur: D, foco: [630, 320], zoom: [1.1, 1.75], cronometro: { valor: GA.cron(t, D, 9.5, 8.5) } });
     const p = v.map(630, 315);
     ART.ui.crac(g, p[0] + 40, p[1] - 60, t, h, { s: 1.3, rot: -6, dur: 0.9 });
     const k = ART.prog(t, tP - 0.3, tP, "inCubic");
