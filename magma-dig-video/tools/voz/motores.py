@@ -102,6 +102,12 @@ def _seed(seed):
     torch.manual_seed(seed)
 
 
+def _max_tokens(texto):
+    """Teto de tokens (12,5 por segundo de áudio): ~2x o tempo esperado a 11 caracteres/s.
+    Sem isso, o modelo às vezes não para e gera até 2048 tokens (164 s) de silêncio/ruído."""
+    return int(12.5 * (2.0 * len(texto) / 11.0 + 2.0))
+
+
 def _qwen_desc(voz):
     return QWEN_DESIGN.get(voz, {}).get("descricao", voz) if isinstance(QWEN_DESIGN.get(voz), dict) \
         else QWEN_DESIGN.get(voz, voz)
@@ -111,7 +117,8 @@ def synth_qwen_design(texto, voz="narrador", velocidade=1.0, seed=0):
     """Voice design direto, frase a frase (timbre pode variar um pouco entre frases)."""
     _seed(seed)
     m = _qwen("design")
-    wavs, sr = m.generate_voice_design(text=texto, language="Portuguese", instruct=_qwen_desc(voz))
+    wavs, sr = m.generate_voice_design(text=texto, language="Portuguese", instruct=_qwen_desc(voz),
+                                         max_new_tokens=_max_tokens(texto))
     return np.asarray(wavs[0], dtype=np.float32), sr
 
 
@@ -149,14 +156,15 @@ def synth_qwen(texto, voz="narrador", velocidade=1.0, seed=0, ref_seed=0):
     _seed(seed)
     m = _qwen("base")
     wavs, sr = m.generate_voice_clone(text=texto, language="Portuguese",
-                                      voice_clone_prompt=_qwen_prompt(voz, ref_seed))
+                                      voice_clone_prompt=_qwen_prompt(voz, ref_seed),
+                                      max_new_tokens=_max_tokens(texto))
     return np.asarray(wavs[0], dtype=np.float32), sr
 
 
 def synth_qwen_custom(texto, voz="Ryan", velocidade=1.0, seed=0):
     _seed(seed)
     m = _qwen("custom")
-    wavs, sr = m.generate_custom_voice(text=texto, language="Portuguese", speaker=voz)
+    wavs, sr = m.generate_custom_voice(text=texto, language="Portuguese", speaker=voz, max_new_tokens=_max_tokens(texto))
     return np.asarray(wavs[0], dtype=np.float32), sr
 
 
