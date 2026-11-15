@@ -26,7 +26,7 @@
     shadow: 1, sit: 0,
     // ator: alvo [x,y] px para olhar, camera 0..1 (olhar para a câmera), segura/seguraB (objeto na pata), bFrente (braço de trás na frente do corpo),
     // costas 0/1 (vista de costas), banho {cor,k} (luz colorida no rosto), blinkSeed
-    alvo: null, camera: 0, segura: null, seguraB: null, bFrente: 0, costas: 0, banho: null, blinkSeed: 0,
+    alvo: null, camera: 0, capacete: 1, segura: null, seguraB: null, bFrente: 0, costas: 0, banho: null, blinkSeed: 0,
   };
 
   // ---------------------------------------------------------------- utilidades de forma
@@ -404,6 +404,7 @@
 
     // capacete
     const brimY = HY - 34, domeCx = HX + s2 * 5;
+    if (p.capacete) {
     // aba (elipse larga), parte de trás mais escura
     const brx2 = 80 + s2 * 4, bry2 = 13;
     ART.ell(g, domeCx + s2 * 9, brimY, brx2, bry2); g.fillStyle = ART.lg(g, 0, brimY - bry2, 0, brimY + bry2, [[0, P.capaceteEsc], [1, P.capaceteSombra]]); g.fill();
@@ -438,8 +439,14 @@
     ART.ell(g, lx + s2 * 7 - 3 * lf, ly - 4, 4 * lf, 3.5); g.fillStyle = "rgba(255,255,255,.9)"; g.fill();
     }
     A.lanterna = g.getTransform().transformPoint(new DOMPoint(lx + s2 * 9, ly));
+    } else {
+      // sem capacete: topo da cabeça com plaquinhas de casco
+      g.save(); headPath(); g.clip(); ART.ell(g, HX, HY - 50, 58, 26); g.fillStyle = ART.shade(P.casco, 0.05); g.fill();
+      for (let i = -2; i <= 2; i++) { ART.ell(g, HX + i * 22, HY - 36, 9, 5); g.fillStyle = ART.rgba(P.cascoEsc, 0.45); g.fill(); } g.restore();
+      A.lanterna = g.getTransform().transformPoint(new DOMPoint(HX, HY - 50));
+    }
     A.cabeca = g.getTransform().transformPoint(new DOMPoint(HX, HY));
-    A.topo = g.getTransform().transformPoint(new DOMPoint(HX, brimY - dry));
+    A.topo = g.getTransform().transformPoint(new DOMPoint(HX, brimY - (p.capacete ? 56 : 20)));
     A.boca = g.getTransform().transformPoint(new DOMPoint(mx + s2 * 12, my + 6));
     // suor / gotas
     if (p.sweat > 0) {
@@ -549,7 +556,7 @@
     dormindo: t => ({ sit: 1, bob: -26 + Math.sin(t * 1.6) * 1.8, sq: 1 + Math.sin(t * 1.6) * 0.02, lF: 80, lB: 76, aF: 25, eF: 40, aB: -20, eB: 40,
       headTilt: 12 + Math.sin(t * 1.6) * 2, headDy: 6, eyes: "fechado", mouth: "dormindo", zzz: 1, legSpread: 1.2, blink: 0 }),
     /** deitado na cama (use ART.cobertor por cima). Rotaciona o corpo; cabeça para a esquerda quando turn>0 */
-    deitado: (t, o = {}) => ({ lean: -84, bob: 0, sq: 1 + Math.sin(t * 1.6) * 0.015, aF: 60, eF: 70, aB: 40, eB: 80, lF: 10, lB: -6, shadow: 0,
+    deitado: (t, o = {}) => ({ capacete: 0, lean: -84, bob: 0, sq: 1 + Math.sin(t * 1.6) * 0.015, aF: 60, eF: 70, aB: 40, eB: 80, lF: 10, lB: -6, shadow: 0,
       eyes: o.acordado ? "meio" : "fechado", mouth: o.acordado ? "neutro" : "dormindo", zzz: o.acordado ? 0 : 1, headTilt: 6, blink: o.acordado ? undefined : 0 }),
     /** comemoração: antecipação, pulo, braços alternados com atraso, cabeça atrasada, pés encolhidos no ar, aterrissagem amassada */
     comemorando: (t, o = {}) => {
@@ -573,7 +580,7 @@
       look: [0.1, 0.9], aF: 30, eF: 60, aB: 25, eB: 65, bFrente: 1, blush: 0.6 }),
     /** cansado / ofegando depois do dia */
     cansado: t => ({ bob: -3 + Math.sin(t * 7) * 2.2, sq: 1 + Math.sin(t * 7) * 0.025, lean: 11, headTilt: 13 + Math.sin(t * 7 + 0.5) * 1.5, headDy: 9,
-      eyes: "meio", mouth: Math.sin(t * 7) > 0 ? "aberto" : "o", brows: "triste", aF: 4, eF: 8, aB: -6, eB: 6, sweat: 1, look: [0.2, 0.6] }),
+      eyes: "meio", mouth: Math.sin(t * 7) > 0 ? "aberto" : "o", aF: 4, eF: 8, aB: -6, eB: 6, sweat: 1, look: [0.2, 0.6] }),
     /** contando moedas com as duas patas na frente do peito */
     contando: (t, o = {}) => {
       const Pd = o.periodo || 0.55, ph = ((t % Pd) + Pd) % Pd / Pd, pass = Math.sin(ph * Math.PI);
@@ -583,7 +590,7 @@
     /** segurando um objeto na frente (ex.: pepita) */
     segurando: (t, o = {}) => ({ aF: 62, eF: 60, aB: 50, eB: 70, bFrente: 1, segura: o.objeto || "pepita", headTilt: 8, look: [0.4, 0.8], eyes: "aberto", mouth: "sorriso", bob: breathe(t) * 1.4 }),
     /** apontando para frente/parede (pata esticada); combine com alvo:[x,y] */
-    apontando: (t) => ({ aF: 104 + Math.sin(t * 3) * 2, eF: -6, aB: -26, eB: 20, lean: -2, mouth: "aberto", bob: breathe(t) * 1.2 }),
+    apontando: (t) => ({ aF: 82 + Math.sin(t * 3) * 2, eF: -4, aB: -26, eB: 20, lean: -2, mouth: "aberto", bob: breathe(t) * 1.2 }),
     /** de costas riscando a parede com giz (plano por cima do ombro) */
     riscando: (t, o = {}) => ({ costas: 1, aF: 152 + Math.sin(t * 15) * 9, eF: -16 + Math.cos(t * 15) * 8, aB: -24, eB: 20, segura: "giz", headTilt: Math.sin(t * 15) * 1.5, bob: breathe(t) * 1.2 }),
   };

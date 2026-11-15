@@ -143,10 +143,10 @@
     if (amt <= 0) return;
     if (!GRAINS.length) for (let v = 0; v < 3; v++) {
       const c = ART.canvas(540, 960), gg = c.getContext("2d"), im = gg.createImageData(540, 960), r = ART.rng(99 + v);
-      for (let i = 0; i < im.data.length; i += 4) { const n = (r() + r() + r() - 1.5) / 1.5; const w = n > 0 ? 255 : 0; im.data[i] = im.data[i + 1] = im.data[i + 2] = w; im.data[i + 3] = Math.min(255, Math.abs(n) * 255); }
+      for (let i = 0; i < im.data.length; i += 4) { const n = (r() + r() + r() - 1.5) / 1.5; const w = n > 0 ? 255 : 0; im.data[i] = im.data[i + 1] = im.data[i + 2] = w; im.data[i + 3] = Math.min(255, Math.abs(n) * 120); }
       gg.putImageData(im, 0, 0); GRAINS.push(c);
     }
-    g.save(); g.globalAlpha *= Math.min(1, amt * 2.2); g.imageSmoothingEnabled = false;
+    g.save(); g.globalAlpha *= Math.min(1, amt * 1.6); g.imageSmoothingEnabled = false;
     g.drawImage(GRAINS[frame % 3], 0, 0, W, H); g.restore();
   };
 
