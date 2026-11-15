@@ -29,9 +29,12 @@
   /** HUD: cronômetro (dir.) + contador (esq.) */
   GA.hud = (g, t, o = {}) => {
     const intro = o.intro ?? 1;
-    if (o.cron != null) { g.save(); g.translate(790, 330); g.scale(intro, intro); ART.ui.cronometro(g, 0, 0, { valor: o.cron, max: o.max || 10, escala: o.escala || o.max || 10, fantasma: o.fantasma, icone: o.icone || "sol", s: 0.9 }); g.restore(); }
-    if (o.moedas != null) { g.save(); g.translate(250, 330); g.scale(intro, intro); ART.ui.contador(g, 0, 0, { valor: o.moedas, icone: o.icone2 || "moeda", pulso: o.pulso || 0 }); g.restore(); }
+    const hy = o.y ?? 330;
+    if (o.cron != null) { g.save(); g.translate(790, hy); g.scale(intro, intro); ART.ui.cronometro(g, 0, 0, { valor: o.cron, max: o.max || 10, escala: o.escala || o.max || 10, fantasma: o.fantasma, icone: o.icone || "sol", s: 0.9 }); g.restore(); }
+    if (o.moedas != null) { g.save(); g.translate(250, hy); g.scale(intro, intro); ART.ui.contador(g, 0, 0, { valor: o.moedas, icone: o.icone2 || "moeda", pulso: o.pulso || 0 }); g.restore(); }
   };
+  /** cronômetro canônico: interpola v0 -> v1 ao longo do plano, ou por âncoras [[t, v], ...] (tempos locais) */
+  GA.cron = (t, D, v0, v1, ancoras) => ancoras ? ART.kf(t, ancoras.map(([a, v]) => [a, v, "linear"])) : ART.lerp(v0, v1, ART.clamp(t / Math.max(0.01, D)));
   /** pulso 0..1 que acende em cada tempo da lista */
   GA.pulsos = (t, lista, dur = 0.25) => Math.max(0, ...lista.map(m => ART.pulse(t, m, dur)));
   /** câmera: enquadramento + movimento (push/tremor) */

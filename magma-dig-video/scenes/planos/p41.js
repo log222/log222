@@ -1,14 +1,14 @@
-/* p41 · "Um segundo. Sete." (C3) — gameplay real com golpes em sequência; zoom no cronômetro desenhado:
- * 1,0 em vermelho caindo; contador 7 na palavra SETE. */
+/* p41 · "Um segundo. Sete." (C3) — golpes em sequência; o cronômetro desenhado cresce para o centro (zoom nele):
+ * 1,8 → 1,0, chega a 1,0 na palavra UM e congela, em vermelho. Contador 7 na palavra SETE. */
 MD.plano("p41", {
-  async setup(ctx) { if (!window.GA) await MD.loadScript("../scenes/planos/_grupoA.js"); await ART.gameplay.preload(3.0, 4.4); return {}; },
+  async setup(ctx) { if (!window.GA) await MD.loadScript("../scenes/planos/_grupoA.js"); await ART.gameplay.preload(3.0, 4.6); return {}; },
   render(g, t, ctx) {
-    const D = ctx.dur || 1.23, tS = GA.w(ctx, "sete", 0, 0.76);
-    const z = ART.prog(t, 0, 0.5, "inOutCubic");
-    g.save(); g.translate(540, 900); g.scale(1 + 0.25 * z, 1 + 0.25 * z); g.translate(-540 - 140 * z, -900 + 160 * z);
-    ART.gameplay.visor(g, t, { de: 3.0, ate: 3.0 + D, dur: D, recorte: ART.gameplay.RECORTES.minaAlta, y: 800, largura: 1010, zoom: [1.05, 1.1], retrato: 0, cronometro: { valor: Math.max(0.01, 1.0 - t * 0.7), escala: 11, fantasma: 10 } });
-    g.restore();
-    GA.hud(g, t, { moedas: t >= tS ? 7 : 6, icone2: "pedra", pulso: ART.pulse(t, tS, 0.3) });
-    ART.post(g, ctx.frame, { vinheta: 0.55, legendaK: 0.3 });
+    const D = ctx.dur || 1.23, tU = GA.w(ctx, "um", 0, 0.04), tS = GA.w(ctx, "sete", 0, D * 0.6);
+    const val = t >= tU ? 1.0 : ART.lerp(1.8, 1.0, ART.clamp(t / Math.max(0.05, tU)));
+    ART.gameplay.cheio(g, t, { de: 3.0, ate: 3.0 + D, dur: D, foco: [720, 350], zoom: [1.2, 1.35], tom: "rgba(80,10,20,.12)" });
+    const z = ART.prog(t, 0, Math.min(0.5, D * 0.5), "inOutCubic");
+    ART.ui.cronometro(g, ART.lerp(790, 540, z), ART.lerp(370, 640, z), { valor: val, escala: 11, fantasma: 10, icone: "sol", s: ART.lerp(0.9, 1.9, z), alerta: 1.0 });
+    GA.hud(g, t, { y: 370, moedas: t >= tS ? 7 : 6, pulso: ART.pulse(t, tS, 0.3) });
+    ART.post(g, ctx.frame, { vinheta: 0.55, legendaK: 0.32 });
   },
 });

@@ -50,6 +50,47 @@
    *       cronometro: {valor, ...} desenhado no canto do quadro (cobre o original), rotulo: 'VISÃO DO ZECA' | null,
    *       retrato: 0..3 (zeca.png) | null, lanterna: 0..1 (vinheta de lanterna dentro do quadro), a}
    *  devolve {x0, y0, w, h, map(xTrailer,yTrailer) -> [x,y] na tela} */
+  /** modo de tela cheia: a imagem do jogo ocupa a largura toda e a faixa y≈300–1250 (bordas esfumadas),
+   *  cronômetro desenhado por cima, selo "IMAGEM REAL DO JOGO". o = {de, ate, dur, img, foco:[x,y] (px do trailer), zoom:[z0,z1],
+   *  cy (centro, 775), altura (950), tapar, borrar (px de desfoque da imagem toda, p/ esconder valores), escurecer (0..1), cronometro, selo, tom} */
+  GP.cheio = (g, t, o = {}) => {
+    const de = o.de ?? 0, ate = o.ate ?? de + 1, dur = o.dur ?? ate - de;
+    const tv = Math.min(ate, de + t * ((ate - de) / dur));
+    const img = o.img ? ART.imgs[o.img] : GP.frame(tv);
+    const W = 1080, H = 1920, cy = o.cy ?? 775, Hh = o.altura ?? 950, y0 = cy - Hh / 2;
+    const iw = img ? img.width : 1280, ih = img ? img.height : 590;
+    const z = ART.lerp((o.zoom || [1, 1.08])[0], (o.zoom || [1, 1.08])[1], ART.prog(t, 0, dur, "inOutSine"));
+    // região de origem: aspecto W/Hh, altura útil (sem a caixa de marketing do topo) dividida pelo zoom
+    const topo = o.topo ?? 108, base = o.base ?? ih;
+    let sh = (base - topo) / z, sw = sh * W / Hh;
+    if (sw > iw) { sw = iw / z; sh = sw * Hh / W; }
+    const f = o.foco || [iw / 2, (topo + base) / 2];
+    const sx = ART.clamp(f[0] - sw / 2, 0, iw - sw), sy = ART.clamp(f[1] - sh / 2, topo, base - sh);
+    const sc = W / sw, map = (X, Y) => [(X - sx) * sc, y0 + (Y - sy) * sc];
+    // fundo: mesma imagem, bem borrada e escura
+    g.fillStyle = "#0E0B18"; g.fillRect(0, 0, W, H);
+    if (img) { const sm = GP._sm2 || (GP._sm2 = ART.canvas(27, 48)), sg = sm.getContext("2d"); sg.clearRect(0, 0, 27, 48); sg.drawImage(img, sx, sy, sw, sh, 0, 0, 27, 48 * Hh / H * 1.4); g.save(); g.globalAlpha = 0.6; g.drawImage(sm, 0, 0, W, H); g.restore(); }
+    g.fillStyle = "rgba(20,12,34,.55)"; g.fillRect(0, 0, W, H);
+    // imagem nítida, bordas superior/inferior esfumadas
+    const L = GP._full || (GP._full = ART.canvas(W, 1100)), lg = L.getContext("2d");
+    lg.setTransform(1, 0, 0, 1, 0, 0); lg.globalCompositeOperation = "source-over"; lg.clearRect(0, 0, W, 1100); lg.filter = o.borrar ? `blur(${o.borrar}px)` : "none";
+    if (img) lg.drawImage(img, sx, sy, sw, sh, 0, 0, W, Hh); lg.filter = "none";
+    for (const [tx, ty, tw, th] of o.tapar || []) { const a = [(tx - sx) * sc, (ty - sy) * sc]; lg.save(); lg.beginPath(); lg.rect(a[0], a[1], tw * sc, th * sc); lg.clip(); lg.filter = "blur(22px)"; if (img) lg.drawImage(img, sx, sy, sw, sh, 0, 0, W, Hh); lg.filter = "none"; lg.fillStyle = "rgba(20,14,30,.55)"; lg.fillRect(a[0], a[1], tw * sc, th * sc); lg.restore(); }
+    if (o.escurecer) { lg.fillStyle = `rgba(10,6,18,${o.escurecer})`; lg.fillRect(0, 0, W, Hh); }
+    lg.fillStyle = ART.rg(lg, W / 2, Hh * 0.5, Hh * 0.3, W * 0.85, [[0, "rgba(255,200,120,0)"], [1, "rgba(14,8,24,.5)"]]); lg.fillRect(0, 0, W, Hh);
+    lg.globalCompositeOperation = "destination-in"; lg.fillStyle = ART.lg(lg, 0, 0, 0, Hh, [[0, "rgba(0,0,0,0)"], [0.08, "rgba(0,0,0,1)"], [0.9, "rgba(0,0,0,1)"], [1, "rgba(0,0,0,0)"]]); lg.fillRect(0, 0, W, Hh);
+    g.drawImage(L, 0, 0, W, Hh, 0, y0, W, Hh);
+    if (o.tom) { g.save(); g.fillStyle = o.tom; g.fillRect(0, y0, W, Hh); g.restore(); }
+    // selo
+    if (o.selo !== null) {
+      const ly = y0 + Hh - 70;
+      g.save(); ART.rr(g, 60, ly - 30, 430, 60, 30); g.fillStyle = "rgba(14,10,22,.7)"; g.fill();
+      ART.circ(g, 92, ly, 9); g.fillStyle = "#FF4D5E"; g.fill();
+      g.font = '900 28px "Nunito"'; g.fillStyle = "#F4EEDC"; g.textBaseline = "middle"; g.textAlign = "left"; g.letterSpacing = "3px"; g.fillText(o.selo || "IMAGEM REAL DO JOGO", 112, ly + 2); g.restore();
+    }
+    if (o.cronometro) ART.ui.cronometro(g, 790, y0 + 70, Object.assign({ s: 0.9, icone: "sol" }, o.cronometro));
+    return { y0, h: Hh, map, sc };
+  };
   GP.visor = (g, t, o = {}) => {
     const de = o.de ?? 0, ate = o.ate ?? de + 1, dur = o.dur ?? ate - de;
     const tv = Math.min(ate, de + t * ((ate - de) / dur));
@@ -120,7 +161,7 @@
       ART.circ(g, tx + 12, ly, 10); g.fillStyle = "#FF4D5E"; g.fill(); ART.glow(g, tx + 12, ly, 30, "#FF4D5E", 0.5 + 0.3 * Math.sin(t * 6));
       g.font = '900 40px "Nunito"'; g.fillStyle = "#F4EEDC"; g.textBaseline = "middle"; g.textAlign = "left"; g.letterSpacing = "3px";
       g.fillText(o.rotulo || "VISÃO DO ZECA", tx + 36, ly + 2); g.letterSpacing = "0px";
-      g.font = '800 30px "Nunito"'; g.fillStyle = "rgba(244,238,220,.55)"; g.textAlign = "right"; g.fillText(o.fonte || "gameplay real", x0 + w - 10, ly + 2);
+      g.font = '800 30px "Nunito"'; g.fillStyle = "rgba(244,238,220,.55)"; g.textAlign = "right"; g.fillText(o.fonte || "imagem real do jogo", x0 + w - 10, ly + 2);
     }
     // 4) cronômetro desenhado por cima (canto superior direito do quadro)
     if (o.cronometro) ART.ui.cronometro(g, x0 + w - 170, y0 + 2, Object.assign({ s: 0.85, icone: "sol" }, o.cronometro));

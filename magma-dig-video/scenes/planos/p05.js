@@ -8,13 +8,14 @@ MD.plano("p05", {
     const passo = ticks.filter(x => t >= x).length;                   // um tique por palavra
     const ang = -150 + passo * 17 + 17 * ART.ease.outBack(ART.clamp((t - (ticks[passo - 1] ?? 0)) / 0.12)) - 17;
     const forte = ART.prog(t, tL - 0.05, tL + 0.15, "outCubic");
-    const cam = GA.cam(540, ART.lerp(1000, 950, ART.prog(t, 0, D, "inOutSine")), ART.lerp(1.35, 1.95, ART.prog(t, 0, D, "inOutSine")), {}, { sy: 760 });
+    const pk = ART.prog(t, 0, D, "inOutSine");
+    const cam = GA.cam(540, ART.lerp(1010, 930, pk), ART.lerp(1.6, 2.9, pk), {}, { sy: ART.lerp(840, 760, pk) });
     let A = null;
     ART.palco(g, t, cam, ART.cenas.mina({ luz: 0.4 }), gg => {
       A = ART.zeca.draw(gg, ART.zeca.pose("parado", t, { x: 540, y: 1182, s: 1.62, turn: 0.08, camera: 0.5, lamp: 0.75 + 0.25 * forte, cone: 0, rim: "#FFC88A", rimA: 0.5, mouth: "sorriso", look: [Math.cos(ART.deg(ang)) * 0.8, -0.6] }));
     }, { frame: ctx.frame });
     // ponteiro de relógio: o feixe sai da lanterna e "anda" um tique por palavra; mancha de luz na parede
-    const L = 520, lx = A.lanterna.x, ly = A.lanterna.y, px = lx + Math.cos(ART.deg(ang)) * L, py = ly + Math.sin(ART.deg(ang)) * L;
+    const L = ART.lerp(420, 640, pk), lx = A.lanterna.x, ly = A.lanterna.y, px = lx + Math.cos(ART.deg(ang)) * L, py = ly + Math.sin(ART.deg(ang)) * L;
     { const a = ART.deg(ang), w1 = 70 + 30 * forte; g.save(); g.globalCompositeOperation = "lighter"; g.translate(lx, ly); g.rotate(a);
       g.beginPath(); g.moveTo(0, -10); g.lineTo(L, -w1); g.lineTo(L, w1); g.lineTo(0, 10); g.closePath();
       g.fillStyle = ART.lg(g, 0, 0, L, 0, [[0, `rgba(255,236,190,${0.7 + 0.25 * forte})`], [1, "rgba(255,220,160,.08)"]]); g.fill(); g.restore(); }

@@ -276,8 +276,6 @@
       g.save(); g.beginPath(); g.rect(-400, -220, 800 * clamp(prog * 2 - 0.2), 260); g.clip();
       g.fillText(m.texto || "1.000", 0, -80);
       g.restore();
-      // moedinha desenhada
-      g.lineWidth = 7; ART.circ(g, 300, -150, 36); g.stroke(); ART.circ(g, 300, -150, 18); g.stroke();
     }, prog * 2);
     // 30 tracinhos (3 fileiras de 10)
     const n = m.tracos ?? 30, rr = ART.rng(77);

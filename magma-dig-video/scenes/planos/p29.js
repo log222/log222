@@ -8,7 +8,7 @@ MD.plano("p29", {
     const corte = (H[0] + H[1]) / 2 + 0.05, B = t >= corte;
     const nh = GA.n(t, H), mo = M.length ? GA.n(t, M) : nh;
     const mov = ART.camera(t, { push: [1, 1.04], dur: D, hits: H, hitAmp: 16 });
-    const cam = B ? GA.cam(560, 1010, 2.45, mov, { sy: 820 }) : GA.cam(470, 1010, 1.85, mov, { sy: 820 });
+    const cam = B ? GA.cam(520, 990, 1.78, mov, { sy: 860 }) : GA.cam(460, 1010, 1.52, mov, { sy: 860 });
     const c0 = GA.centroBloco();
     ART.palco(g, t, cam, ART.cenas.mina({}), gg => {
       ART.cubo(gg, GA.B.X, GA.B.Z, { crack: Math.min(3, nh * 1.2), seed: 4, ores: [{ tipo: "prata", u: 0.7, v: 0.3, r: 0.07 }] });
@@ -22,7 +22,7 @@ MD.plano("p29", {
     const bs = GA.tela(cam, c0[0] - 60, c0[1] - 60);
     M.forEach(m => { const k = ART.prog(t, m - 0.28, m, "inCubic"); if (k > 0 && k < 1) ART.ui.moeda(g, ART.lerp(bs[0], 250, k), ART.lerp(bs[1], 330, k) - Math.sin(k * Math.PI) * 220, 30 * (1 - 0.3 * k), t * 9, { brilho: 0.4 }); });
     H.forEach((h, i) => ART.ui.crac(g, i ? 640 : 600, i ? 760 : 820, t, h, { s: 1.15, rot: i ? 5 : -7 }));
-    GA.hud(g, t, { cron: 8.6 - t, moedas: mo, pulso: GA.pulsos(t, M.length ? M : H) });
+    GA.hud(g, t, { cron: GA.cron(t, D, 8.6, 7.2), moedas: mo, pulso: GA.pulsos(t, M.length ? M : H) });
     M.forEach(m => ART.ui.flutua(g, 400, 500, t, m, { texto: "+1", s: 0.7 }));
   },
 });

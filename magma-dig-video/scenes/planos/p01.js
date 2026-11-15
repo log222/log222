@@ -7,16 +7,16 @@ MD.plano("p01", {
     const ART = window.ART, GC = window.GC, D = ctx.dur || 0.96;
     const tc = GC.mark(ctx, "clique", 0.02);
     // acende: clique -> estala, pisca uma vez, firma
-    const on = ART.kf(t - tc, [[0, 0], [0.03, 0], [0.06, 1, "outExpo"], [0.1, 0.25], [0.15, 1, "outCubic"], [0.2, 0.85], [0.26, 1]]);
+    const on = ART.kf(t, [[0, 0.6], [0.04, 1, "outExpo"], [0.09, 0.4], [0.14, 1, "outCubic"], [0.19, 0.85], [0.25, 1]]);   // já acendendo no quadro 0 (o clique está no som)
     // câmera: push-in rápido no capacete, centrado na lâmpada; no fim acelera para dentro da luz
-    const z = ART.kf(t, [[0, 1.0], [0.2, 1.08, "outCubic"], [D - 0.18, 1.26, "inOutSine"], [D, 1.5, "inCubic"]]);
-    const LX = 540, LY = 580, S = 7;                      // lâmpada fica aqui na tela
-    const sh = GC.shake(t, tc + 0.04, 0.18, 7, 3);
+    const z = ART.kf(t, [[0, 1.0], [0.2, 1.06, "outCubic"], [D - 0.18, 1.2, "inOutSine"], [D, 1.36, "inCubic"]]);
+    const LX = 540, LY = 470, S = 6.2, CX = 540, CY = 900;   // lâmpada no alto; boca acima de y 1200; legenda cai no corpo
+    const sh = GC.shake(t, 0.02, 0.18, 7, 3);
     g.save();
     GC.breu(g, t, { x: LX, y: LY, c0: ART.mix("#07060B", "#1C1626", on), c1: "#030206" });
-    GC.cam(g, z, LX, LY, sh.x, sh.y);
+    GC.cam(g, z, CX, CY, sh.x, sh.y);
     // Zeca de frente, em close: capacete enorme, rosto no breu iluminado só pelo vazamento da lanterna
-    const pose = ART.zeca.pose("parado", t + 3, { x: 540, y: LY + 201 * S, s: S, turn: 0, camera: 1, look: [0, 0.05], eyes: (t - tc > 0.04 && t - tc < 0.3) ? "meio" : "aberto", mouth: "neutro", blink: 0, headTilt: -2 });
+    const pose = ART.zeca.pose("parado", t + 3, { x: 540, y: LY + 201 * S, s: S, turn: 0, camera: 1, look: [0, 0.05], eyes: t < 0.22 ? "meio" : "aberto", mouth: "neutro", blink: 0, headTilt: -2 });
     const anc = GC.zecaNoEscuro(g, pose, { escuro: ART.lerp(1, 0.8, on), raio: 1000, rimK: on, apagado: 0.97 * (1 - Math.min(1, on * 3)) });
     g.restore();
     // a lâmpada (desenhada por cima, em px de tela, acompanhando a câmera)

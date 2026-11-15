@@ -60,17 +60,22 @@
    *  o = {s, dedos: 'aberta'|'aponta'|'segura', objeto: fn(g) desenhado na palma} */
   ART.pata = (g, x, y, ang = 0, o = {}) => {
     const s = o.s || 1, dedos = o.dedos || "aberta";
+    const Lb = (o.braco ?? 250) / s + 60;   // comprimento visível do braço em px de tela (padrão 250)
     g.save(); g.translate(x, y); g.rotate(ART.deg(ang)); g.scale(s, s);
-    // antebraço: pele com placas de casco (faixas recortadas no braço)
-    const arm = () => ART.capsule(g, 70, 0, 1000, 20, 72);
+    // antebraço: pele com placas de casco, termina esfumado (não atravessa o quadro)
+    const arm = () => ART.capsule(g, 70, 0, Lb + 200, 20 * Lb / 1000, 72);
+    g.save();
+    g.beginPath(); g.rect(-400, -300, Lb + 400, 600); g.clip();
     g.shadowColor = "rgba(0,0,0,.5)"; g.shadowBlur = 50; g.shadowOffsetY = 24;
     arm(); g.fillStyle = P.pele; g.fill(); g.shadowColor = "transparent";
     g.save(); arm(); g.clip();
-    g.fillStyle = ART.lg(g, 0, -72, 0, 92, [[0, "rgba(255,240,220,.25)"], [0.5, "rgba(0,0,0,0)"], [1, "rgba(60,20,20,.35)"]]); g.fillRect(0, -100, 1100, 220);
-    // capa de casco na parte de cima do antebraço
-    g.beginPath(); g.moveTo(230, -90); g.lineTo(1100, -90); g.lineTo(1100, 40); g.quadraticCurveTo(600, 30, 230, 10); g.closePath();
+    g.fillStyle = ART.lg(g, 0, -72, 0, 92, [[0, "rgba(255,240,220,.25)"], [0.5, "rgba(0,0,0,0)"], [1, "rgba(60,20,20,.35)"]]); g.fillRect(0, -100, Lb + 300, 220);
+    g.beginPath(); g.moveTo(230, -90); g.lineTo(Lb + 300, -90); g.lineTo(Lb + 300, 40); g.quadraticCurveTo(600, 30, 230, 10); g.closePath();
     g.fillStyle = ART.lg(g, 0, -80, 0, 30, [[0, P.cascoClaro], [1, P.casco]]); g.fill();
-    for (let i = 0; i < 6; i++) { const xx = 280 + i * 90; g.beginPath(); g.moveTo(xx, -90); g.quadraticCurveTo(xx + 22, -30, xx - 4, 22); g.lineWidth = 7; g.strokeStyle = ART.rgba(P.cascoEsc, 0.7); g.stroke(); }
+    for (let i = 0; i < 12; i++) { const xx = 280 + i * 90; if (xx > Lb + 60) break; g.beginPath(); g.moveTo(xx, -90); g.quadraticCurveTo(xx + 22, -30, xx - 4, 22); g.lineWidth = 7; g.strokeStyle = ART.rgba(P.cascoEsc, 0.7); g.stroke(); }
+    g.restore();
+    // esfuma o fim do braço (mistura com o fundo escuro)
+    g.globalCompositeOperation = "source-atop"; g.fillStyle = ART.lg(g, Lb - 160, 0, Lb, 0, [[0, "rgba(14,10,22,0)"], [1, "rgba(14,10,22,.95)"]]); g.fillRect(Lb - 160, -120, 170, 240);
     g.restore();
     // pata (luva redonda)
     ART.ell(g, 20, 4, 108, 92); g.fillStyle = ART.rg(g, -10, -40, 10, 130, [[0, ART.shade(P.pele, 0.16)], [1, ART.shade(P.pele, -0.04)]]); g.fill();

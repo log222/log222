@@ -7,12 +7,12 @@ MD.plano("p21", {
     const ART = window.ART, GC = window.GC, D = ctx.dur || 1.44;
     const tDoze = Math.min(GC.wt(ctx, "doze", 0.26), GC.mark(ctx, "moeda", 0.25));
     const regua = ART.prog(t, 0, tDoze + 0.05, "outCubic");
-    const z = ART.map(t, 0, D, 1.0, 1.06, "outSine");
+    const z = ART.map(t, 0, D, 1.04, 1.08, "outSine");
     ART.blueprint(g, t);
-    g.save(); GC.foco(g, z, 560, 860, 540, 800);
-    GC.semFundo(() => ART.ciencia.crosta(g, t, { furo: 1, regua, t12: tDoze, y0: 470, y1: 1230 }));
+    g.save(); GC.focoCrosta(g, z);
+    GC.semFundo(() => ART.ciencia.crosta(g, t, { furo: 1, regua, t12: tDoze, y0: 490, y1: 1250 }));
     // flash na ponta quando o número entra
-    ART.glow(g, 600, 1240, 220, ART.BP.amarelo, 0.8 * ART.pulse(t, tDoze - 0.02, 0.4));
+    GC.furo(g, 490, 1250); ART.glow(g, 600, 1260, 220, ART.BP.amarelo, 0.8 * ART.pulse(t, tDoze - 0.02, 0.4));
     g.restore();
     GC.post(g, ctx, { vinheta: 0.55, legendaK: 0.3 });
   },

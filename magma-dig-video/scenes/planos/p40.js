@@ -4,7 +4,7 @@ MD.plano("p40", {
   async setup(ctx) { if (!window.GA) await MD.loadScript("../scenes/planos/_grupoA.js"); return {}; },
   render(g, t, ctx) {
     const D = ctx.dur || 1.62, H = GA.ms(ctx, "picareta"); if (!H.length) H.push(0.05, 0.27, 0.49, 0.71);
-    const tQ = GA.w(ctx, "quatro", 0, 0.94), nh = GA.n(t, H);
+    const tQ = GA.w(ctx, "quatro", 0, D * 0.6), tC = GA.w(ctx, "cinco", 0, 0.04), nh = GA.n(t, H);
     const mao = { sx: ART.noise(t * 3, 2) * 10, sy: ART.noise(t * 3, 5) * 8, rot: ART.noise(t * 2, 8) * 0.6 };
     const cam = ART.camMais(GA.cam(500, 1000, 2.05, ART.camera(t, { push: [1, 1.05], dur: D, hits: H, hitAmp: 12, hitDur: 0.18 }), { sy: 800 }), mao);
     const c0 = GA.centroBloco();
@@ -18,6 +18,6 @@ MD.plano("p40", {
       }
     }, { frame: ctx.frame });
     H.forEach((h, i) => ART.ui.crac(g, 560 + (i % 2) * 90, 820 - (i % 2) * 40, t, h, { s: 0.85, rot: i % 2 ? 6 : -6, dur: 0.4 }));
-    GA.hud(g, t, { cron: 5.0 - t * 0.6, max: 11, escala: 11, moedas: t >= tQ ? 4 : 3, icone2: "pedra", pulso: ART.pulse(t, tQ, 0.3) });
+    GA.hud(g, t, { cron: GA.cron(t, D, 0, 0, [[0, 5.6], [tC, 5.0], [D, 4.2]]), max: 11, escala: 11, moedas: t >= tQ ? 4 : nh >= 2 ? 3 : 2, pulso: GA.pulsos(t, [tQ, H[1] ?? 9]) });
   },
 });

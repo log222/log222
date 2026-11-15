@@ -21,7 +21,7 @@
     lF: 0, lB: 0, liftF: 0, liftB: 0, legSpread: 1,
     eyes: "aberto", mouth: "sorriso", brows: "nenhum", blush: 1, look: [0.15, 0], blink: 0,
     tool: null, toolMat: "ferro", toolOff: 0, toolHand: "F",
-    lamp: 0, cone: 0, coneAng: 8, coneLen: 900,
+    lamp: 0, cone: null, coneAng: 8, coneLen: 900,
     rim: "#B58CFF", rimA: 0.55, key: 1, ambient: null, ball: 0, spin: 0, sweat: 0, zzz: 0, t: 0,
     shadow: 1, sit: 0,
     // ator: alvo [x,y] px para olhar, camera 0..1 (olhar para a câmera), segura/seguraB (objeto na pata), bFrente (braço de trás na frente do corpo),
@@ -195,6 +195,7 @@
     }
     if (p.camera > 0) { const tt0 = Math.abs(p.turn); p.headTurn = lerp(p.headTurn, -tt0 * 0.9, p.camera); p.look = [lerp(p.look[0], 0, p.camera), lerp(p.look[1], 0, p.camera)]; }
     const costas = p.costas > 0.5;
+    if (p.cone == null) p.cone = p.lamp > 0 ? 0.5 : 0;   // lanterna acesa sempre tem feixe (passe cone: 0 para desligar)
     const flip = p.turn < 0 ? -1 : 1;
     const tt = Math.abs(p.turn), th = tt * Math.PI / 2, sT = Math.sin(th), cT = Math.cos(th);
     g.save();
@@ -330,6 +331,9 @@
       g.restore();
     };
 
+    // braço/ferramenta erguidos acima do ombro passam por trás da cabeça (não cobrem o rosto)
+    const ergue = p.aF > 125 && !costas;
+    if (ergue) { drawTool(); drawArm(armF, true); }
     // ----- cabeça
     const HX = sT * 8 + p.headDx, HY = BY - BRY - 12 + p.headDy + 6;
     const th2 = clamp(th + deg(p.headTurn * 90), -0.2, Math.PI / 2), s2 = Math.sin(th2), c2 = Math.cos(th2);
@@ -455,9 +459,9 @@
     }
     g.restore(); // cabeça
 
-    drawTool();
+    if (!ergue) drawTool();
     if (p.seguraB && bFront) objeto(g, p.seguraB, armB, p);
-    drawArm(armF, true);
+    if (!ergue) drawArm(armF, true);
     if (p.segura) objeto(g, p.segura, armF, p);
     A.mao = g.getTransform().transformPoint(new DOMPoint(armF.hx, armF.hy));
     if (toolInfo) { A.ponta = toolInfo.tip; A.pontaB = toolInfo.tipB; }
@@ -487,8 +491,14 @@
     const { x, y } = A.lanterna, k = p.lamp, sc = p.s / 2;
     const tt = Math.abs(p.turn);
     // halo
-    ART.glow(g, x, y, 70 * sc, "#FFF2C4", 0.9 * k);
-    ART.glow(g, x, y, 22 * sc, "#FFFFFF", 0.9 * k);
+    ART.glow(g, x, y, 120 * sc, "#FFE6A0", 0.75 * k);
+    ART.glow(g, x, y, 40 * sc, "#FFFFFF", 1.0 * k);
+    ART.glow(g, x, y, 16 * sc, "#FFFFFF", 1.0 * k);
+    if (tt <= 0.2 && !p.coneLivre && p.cone > 0) { // de frente: estrela de luz em direção à câmera
+      g.save(); g.globalCompositeOperation = "lighter"; g.globalAlpha = 0.5 * k * p.cone;
+      g.fillStyle = ART.lg(g, x - 160 * sc, 0, x + 160 * sc, 0, [[0, "rgba(255,240,200,0)"], [0.5, "rgba(255,245,220,.9)"], [1, "rgba(255,240,200,0)"]]);
+      g.fillRect(x - 160 * sc, y - 2.5 * sc, 320 * sc, 5 * sc); g.restore();
+    }
     if (p.cone > 0 && (tt > 0.2 || p.coneLivre)) {
       const ang = p.coneLivre ? p.coneAng : p.turn > 0 ? p.coneAng : 180 - p.coneAng; // graus, 0 = direita
       const spr = ART.cache("cone", 256, 128, gg => {

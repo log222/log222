@@ -238,8 +238,9 @@
   /** transição-assinatura: tela preta com uma linha de luz horizontal que abre como um olho (k 0..1) */
   ART.aberturaOlho = (g, k, o = {}) => {
     const clamp = ART.clamp, y = o.y ?? ART.H * 0.45, W = ART.W, H = ART.H, e = ART.ease.inOutCubic(clamp(k)), h = e * H * 2.4;
-    g.save(); g.fillStyle = "#000";
-    g.beginPath(); g.rect(0, 0, W, H); g.moveTo(0, y); g.bezierCurveTo(W * 0.3, y - h * 0.6, W * 0.7, y - h * 0.6, W, y); g.bezierCurveTo(W * 0.7, y + h * 0.6, W * 0.3, y + h * 0.6, 0, y); g.fill("evenodd");
+    g.save(); g.fillStyle = "#000"; g.globalAlpha = 1 - ART.prog(k, 0.7, 0.98);   // no fim a "pálpebra" some por inteiro
+    g.beginPath(); g.rect(0, 0, W, H); g.moveTo(-W * 0.6, y); g.bezierCurveTo(W * 0.1, y - h * 0.6, W * 0.9, y - h * 0.6, W * 1.6, y); g.bezierCurveTo(W * 0.9, y + h * 0.6, W * 0.1, y + h * 0.6, -W * 0.6, y); g.fill("evenodd");
+    g.globalAlpha = 1;
     const lk = clamp(1 - Math.abs(k - 0.12) / 0.3);
     g.globalCompositeOperation = "lighter"; g.globalAlpha = lk; g.fillStyle = ART.lg(g, 0, 0, W, 0, [[0, "rgba(255,230,180,0)"], [0.5, "rgba(255,245,220,1)"], [1, "rgba(255,230,180,0)"]]);
     g.fillRect(0, y - 3 - h * 0.05, W, 6 + h * 0.1); ART.glow(g, W / 2, y, 300, "#FFE6B0", lk);

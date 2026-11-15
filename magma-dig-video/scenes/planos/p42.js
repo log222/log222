@@ -12,7 +12,7 @@ MD.plano("p42", {
     ART.duplaExposicao(g, d => { d.fillStyle = "#03020A"; d.fillRect(0, 0, 1080, 1920); ART.withLayer(d, cam, 1, gg => ART.zeca.drawEscuro(gg, Object.assign({}, pose, { lamp: 0, eyes: "aberto", brows: "nenhum", mouth: "neutro", rim: "#7FA0FF", rimA: 1 }), 0.62, { cor: "#9FC4FF" })); }, k, { dx: 46, dy: -10, escala: 1.06, tint: "rgba(40,70,160,.3)" });
     if (k > 0.3) { g.save(); g.font = '900 34px "Nunito"'; g.letterSpacing = "6px"; g.fillStyle = `rgba(160,190,255,${(k - 0.3) * 1.6})`; g.textAlign = "center"; g.fillText("ONTEM · 10,0 s", 540, 470); g.restore(); }
     // "ontem": a barra fantasma do cronômetro terminava aqui
-    GA.hud(g, t, { cron: 1.0 - t * 0.05, max: 11, escala: 11, fantasma: 0.0001 + 0 });
+    GA.hud(g, t, { cron: 1.0, max: 11, escala: 11 });
     ART.post(g, ctx.frame, {});
   },
 });

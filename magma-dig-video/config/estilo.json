@@ -58,7 +58,8 @@
       "centro": {
         "centro_y": 960
       }
-    }
+    },
+    "dur_min_bloco": 0.35
   },
   "transicao_padrao": {
     "tipo": "corte",

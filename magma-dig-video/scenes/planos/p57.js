@@ -6,16 +6,16 @@ MD.plano("p57", {
   render(g, t, ctx) {
     const ART = window.ART, GC = window.GC, D = ctx.dur || 2.58;
     const tCurte = GC.wt(ctx, "Curte", 0.04), fimDois = GC.wf(ctx, "dois.", 1.45);
-    // apaga no som "apagar" se ele estiver depois da fala; senão logo após "dois" (pedido de ajuste de sfx no relatório)
-    const mApag = GC.mark(ctx, "apagar", -1);
-    const tOff = mApag > fimDois - 0.1 ? mApag : Math.min(D - 0.6, fimDois + 0.12);
-    const on = t < tOff ? 1 : ART.kf(t - tOff, [[0, 1], [0.03, 0.15], [0.07, 0.5], [0.1, 0]]);
-    const z = ART.kf(t, [[0, 1.12], [tOff, 1.02, "outSine"], [D, 1.0]]);
-    const LX = 540, LY = 580, S = 7;
+    // apaga NO QUADRO do clique (ctx.marks) que vem depois da fala; senão no "apagar"; senão logo após "dois"
+    const depois = nome => MD.marks(ctx, nome).filter(m => m > fimDois - 0.3).sort((a, b) => a - b)[0];
+    const tOff = depois("clique") ?? depois("apagar") ?? Math.min(D - 0.6, fimDois + 0.12);
+    const on = t < tOff ? 1 : ART.kf(t - tOff, [[0, 0.12], [0.04, 0.4], [0.08, 0]]);
+    const z = ART.kf(t, [[0, 1.12], [tOff, 1.03, "outSine"], [D, 0.99]]);
+    const LX = 540, LY = 470, S = 6.2, CX = 540, CY = 900;   // mesmo enquadramento do p01
     const feliz = ART.prog(t, tCurte + 0.1, tCurte + 0.3);
     g.save();
     GC.breu(g, t, { x: LX, y: LY, c0: ART.mix("#07060B", "#1C1626", on), c1: "#030206" });
-    GC.cam(g, z, LX, LY);
+    GC.cam(g, z, CX, CY);
     const pose = ART.zeca.pose("parado", t + 3, { x: 540, y: LY + 201 * S, s: S, turn: 0, camera: 1, look: [0, 0.05], eyes: feliz > 0.5 && t < tOff ? "feliz" : "aberto", mouth: feliz > 0.5 ? "sorriso" : "neutro", blink: 0, headTilt: -2 + 5 * ART.pulse(t, tCurte + 0.1, 0.5) });
     let anc;
     if (on > 0.02) anc = GC.zecaNoEscuro(g, pose, { escuro: ART.lerp(1, 0.8, on), raio: 1000, rimK: on, apagado: 0.97 * (1 - Math.min(1, on * 3)) });

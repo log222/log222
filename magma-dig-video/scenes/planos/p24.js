@@ -6,18 +6,23 @@ MD.plano("p24", {
   render(g, t, ctx) {
     const ART = window.ART, GC = window.GC, BP = ART.BP, D = ctx.dur || 2.19;
     const tC = GC.wt(ctx, "centro", 0.43), tS = GC.wt(ctx, "seis", 1.15);
-    const CX = 440, CY = 820, R = 330;
-    const z = ART.map(t, 0, D, 1.0, 1.75, "inOutSine");
+    const K = GC.KOLA, { CX, CY, R, aF } = K;
+    // começa EXATAMENTE no quadro final do p23 (rótulos, seta, 6.371 KM, ×520), que somem enquanto a câmera empurra
+    const sai = 1 - ART.prog(t, 0.08, Math.min(0.45, D * 0.25));
+    const kz = ART.prog(t, 0.05, D, "inOutSine");
+    const z = ART.lerp(K.zFim, 1.75, kz);
     const nk = ART.prog(t, tC, tS + 0.1, "inOutQuad") * (0.92 + 0.08 * Math.sin(t * 9));
     ART.blueprint(g, t);
-    g.save(); GC.foco(g, z, ART.lerp(CX + 40, CX, ART.prog(t, 0, D)), CY, 440, 760);
-    GC.planeta(g, t, { cx: CX, cy: CY, R, nucleo: nk, rotulos: 0, risco: 0 });
+    g.save(); GC.foco(g, z, CX, CY, ART.lerp(CX, 450, kz), ART.lerp(CY, 760, kz));
+    const fr = GC.planeta(g, t, { cx: CX, cy: CY, R, aFuro: aF, nucleo: nk, rotulos: sai, risco: 1 });
+    GC.kolaMarcas(g, fr, CX, CY, { a: sai, far: 1, seta: 1, label: 1, selo: 1 });
     // ondas de calor saindo do núcleo
     for (let i = 0; i < 3; i++) { const ph = ((t * 0.9 + i / 3) % 1); g.save(); g.globalAlpha = nk * (1 - ph) * 0.6; ART.circ(g, CX, CY, R * (0.19 + ph * 0.36)); g.strokeStyle = "#FFB548"; g.lineWidth = 3 / z; g.stroke(); g.restore(); }
     g.restore();
     // termômetro (tela)
-    const TX = 870, TT = 380, TB = 1000, fill = ART.prog(t, tC - 0.1, tS, "inCubic");
-    g.save();
+    const TX = 835, TT = 380, TB = 1000, fill = ART.prog(t, tC - 0.1, tS, "inCubic");
+    const entra = ART.ease.outCubic(ART.prog(t, Math.max(0.1, tC - 0.35), Math.max(0.35, tC - 0.05)));
+    g.save(); g.translate(260 * (1 - entra), 0); g.globalAlpha = entra;
     ART.rr(g, TX - 70, TT - 70, 140, TB - TT + 190, 40); g.fillStyle = "rgba(6,22,32,.88)"; g.fill();
     GC.neon(g, () => { ART.rr(g, TX - 70, TT - 70, 140, TB - TT + 190, 40); g.stroke(); }, { w: 2, cor: ART.BP.fraca, blur: 4 });
     ART.rr(g, TX - 26, TT - 26, 52, TB - TT + 52, 26); g.fillStyle = "rgba(6,26,38,.9)"; g.fill();

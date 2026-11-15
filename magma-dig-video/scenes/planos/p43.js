@@ -8,11 +8,11 @@ MD.plano("p43", {
     const ART = window.ART, GC = window.GC, D = ctx.dur || 1.44;
     const tH = GC.wt(ctx, "hoje", 0.36), tM = GC.wt(ctx, "mais", 1.0);
     const on = t < tH ? 0.25 + 0.75 * ART.zeca.falha(t, 0.9, 7) : 0.85 + 0.15 * ART.prog(t, tH, tH + 0.15);
-    const z = ART.kf(t, [[0, 1.0], [tH, 1.04], [D, 1.2, "inOutSine"]]);
-    const LX = 470, LY = 600, S = 8.6;
+    const z = ART.kf(t, [[0, 1.0], [tH, 1.04], [D, 1.18, "inOutSine"]]);
+    const LX = 490, LY = 450, S = 7.0, CX = 520, CY = 880;   // olhos e boca acima de y 1200
     g.save();
     GC.breu(g, t, { x: LX, y: LY, c0: ART.mix("#0A0810", "#221A2C", on), c1: "#040308" });
-    GC.cam(g, z, LX, LY);
+    GC.cam(g, z, CX, CY);
     const pose = ART.zeca.pose("parado", t + 5, { x: LX + 40, y: LY + 201 * S, s: S, turn: 0.15, look: [0.1, 0], eyes: t < tH ? "preocupado" : "determinado", brows: t < tH ? "preocupado" : "bravo", mouth: "neutro", blink: 0, headTilt: 3 });
     const anc = GC.zecaNoEscuro(g, pose, { escuro: ART.lerp(0.95, 0.72, on), raio: 1100, rimK: on });
     g.restore();
@@ -28,6 +28,8 @@ MD.plano("p43", {
       ART.textFx(g, "+1 s", 0, 175, { size: 70, fam: "Nunito", weight: 1000, fill: "#FFD23F", stroke: "#1A1020", sw: 14 });
       g.restore();
     }
+    // relógio canônico: 1,0 congelado (o segundo comprado), vermelho, piscando de leve
+    ART.ui.cronometro(g, 300, 335, { valor: 1.0, max: 11, s: 0.95, icone: "sol", alerta: 1.0, a: 0.85 + 0.15 * Math.sin(t * 12) });
     GC.post(g, ctx, { vinheta: 0.7, legendaK: 0.38 });
   },
 });

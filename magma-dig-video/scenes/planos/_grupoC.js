@@ -136,11 +136,11 @@
     }
     const lk = o.rotulos ?? 0;
     if (lk > 0) {
-      const lx = o.lx ?? cx + R + 36;
+      const lx = o.lx ?? cx + R + 30, rs = o.rotSize ?? 34;
       [[R * 0.995, "CROSTA"], [R * 0.78, "MANTO"], [R * 0.38, "NÚCLEO|EXTERNO"], [R * 0.1, "NÚCLEO|INTERNO"]].forEach(([rr, nome], i) => {
-        const a = -Math.PI * 0.28 + i * 0.05, px = cx + Math.cos(a) * rr, py = cy + Math.sin(a) * rr, ly = cy - R + 40 + i * 104;
+        const a = -Math.PI * 0.28 + i * 0.05, px = cx + Math.cos(a) * rr, py = cy + Math.sin(a) * rr, ly = cy - R + 10 + i * 100;
         GC.neon(g, () => { g.beginPath(); g.moveTo(px, py); g.lineTo(lx - 12, ly); g.stroke(); ART.circ(g, px, py, 4); g.stroke(); }, { w: 1.5, cor: BP.fraca, blur: 3, a: lk });
-        nome.split("|").forEach((ln, j) => GC.rot(g, ln, lx, ly + j * 28, { size: 24, sp: 2, a: lk, cor: i === 3 && nk > 0.3 ? "#FFD08A" : BP.linha }));
+        nome.split("|").forEach((ln, j) => GC.rot(g, ln, lx, ly + j * (rs + 4), { size: rs, sp: 1, a: lk, cor: i === 3 && nk > 0.3 ? "#FFD08A" : BP.linha }));
       });
     }
     // furo de 12 km em escala real
@@ -158,6 +158,47 @@
 
   /** roda fn com ART.blueprint desligado (o fundo já foi desenhado fora da câmera: sem emenda nem varredura dupla) */
   GC.semFundo = fn => { const ART = A(), bp = ART.blueprint; ART.blueprint = () => {}; try { fn(); } finally { ART.blueprint = bp; } };
+
+  /** brilho extra no furo de Kola (x = 600 no desenho do kit): núcleo amarelo de ~10 px com halo */
+  GC.furo = (g, y0, y1, k = 1) => {
+    const ART = A(); if (y1 <= y0) return;
+    g.save(); g.globalCompositeOperation = "lighter"; g.globalAlpha = 0.5 * k;
+    g.fillStyle = ART.lg(g, 588, 0, 612, 0, [[0, "rgba(235,186,64,0)"], [0.5, "rgba(255,214,110,.9)"], [1, "rgba(235,186,64,0)"]]);
+    g.fillRect(586, y0, 28, y1 - y0);
+    g.globalAlpha = 0.9 * k; g.strokeStyle = "#FFE7A0"; g.lineWidth = 4; g.shadowColor = "#EBBA40"; g.shadowBlur = 22;
+    g.beginPath(); g.moveTo(600, y0); g.lineTo(600, y1); g.stroke();
+    g.restore();
+  };
+  /** enquadramento comum do corte da crosta (p20–p21): tudo entre x 80 e 960 */
+  GC.focoCrosta = (g, z, wy = 870, sy = 850) => GC.foco(g, z, 555, wy, 520, sy);
+
+  /** enquadramento final do zoom do p23 = inicial do p24 */
+  GC.KOLA = { CX: 420, CY: 820, R: 310, aF: -Math.PI * 0.62, zFim: 1.03 };
+  /** marcas do p23 por cima do planeta: círculo do furo + "12 KM", seta até o centro + "6.371 KM", selo "×520" */
+  GC.kolaMarcas = (g, fr, cx, cy, o = {}) => {
+    const ART = A(), BP = BPc(), a = o.a ?? 1;
+    const far = (o.far ?? 1) * a;
+    if (far > 0) {
+      g.save(); g.globalAlpha = far; ART.circ(g, fr.px, fr.py, 24); g.setLineDash([6, 6]); g.strokeStyle = BP.amarelo; g.lineWidth = 3; g.stroke(); g.restore();
+      GC.rot(g, "12 KM", fr.px - 34, fr.py - 46, { size: 40, cor: BP.amarelo, align: "right", a: far });
+    }
+    const sk = o.seta ?? 0;
+    if (sk > 0 && a > 0) {
+      const ex = ART.lerp(fr.px, cx, sk), ey = ART.lerp(fr.py, cy, sk), ang = Math.atan2(cy - fr.py, cx - fr.px);
+      GC.neon(g, () => { g.beginPath(); g.moveTo(fr.px, fr.py); g.lineTo(ex, ey); g.stroke(); g.beginPath(); g.moveTo(ex, ey); g.lineTo(ex - Math.cos(ang - 0.4) * 30, ey - Math.sin(ang - 0.4) * 30); g.moveTo(ex, ey); g.lineTo(ex - Math.cos(ang + 0.4) * 30, ey - Math.sin(ang + 0.4) * 30); g.stroke(); }, { cor: "#FFFFFF", w: 5, a });
+      ART.glow(g, ex, ey, 60, "#FFFFFF", 0.6 * a);
+    }
+    const lk = (o.label ?? 0);
+    if (lk > 0 && a > 0) { g.save(); g.globalAlpha = a; g.translate((fr.px + cx) / 2 - 18, (fr.py + cy) / 2 + 6); g.scale(lk, lk); ART.textFx(g, "6.371 KM", 0, 0, { size: 56, fam: "Lilita One", fill: "#FFFFFF", stroke: "#03121A", sw: 10, align: "right", shadow: "rgba(143,211,232,.5)", sblur: 20, sdy: 0 }); g.restore(); }
+    const bk = o.selo ?? 0;
+    if (bk > 0 && a > 0) {
+      g.save(); g.globalAlpha = a; g.translate(o.seloX ?? 760, o.seloY ?? 380); g.scale(bk, bk);
+      ART.rr(g, -120, -52, 240, 104, 30); g.fillStyle = "rgba(6,26,38,.92)"; g.fill();
+      GC.neon(g, () => { ART.rr(g, -120, -52, 240, 104, 30); g.stroke(); }, { cor: BP.amarelo, w: 3 });
+      ART.textFx(g, "×520", 0, 4, { size: 70, fam: "Lilita One", fill: BP.amarelo, stroke: null, sw: 0, shadow: null });
+      g.restore();
+    }
+  };
 
   /** tremor determinístico */
   GC.shake = (t, t0, dur, amp, seed = 1) => MD.shake(t, { t0, dur, amp, freq: 26, seed, rot: 0.6 });

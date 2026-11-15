@@ -492,11 +492,50 @@ def build_captions(falas, planos, laid, pstart, pend, st):
             if nxt - last < 0.7:
                 end = nxt      # legenda contínua: segura até o próximo bloco
             end = min(end, nxt)
-        bl["fim"] = round(max(end, bl["ini"] + 0.2), 3)
-        if not bl["estilo"]:
-            bl.pop("estilo")
-        if not bl["pos"]:
-            bl.pop("pos")
+        bl["fim"] = round(end, 3)
+    # duração mínima de exibição: bloco curto se junta ao vizinho (preferência: mesmo plano, dentro do limite
+    # de caracteres; só cruza corte de plano se não houver outro jeito)
+    dmin = float(L.get("dur_min_bloco", 0.35))
+    chars = lambda ws: sum(len(w["w"]) for w in ws) + len(ws) - 1
+    curto = lambda b: b["fim"] - b["ini"] < dmin - 1e-6
+    antes = sum(curto(b) for b in blocks)
+    mudou = True
+    while mudou:
+        mudou = False
+        for i, bl in enumerate(blocks):
+            if not curto(bl):
+                continue
+            cands = []
+            for j in (i + 1, i - 1):
+                if 0 <= j < len(blocks):
+                    o = blocks[j]
+                    ws = (bl["palavras"] + o["palavras"]) if j > i else (o["palavras"] + bl["palavras"])
+                    if chars(ws) <= maxc and len(ws) <= maxu + 1:
+                        gap = o["ini"] - bl["fim"] if j > i else bl["ini"] - o["fim"]
+                        cands.append((o["plano"] != bl["plano"], gap > 0.5, j, ws))
+            if not cands:
+                continue
+            cross, longe, j, ws = sorted(cands, key=lambda c: (c[0], c[1]))[0]
+            if longe:
+                continue
+            a_, b_ = sorted((i, j))
+            novo = dict(blocks[a_]); novo["palavras"] = ws
+            novo["ini"], novo["fim"] = blocks[a_]["ini"], blocks[b_]["fim"]
+            if cross:
+                novo["plano"] = blocks[a_]["plano"] + "+" + blocks[b_]["plano"]
+            blocks[a_:b_ + 1] = [novo]
+            mudou = True
+            break
+    # nunca dois blocos visíveis ao mesmo tempo
+    for i in range(len(blocks) - 1):
+        blocks[i]["fim"] = min(blocks[i]["fim"], blocks[i + 1]["ini"])
+    depois = sum(curto(b) for b in blocks)
+    print(f"   legenda: blocos abaixo de {dmin:.2f}s: {antes} antes da junção -> {depois} depois")
+    for bl in blocks:
+        if not bl.get("estilo"):
+            bl.pop("estilo", None)
+        if not bl.get("pos"):
+            bl.pop("pos", None)
     return blocks
 
 
