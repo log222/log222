@@ -4,7 +4,7 @@ MD.plano("p48", {
   async setup(ctx) { if (!window.GA) await MD.loadScript("../scenes/planos/_grupoA.js"); return {}; },
   render(g, t, ctx) {
     const D = ctx.dur || 2.21, tE = GA.w(ctx, "escuro", 0, 1.69);
-    const tF = GA.w(ctx, "ficava", 0, D * 0.5), esc = ART.prog(t, tF, tE + 0.2, "inOutSine"), veios = 1 - ART.prog(t, tF, tE + 0.3, "inQuad");
+    const tF = GA.w(ctx, "ficava", 0, D * 0.5), esc = ART.prog(t, tF, D, "inOutSine") * 0.92, veios = 1 - ART.prog(t, tF, D + 0.25, "inQuad");
     const lampOn = t < tF ? 1 - 0.5 * ART.zeca.falha(t, ART.prog(t, tF - 0.5, tF), 9) : 0;
     const cam = GA.cam(560, 980, 2.1, {}, { sy: 820 });
     ART.palco(g, t, cam, ART.cenas.mina({ luz: 0.5 * (1 - esc), lanternas: false }), gg => {

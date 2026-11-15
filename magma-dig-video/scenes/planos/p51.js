@@ -11,7 +11,7 @@ MD.plano("p51", {
     const ART = window.ART, GB = window.GB, { clamp } = GB, dur = ctx.dur, u = ART.ui;
     const tCobre = GB.wt(ctx, "cobre", 0.38), tPaga = GB.wt(ctx, "paga", 0.72), tQ = GB.wt(ctx, "quarenta", 1.1);
     GB.fundoC5(g, t, { dx: ART.map(t, 0, dur, -25, 25), z: 1.08, escuro: 0.1 });
-    const trava = tQ + 0.12;
+    const trava = tQ - 0.01;   // o 40 pousa junto com a legenda "QUARENTA"
     const preco = t >= trava ? 40 : "?";   // o 40 estreia aqui, na palavra "quarenta" (o p49 termina só no título MERCADO)
     const pop = GB.hit(t, trava, 0.4);
     const z = ART.map(t, 0, dur, 1.0, 1.14, "inOutSine");

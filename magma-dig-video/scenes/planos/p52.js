@@ -61,6 +61,6 @@ MD.plano("p52", {
     g.save(); g.fillStyle = ART.lg(g, 0, 1250, 0, 1920, [[0, "rgba(10,6,16,0)"], [0.5, "rgba(10,6,16,.55)"], [1, "rgba(10,6,16,.9)"]]); g.fillRect(0, 1250, 1080, 670); g.restore();
     ART.faixaLegenda(g, 0.4);
     // cartão fixo: saldo 7, cobre na mochila = 4% → RESTAM 28
-    GB.cartao(g, 540, 330, { saldo: 7, dia: 2, s: 0.86, cobre: kFill, rotulo: t >= tVinte - 0.05 ? "RESTAM 28" : kFill > 0.001 ? "COBRE 4%" : null, pulso: GB.hit(t, tVinte, 0.5) + GB.hit(t, tMeta, 0.5) * 0.6 });
+    GB.cartao(g, 540, 365, { saldo: 7, dia: 2, s: 0.86, cobre: kFill, rotulo: t >= tVinte - 0.05 ? "RESTAM 28" : kFill > 0.001 ? "COBRE 4%" : null, pulso: GB.hit(t, tVinte, 0.5) + GB.hit(t, tMeta, 0.5) * 0.6 });
   },
 });

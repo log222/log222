@@ -16,11 +16,11 @@ MD.plano("p15", {
     const nTr = Math.floor(ART.map(t, tTrinta - 0.08, tDias + 0.05, 0, 30, "inOutSine") + 0.001);
     const cena = GB.toca({ prog, tracos: nTr, riscados: 0 });
     const bate = GB.hit(t, tAc + 0.05, 0.5);
-    const cam = ART.camera(t, { push: [1.7, 1.9], dur, ease: "outQuad", hits: [tAc + 0.05], hitAmp: 7 });
+    const cam = ART.camera(t, { push: [1.6, 1.78], dur, ease: "outQuad", hits: [tAc + 0.05], hitAmp: 7 });
     // enquadra o ponto (500, 720) da parede (d=0.8) em (540, 800) na tela
     const z = 1 + (cam.zoom - 1) * 0.8;
     cam.x = (522 - 540) / 0.8 + ART.map(t, 0, dur, -10, 12);
-    cam.y = (734 - 960 - (870 - 960) / z) / 0.8;
+    cam.y = (734 - 960 - (915 - 960) / z) / 0.8;
     GB.palco(g, t, cam, cena, null, {
       frame: ctx.frame,
       luz: (gg, tt, c) => {
@@ -51,6 +51,6 @@ MD.plano("p15", {
     }
     // cartão fixo estreia em "moedas" (desce do topo)
     const kc = ART.ease.outBack(clamp((t - (tMoedas - 0.08)) / 0.3));
-    if (kc > 0) GB.cartao(g, 540, 330 - (1 - kc) * 260, { saldo: 0, dia: 1, s: 0.86, a: clamp(kc * 2), pulso: GB.hit(t, tMoedas + 0.2, 0.5) });
+    if (kc > 0) GB.cartao(g, 540, 365 - (1 - kc) * 260, { saldo: 0, dia: 1, s: 0.86, a: clamp(kc * 2), pulso: GB.hit(t, tMoedas + 0.2, 0.5) });
   },
 });

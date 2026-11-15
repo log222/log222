@@ -27,6 +27,6 @@ MD.plano("p26", {
     if (b > 0) { const [px, py, z] = GB.proj(cam, 0.85, 610, 720 + 70 + 70); ART.glow(g, px, py, 330 * z, "#FFD98A", 0.4 * b); }
     // cartão fixo: DIA 1 DE 30 (pulsa no "um")
     const kc = ART.ease.outBack(clamp((t + 0.05) / 0.25));
-    GB.cartao(g, 540, 330 - (1 - kc) * 200, { saldo: 0, dia: 1, s: 0.86, a: clamp(kc * 2), pulso: GB.hit(t, tUm, 0.5) });
+    GB.cartao(g, 540, 365 - (1 - kc) * 200, { saldo: 0, dia: 1, s: 0.86, a: clamp(kc * 2), pulso: GB.hit(t, tUm, 0.5) });
   },
 });

@@ -13,13 +13,14 @@ MD.plano("p14", {
     // escrita: o "1.000" grande (o "1" num traço forte no "riscou"); o META entra no close do p15.
     // Câmera FIXA na parede: o que já foi escrito fica sempre à esquerda da pata, livre; o Zeca vai à direita.
     const W1 = 680 * 0.92; // largura aprox. do "1.000" (Lilita 230 px)
-    const k1F = tt => ART.map(tt, tRis - 0.14, tRis + 0.2, 0, 0.2, "outCubic") + ART.map(tt, tRis + 0.24, Math.max(dur, tRis + 0.6) + 0.2, 0, 0.5);
+    // o "1.000" inteiro fica pronto em ~2/3 do plano; depois o Zeca sai andando pela prancha e revela o número completo
+    const D = Math.max(dur, tRis + 0.9), tFim = Math.max(tRis + 0.5, 0.64 * D);
+    const k1F = tt => ART.map(tt, tRis - 0.14, tRis + 0.18, 0, 0.22, "outCubic") + ART.map(tt, tRis + 0.2, tFim, 0, 0.78, "inOutSine");
     const tipF = tt => {
       const k1 = k1F(tt), x = -W1 / 2 + W1 * k1, y = -110 + 70 * Math.sin(tt * 10);
       const chega = ART.ease.inOutSine(clamp(tt / Math.max(0.2, tRis - 0.14)));  // a pata chega ao ponto de partida
       return [ART.lerp(-W1 / 2 + 160, x, chega), ART.lerp(-300, y, chega)];
     };
-    const D = Math.max(dur, tRis + 0.6);
     const cam = { zoom: ART.map(t, 0, D, 1.62, 1.7), x: 0, y: 0, sx: 0, sy: 0 };
     GB.mira(cam, 0.8, 500, 636, 470 + ART.map(t, 0, D, 10, -10), 700);
     const tp = tipF(t), [mx, my] = GB.gizMundo(tp[0], tp[1]);
@@ -33,20 +34,25 @@ MD.plano("p14", {
       luz: (gg, tt, c) => {
         GB.tocaLuz(gg, tt, c, { janela: 0.7 });
         const tp = tipF(tt), [wx, wy] = GB.gizMundo(tp[0], tp[1]), [sx, sy] = GB.proj(c, 0.8, wx, wy);
-        GB.poeiraGiz(gg, tt, sx, sy + 10, 1, 9);
+        GB.poeiraGiz(gg, tt, sx, sy + 10, 1 - clamp((tt - tFim) / 0.12), 9);
       },
     });
     // corpo segue a ponta do giz com atraso (média móvel, função pura de t)
     const [sx, sy] = GB.proj(cam, 0.8, mx, my);
     const forte = GB.hit(t, tRis, 0.45);
     const base = { s: 3.3, turn: -0.42, lamp: 0.25, cone: 0, rim: "#FFB070", rimA: 0.75, lean: -3 - 7 * forte, sq: 1 + 0.03 * forte };
-    const p = ART.zeca.pose("riscando", t, Object.assign({ x: 0, y: 0 }, base));
+    const sai = ART.ease.inOutSine(clamp((t - tFim - 0.04) / Math.max(0.35, D - tFim - 0.15)));
+    const escreve = ART.zeca.pose("riscando", Math.min(t, tFim), Object.assign({ x: 0, y: 0 }, base));
+    const anda = ART.zeca.pose("andando", t, Object.assign({ x: 0, y: 0 }, base, { turn: 0.85, lean: 4, sq: 1, eyes: "feliz", mouth: "sorriso" }), { periodo: 0.42 });
+    const kb = clamp((t - tFim) / 0.16);
+    const p = kb > 0 ? Object.assign(ART.zeca.mix(escreve, anda, ART.ease.inOutQuad(kb)), { t }) : escreve;
     if (!this._dry) this._dry = ART.canvas(4, 4).getContext("2d");
     this._dry.setTransform(1, 0, 0, 1, 0, 0);
     const A0 = ART.zeca.draw(this._dry, p);
     const mao = A0.mao || { x: 0, y: -700 };
     const [, syC] = GB.proj(cam, 0.8, ...GB.gizMundo(0, -80));
-    p.x = sx - mao.x - 10; p.y = syC - mao.y + 30;   // pés fixos na prancha; só anda de lado
+    const A1 = ART.zeca.draw(this._dry, escreve), m1 = A1.mao || mao;
+    p.x = sx - m1.x - 10 + sai * 760; p.y = syC - m1.y + 30;   // pés fixos na prancha; só anda de lado
     p.shadow = 0;
     // andaime de madeira (prancha comprida com pés): a meta fica alta na parede, ele escreve de cima dela
     {

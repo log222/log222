@@ -37,7 +37,11 @@ MD.plano("p36", {
         u.moeda(gg, x, y, 40 * (1 - 0.4 * e), k * 9 + i, { brilho: 0.25 });
       }
       // +1 no nível
-      if (t > tTempo) u.flutua(gg, CX0 + CW - 120, CY + 20, t, tTempo, { texto: "+1", cor: "#7FE8F0" });
+      if (t > tTempo) {   // "+1" colado no "1/7" do cartão (sobe pouco, não invade o fundo)
+        const dt = t - tTempo, sc = dt < 0.12 ? ART.ease.outBack(dt / 0.12) : 1;
+        gg.save(); gg.globalAlpha = 1 - clamp((dt - 0.9) / 0.3); gg.translate(CX0 + CW - 340 * S, CY + 66 * S - 30 * ART.ease.outCubic(clamp(dt / 0.4))); gg.scale(sc, sc);
+        ART.textFx(gg, "+1", 0, 0, { size: 54, fam: "Nunito", weight: 1000, fill: "#7FE8F0", stroke: "#0B2A30", sw: 10 }); gg.restore();
+      }
     });
     // pata empurrando a pilha (vem de baixo/direita), sai depois do "tudo"
     const sai = ART.ease.inCubic(clamp((t - tTudo - 0.05) / 0.35));

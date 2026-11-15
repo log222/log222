@@ -170,7 +170,9 @@
     g.restore();
   };
   /** enquadramento comum do corte da crosta (p20–p21): tudo entre x 80 e 960 */
-  GC.focoCrosta = (g, z, wy = 870, sy = 850) => GC.foco(g, z, 555, wy, 520, sy);
+  GC.focoCrosta = (g, z, wy = 870, sy = 880) => GC.foco(g, z, 555, wy, 520, sy);
+  /** título do corte da crosta em px de tela (fora da faixa do topo do Instagram) */
+  GC.tituloKola = (g, a = 1) => GC.rot(g, "POÇO DE KOLA · RÚSSIA", 540, 298, { align: "center", size: 40, a });
 
   /** enquadramento final do zoom do p23 = inicial do p24 */
   GC.KOLA = { CX: 420, CY: 820, R: 310, aF: -Math.PI * 0.62, zFim: 1.03 };

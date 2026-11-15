@@ -58,7 +58,11 @@
   // ================================================================= pata do Zeca em close
   /** braço+pata em close vindo de uma borda. (x,y) = ponta da pata; ang = direção do braço (graus, 0 = vem da direita);
    *  o = {s, dedos: 'aberta'|'aponta'|'segura', objeto: fn(g) desenhado na palma} */
-  ART.pata = (g, x, y, ang = 0, o = {}) => {
+  let PATA = null;
+  ART.pata = (g0, x, y, ang = 0, o = {}) => {
+    const c0 = g0.canvas; if (!PATA || PATA.width !== c0.width || PATA.height !== c0.height) PATA = ART.canvas(c0.width, c0.height);
+    const g = PATA.getContext("2d"); g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = "source-over"; g.globalAlpha = 1; g.clearRect(0, 0, PATA.width, PATA.height);
+    g.setTransform(g0.getTransform());
     const s = o.s || 1, dedos = o.dedos || "aberta";
     const Lb = (o.braco ?? 250) / s + 60;   // comprimento visível do braço em px de tela (padrão 250)
     g.save(); g.translate(x, y); g.rotate(ART.deg(ang)); g.scale(s, s);
@@ -75,7 +79,7 @@
     for (let i = 0; i < 12; i++) { const xx = 280 + i * 90; if (xx > Lb + 60) break; g.beginPath(); g.moveTo(xx, -90); g.quadraticCurveTo(xx + 22, -30, xx - 4, 22); g.lineWidth = 7; g.strokeStyle = ART.rgba(P.cascoEsc, 0.7); g.stroke(); }
     g.restore();
     // esfuma o fim do braço (mistura com o fundo escuro)
-    g.globalCompositeOperation = "source-atop"; g.fillStyle = ART.lg(g, Lb - 160, 0, Lb, 0, [[0, "rgba(14,10,22,0)"], [1, "rgba(14,10,22,.95)"]]); g.fillRect(Lb - 160, -120, 170, 240);
+    g.globalCompositeOperation = "destination-out"; g.fillStyle = ART.lg(g, Lb - 180, 0, Lb, 0, [[0, "rgba(0,0,0,0)"], [1, "rgba(0,0,0,1)"]]); g.fillRect(Lb - 180, -140, 200, 280);
     g.restore();
     // pata (luva redonda)
     ART.ell(g, 20, 4, 108, 92); g.fillStyle = ART.rg(g, -10, -40, 10, 130, [[0, ART.shade(P.pele, 0.16)], [1, ART.shade(P.pele, -0.04)]]); g.fill();
@@ -92,6 +96,7 @@
     ART.ell(g, 30, 30, 34, 22, 0.2); g.fillStyle = ART.rgba(P.bochecha, 0.55); g.fill();
     if (o.objeto) o.objeto(g);
     g.restore();
+    g0.save(); g0.setTransform(1, 0, 0, 1, 0, 0); g0.drawImage(PATA, 0, 0); g0.restore();
   };
 
   // ================================================================= C6: CIÊNCIA (blueprint)

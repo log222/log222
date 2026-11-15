@@ -29,14 +29,16 @@ MD.plano("p31", {
     // câmera: acompanha a ponta do giz e, no 167, abre para o enquadramento final com a conta inteira (x 60–960)
     const [rx, ry] = GB.gizMundo((XB + XFIM) / 2, LY);
     const contaE = GB.gizMundo(X0, LY)[0], contaD = GB.gizMundo(XFIM, LY)[0];
-    const zoom = ART.kf(t, [[0, 1.42], [tCento, 1.38], [tSete + 0.3, 1.27, "inOutCubic"], [Math.max(dur, tSete + 0.6), 1.31]]);
+    const zoom = ART.kf(t, [[0, 1.42], [tCento - 0.25, 1.34], [tSete + 0.3, 1.2, "inOutCubic"], [Math.max(dur, tSete + 0.6), 1.23]]);
     const cam = { zoom, x: 0, y: 0, sx: 0, sy: 0 };
     const tp0 = tipF(t), tipW = GB.gizMundo(tp0[0], LY)[0];
     const fim = (contaE + contaD + 290) / 2;                         // conta + Zeca à direita
     const kf = ART.ease.inOutCubic(clamp((t - tCento + 0.1) / (tSete + 0.35 - tCento + 0.1)));
     const zEff = 1 + (zoom - 1) * 0.8;
-    const cxW = ART.lerp(Math.max(tipW, contaE + 330 / zEff), fim, kf);
-    GB.mira(cam, 0.8, cxW, 1016, ART.lerp(470, 500, kf), 980);
+    const ancX = ART.lerp(470, 500, kf);
+    // a conta nunca passa da borda esquerda: o "1" fica sempre em x ≥ 80
+    const cxW = Math.min(ART.lerp(Math.max(tipW, contaE + 330 / zEff), fim, kf), contaE + (ancX - 80) / zEff);
+    GB.mira(cam, 0.8, cxW, 1016, ancX, 980);
     GB.palco(g, t, cam, cena, null, {
       frame: ctx.frame, legenda: false,
       meio: gg => ART.withLayer(gg, cam, 0.8, w => {

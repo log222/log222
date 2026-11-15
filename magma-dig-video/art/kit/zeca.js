@@ -195,7 +195,7 @@
     }
     if (p.camera > 0) { const tt0 = Math.abs(p.turn); p.headTurn = lerp(p.headTurn, -tt0 * 0.9, p.camera); p.look = [lerp(p.look[0], 0, p.camera), lerp(p.look[1], 0, p.camera)]; }
     const costas = p.costas > 0.5;
-    if (p.cone == null) p.cone = p.lamp > 0 ? 0.5 : 0;   // lanterna acesa sempre tem feixe (passe cone: 0 para desligar)
+    if (p.cone == null) p.cone = p.lamp > 0 ? 0.85 : 0;   // lanterna acesa sempre tem feixe (passe cone: 0 para desligar)
     const flip = p.turn < 0 ? -1 : 1;
     const tt = Math.abs(p.turn), th = tt * Math.PI / 2, sT = Math.sin(th), cT = Math.cos(th);
     g.save();
@@ -469,8 +469,13 @@
 
     // luz da lanterna (fora das transformações, em px)
     A.flip = flip; A.turn = p.turn;
-    if (p.lamp > 0) lampLight(g, p, A);
-    if (p.zzz > 0) zzz(g, A.topo.x + 40 * flip * p.s / 2, A.topo.y + 10, p.t, p.s / 2, p.zzz);
+    // âncoras estão em px de dispositivo: luz e Zzz são desenhados sem a transformação da câmera/camada
+    const m = g.getTransform(), esc = Math.sqrt(m.a * m.a + m.b * m.b) || 1;
+    g.save(); g.setTransform(1, 0, 0, 1, 0, 0);
+    const pe = Object.assign({}, p, { s: p.s * esc });
+    if (p.lamp > 0) lampLight(g, pe, A);
+    if (p.zzz > 0) zzz(g, A.topo.x + 40 * flip * pe.s / 2, A.topo.y + 10, p.t, pe.s / 2, p.zzz);
+    g.restore();
     return A;
   }
 
@@ -491,9 +496,11 @@
     const { x, y } = A.lanterna, k = p.lamp, sc = p.s / 2;
     const tt = Math.abs(p.turn);
     // halo
-    ART.glow(g, x, y, 120 * sc, "#FFE6A0", 0.75 * k);
-    ART.glow(g, x, y, 40 * sc, "#FFFFFF", 1.0 * k);
-    ART.glow(g, x, y, 16 * sc, "#FFFFFF", 1.0 * k);
+    ART.glow(g, x, y, 70 * sc, "#FFC860", 0.5 * k);
+    ART.glow(g, x, y, 30 * sc, "#FFF4D0", 0.9 * k);
+    // lente acesa: núcleo nítido quente (lê como lâmpada, não como borrão)
+    g.save(); g.globalAlpha = Math.min(1, k * 1.2); ART.circ(g, x - 2 * sc, y, 9 * sc); g.fillStyle = "#FFFBE6"; g.fill();
+    g.lineWidth = 2.5 * sc; g.strokeStyle = "rgba(255,200,90,.9)"; g.stroke(); g.restore();
     if (tt <= 0.2 && !p.coneLivre && p.cone > 0) { // de frente: estrela de luz em direção à câmera
       g.save(); g.globalCompositeOperation = "lighter"; g.globalAlpha = 0.5 * k * p.cone;
       g.fillStyle = ART.lg(g, x - 160 * sc, 0, x + 160 * sc, 0, [[0, "rgba(255,240,200,0)"], [0.5, "rgba(255,245,220,.9)"], [1, "rgba(255,240,200,0)"]]);
@@ -501,14 +508,20 @@
     }
     if (p.cone > 0 && (tt > 0.2 || p.coneLivre)) {
       const ang = p.coneLivre ? p.coneAng : p.turn > 0 ? p.coneAng : 180 - p.coneAng; // graus, 0 = direita
-      const spr = ART.cache("cone", 256, 128, gg => {
+      const spr = ART.cache("zeca:cone2", 256, 128, gg => {
         gg.translate(0, 64); gg.beginPath(); gg.moveTo(0, -4); gg.lineTo(236, -50); gg.lineTo(236, 50); gg.lineTo(0, 4); gg.closePath();
-        gg.fillStyle = ART.rg(gg, 0, 0, 0, 240, [[0, "rgba(255,236,170,.75)"], [0.35, "rgba(255,214,120,.25)"], [1, "rgba(255,200,100,0)"]]);
+        gg.fillStyle = ART.rg(gg, 0, 0, 0, 240, [[0, "rgba(255,238,175,.9)"], [0.3, "rgba(255,214,120,.45)"], [0.7, "rgba(255,200,100,.12)"], [1, "rgba(255,200,100,0)"]]);
         gg.filter = "blur(5px)"; gg.fill();
       });
       const L = p.coneLen * sc;
-      g.save(); g.translate(x, y); g.rotate(deg(ang)); g.globalCompositeOperation = "lighter"; g.globalAlpha = 0.55 * p.cone * k;
+      g.save(); g.translate(x, y); g.rotate(deg(ang));
+      // 1) cunha quente em mistura normal: aparece sobre fundo claro (pedra cinza), não só no escuro
+      g.globalAlpha = Math.min(1, 0.8 * p.cone * k);
       g.drawImage(spr, 0, -L * 0.5 * (p.coneAbre || 1), L * 256 / 236, L * (p.coneAbre || 1));
+      // 2) núcleo aditivo
+      g.globalCompositeOperation = "lighter"; g.globalAlpha = Math.min(1, 0.7 * p.cone * k);
+      g.drawImage(spr, 0, -L * 0.5 * (p.coneAbre || 1), L * 256 / 236, L * (p.coneAbre || 1));
+      g.globalAlpha = Math.min(1, 0.6 * p.cone * k); g.drawImage(spr, 0, -L * 0.18 * (p.coneAbre || 1), L * 0.8 * 256 / 236, L * 0.36 * (p.coneAbre || 1));
       g.restore();
     }
   }

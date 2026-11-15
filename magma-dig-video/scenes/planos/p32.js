@@ -43,7 +43,7 @@ MD.plano("p32", {
     }
     // cartão fixo: DIA 1 DE 30 → "RESTAM 29" no "nove"
     const kr = clamp((t - tNove + 0.05) / 0.2);
-    GB.cartao(g, 540, 330, { saldo: 6, dia: 1, s: 0.86, rotulo: kr > 0 ? "RESTAM 29" : null, a: 1, pulso: GB.hit(t, tNove, 0.5) });
+    GB.cartao(g, 540, 365, { saldo: 6, dia: 1, s: 0.86, rotulo: kr > 0 ? "RESTAM 29" : null, a: 1, pulso: GB.hit(t, tNove, 0.5) });
     ART.faixaLegenda(g, 0.4);
   },
 });

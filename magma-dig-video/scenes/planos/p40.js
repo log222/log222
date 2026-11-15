@@ -18,6 +18,6 @@ MD.plano("p40", {
       }
     }, { frame: ctx.frame });
     H.forEach((h, i) => ART.ui.crac(g, 560 + (i % 2) * 90, 820 - (i % 2) * 40, t, h, { s: 0.85, rot: i % 2 ? 6 : -6, dur: 0.4 }));
-    GA.hud(g, t, { cron: GA.cron(t, D, 0, 0, [[0, 5.6], [tC, 5.0], [D, 4.2]]), max: 11, escala: 11, moedas: t >= tQ ? 4 : nh >= 2 ? 3 : 2, pulso: GA.pulsos(t, [tQ, H[1] ?? 9]) });
+    GA.hud(g, t, { cron: GA.cron(t, D, 0, 0, [[0, 5.6], [Math.max(tC, 0.35), 5.0], [D, 4.2]]), max: 11, escala: 11, moedas: t >= tQ ? 4 : nh >= 2 ? 3 : 2, pulso: GA.pulsos(t, [tQ, H[1] ?? 9]) });
   },
 });

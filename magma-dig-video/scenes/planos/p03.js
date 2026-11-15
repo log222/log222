@@ -26,17 +26,24 @@ MD.plano("p03", {
     ART.beam(g, 540, -160, 90, 1500, 260, 1100, "#FFE2A0", 0.35 * luz);
     g.restore();
     // Zeca cavando sem parar embaixo do relógio; a lanterna dele morre junto com o tempo
-    const CY = 600;
+    const CY = 520;
     g.save(); GC.cam(g, 1 + (z - 1) * 0.7, 540, CY, sh.x * 0.7, sh.y * 0.7);
     // UM golpe contínuo e lento ao longo do plano (sem trocar de pose quadro a quadro): impacto no meio da contagem
     const PER = Math.max(0.8, D * 0.85), tImp = (t0 + t1) / 2, cT0 = tImp - 0.66 * PER;
-    const pz = ART.zeca.pose("cavando", t, { x: 640, y: 1265, s: 1.95, turn: -0.88, lamp: luz, cone: 0.9 * luz, coneLen: 700, rim: "#FFB060", rimA: 0.4 * luz }, { periodo: PER, t0: cT0 });
+    // golpe próprio, sem levantar a picareta por trás da cabeça (o arco grande do kit lia como "virar de lado"):
+    // sempre o mesmo lado (turn fixo), picareta sempre visível na frente
+    const ph = ART.clamp((t - cT0) / PER);
+    const aF = ART.kf(ph, [[0, 70], [0.5, 138, "outCubic"], [0.66, 72, "inQuart"], [1, 88, "inOutSine"]]);
+    const eF = ART.kf(ph, [[0, 8], [0.5, -12], [0.66, 6, "inQuart"], [1, 8]]);
+    const lean = ART.kf(ph, [[0, 3], [0.5, -6, "outCubic"], [0.66, 12, "inQuart"], [1, 6]]);
+    const pz = ART.zeca.pose("cavando", t, { x: 650, y: 1285, s: 2.5, turn: -0.85, aF, eF, aB: aF - 14, eB: eF + 4, lean, headTilt: lean * 0.4, sq: 1 + 0.06 * ART.pulse(ph, 0.64, 0.1),
+      lamp: luz, cone: 0.9 * luz, coneLen: 700, rim: "#FFB060", rimA: 0.4 * luz }, { periodo: PER, t0: cT0 });
     // bloco de pedra que ele acerta + faíscas em cada impacto (66% do ciclo)
-    ART.rocha(g, 300, 1205, 105, 7);
+    ART.rocha(g, 235, 1215, 105, 7);
     if (luz > 0.05) ART.zeca.draw(g, pz); else ART.zeca.drawEscuro(g, pz, 1);
     for (let n = 0; n < 1; n++) {
       const ti = tImp;
-      const ps = ART.burst(t, { t0: ti, count: 18, x: 360, y: 1180, speed: [250, 650], angle: [-170, -40], gravity: 1600, life: [0.15, 0.35], seed: 40 + n });
+      const ps = ART.burst(t, { t0: ti, count: 18, x: 270, y: 1195, speed: [250, 650], angle: [-170, -40], gravity: 1600, life: [0.15, 0.35], seed: 40 + n });
       g.save(); g.globalCompositeOperation = "lighter";
       for (const q of ps) { g.globalAlpha = q.alpha * luz; ART.circ(g, q.x, q.y, 4); g.fillStyle = "#FFD27A"; g.fill(); }
       g.restore();

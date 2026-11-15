@@ -5,7 +5,7 @@ MD.plano("p17", {
   render(g, t, ctx) {
     const D = ctx.dur || 1.55, tP = GA.w(ctx, "proxima", 0, D * 0.4);
     const k = ART.prog(t, 0.05, tP + 0.25, "inOutCubic");
-    const v = ART.gameplay.cheio(g, t, { de: 20.0, ate: 21.6, dur: D, topo: 60, base: 470, foco: [ART.lerp(220, 330, k), 220], zoom: [1.05, 1.1], selo: "MAPA DA JORNADA · IMAGEM REAL" });
+    const v = ART.gameplay.cheio(g, t, { de: 20.0, ate: 21.6, dur: D, topo: 60, base: 470, foco: [ART.lerp(176, 336, k), 210], zoom: [1.6, 1.6], selo: "MAPA DA JORNADA · IMAGEM REAL" });
     const b = v.map(336, 205), pk = ART.prog(t, tP, tP + 0.3, "outBack");
     if (pk > 0) { g.save(); g.lineWidth = 9; g.strokeStyle = "#FFD23F"; g.globalAlpha = pk; ART.circ(g, b[0], b[1], 80 + 10 * Math.sin(t * 10)); g.stroke(); g.restore(); ART.glow(g, b[0], b[1], 220, "#FFD23F", 0.45 * pk); }
     ART.post(g, ctx.frame, { vinheta: 0.45, legendaK: 0.32 });
