@@ -16,7 +16,7 @@ MD.plano("p38", {
     g.save(); GC.cam(g, 1 + (z - 1) * 0.5, 540, 900);
     g.globalAlpha = 0.5 * on; g.fillStyle = g.createPattern(tex, "repeat"); g.fillRect(-100, -100, 1280, 2120); g.globalAlpha = 1;
     g.fillStyle = ART.rg(g, 640, 1000, 60, 1100, [[0, "rgba(5,4,9,0)"], [0.6, "rgba(5,4,9,.55)"], [1, "rgba(5,4,9,.97)"]]); g.fillRect(-100, -100, 1280, 2120);
-    const pz = ART.zeca.pose("parado", t, { x: 540, y: 1270, s: 2.1, turn: 0.35, tool: "picareta", aF: 40, eF: 60, eyes: "determinado", mouth: "neutro", brows: "bravo", lamp: on, cone: 0.9 * on, coneLen: 800, rim: "#FFB060", rimA: 0.4 * on });
+    const pz = ART.zeca.pose("parado", t, { x: 540, y: 1270, s: 2.1, turn: 0.35, tool: "picareta", aF: 40, eF: 60, eyes: "determinado", mouth: "neutro", brows: "bravo", lamp: on, cone: 0.9 * on, coneAng: 42, coneLen: 560, rim: "#FFB060", rimA: 0.4 * on });
     if (on > 0.05) ART.zeca.draw(g, pz); else ART.zeca.drawEscuro(g, pz, 1);
     g.restore();
     // cronômetro grande com barra fantasma
