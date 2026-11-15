@@ -54,16 +54,20 @@ function args() {
       "-crf", A.crf || "17", "-threads", A.threads || "2", "-r", String(fps), A.out], { stdio: ["pipe", "inherit", "inherit"] });
     const done = new Promise((res, rej) => ff.on("close", c => (c === 0 ? res() : rej(new Error("ffmpeg saiu com " + c)))));
     const t0 = Date.now();
+    const tempos = [];
     for (let f = from; f < to; f++) {
+      const ta = Date.now();
       await page.evaluate(([t, f]) => window.renderFrame(t, f), [f / fps, f]);
+      const tb = Date.now();
       const buf = await page.screenshot({ clip, type: "jpeg", quality: q });
+      tempos.push([f, tb - ta, Date.now() - ta]);
       if (!ff.stdin.write(buf)) await new Promise(r => ff.stdin.once("drain", r));
       if (A.progress && (f - from) % 30 === 29) process.stderr.write(`  [${A.label || ""}] ${f - from + 1}/${to - from}\r`);
     }
     ff.stdin.end();
     await done;
     const dt = (Date.now() - t0) / 1000;
-    console.log(JSON.stringify({ seg: A.out, frames: to - from, secs: +dt.toFixed(2), fps: +((to - from) / dt).toFixed(2) }));
+    console.log(JSON.stringify({ seg: A.out, frames: to - from, secs: +dt.toFixed(2), fps: +((to - from) / dt).toFixed(2), tempos }));
   }
   const warns = await page.evaluate(() => window.__WARNINGS__ || []);
   for (const w of [...errors, ...warns]) console.error("AVISO: " + w);

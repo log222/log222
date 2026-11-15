@@ -550,6 +550,18 @@ def render_stills(tl_path, frames, outdir, scale):
     return [outdir / f"f{f:06d}.png" for f in frames]
 
 
+def contact_sheets(items, out_png, maxn=0):
+    """divide em vários arquivos <stem>-01.png ... se maxn > 0"""
+    out_png = Path(out_png)
+    if not maxn or len(items) <= maxn:
+        contact_sheet(items, out_png); return [out_png]
+    outs = []
+    for i in range(0, len(items), maxn):
+        o = out_png.with_name(f"{out_png.stem}-{i // maxn + 1:02d}.png")
+        contact_sheet(items[i:i + maxn], o); outs.append(o)
+    return outs
+
+
 def contact_sheet(items, out_png, cols=6, thumb_w=270):
     """items: [(png, t, rótulo_extra)]"""
     from PIL import Image, ImageDraw, ImageFont
@@ -610,6 +622,8 @@ def main():
     ap.add_argument("--so-contact-sheet", action="store_true")
     ap.add_argument("--cs-quadros", type=int, default=24, help="nº de quadros no contact sheet")
     ap.add_argument("--cs-cortes", action="store_true", help="contact sheet: 1 quadro no meio de cada plano")
+    ap.add_argument("--cs-por-plano", type=int, default=0, help="contact sheet: N quadros por plano (3 = início, meio, fim)")
+    ap.add_argument("--cs-max", type=int, default=0, help="divide o contact sheet em arquivos de até N quadros")
     ap.add_argument("--zona-segura", action="store_true")
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--so-audio", action="store_true", help="para após gerar timeline e mix.wav")
@@ -730,7 +744,18 @@ def main():
 
     # 5) quadros do contact sheet
     sel_ids = set(a.plano.split(",")) if a.plano else None
-    if a.cs_cortes:
+    if a.cs_por_plano:
+        cs = []
+        for k, b in enumerate(beats):
+            if sel_ids and not (b["id"] in sel_ids or b["fala"] in sel_ids):
+                continue
+            if not sel_ids and not (pend[k] * fps > f0 + 0.5 and pstart[k] * fps < f1 - 0.5):
+                continue
+            g0, g1 = int(math.ceil(pstart[k] * fps)) + 2, int(pend[k] * fps) - 3
+            g1 = max(g0, g1)
+            n = a.cs_por_plano
+            cs += [(g0 + round((g1 - g0) * j / max(1, n - 1)), b["id"]) for j in range(n)]
+    elif a.cs_cortes:
         cs = [(min(f1 - 1, int((pstart[k] + pend[k]) / 2 * fps)), b["id"]) for k, b in enumerate(beats)
               if (b["id"] in sel_ids or b["fala"] in sel_ids if sel_ids else
                   pend[k] * fps > f0 + 0.5 and pstart[k] * fps < f1 - 0.5)]
@@ -748,8 +773,8 @@ def main():
     if a.so_contact_sheet:
         t0 = time.time()
         ims = render_stills(tl_path, [f for f, _ in cs], work / "stills", scale)
-        contact_sheet([(p, f / fps, lab) for p, (f, lab) in zip(ims, cs)], cs_png)
-        print(f"[contact sheet] {cs_png} ({len(ims)} quadros em {time.time() - t0:.1f}s); PNGs em {work / 'stills'}")
+        outs = contact_sheets([(p, f / fps, lab) for p, (f, lab) in zip(ims, cs)], cs_png, a.cs_max)
+        print(f"[contact sheet] {', '.join(map(str, outs))} ({len(ims)} quadros em {time.time() - t0:.1f}s); PNGs em {work / 'stills'}")
         return
 
     # 6) vídeo
@@ -764,6 +789,16 @@ def main():
     nf = f1 - f0
     print(f"[render] {nf} quadros em {dt:.1f}s = {nf / dt:.1f} quadros/s ({len(segs)} workers; "
           f"por worker: {', '.join(str(s['fps']) for s in rstats)} q/s) -> 100 s de vídeo ≈ {100 * fps / (nf / dt) / 60:.1f} min")
+    per = {}
+    for stt in rstats:
+        for fr, ms_r, ms_t in stt.get("tempos", []):
+            k = next((k for k in range(len(beats)) if pstart[k] <= fr / fps < pend[k]), len(beats) - 1)
+            per.setdefault(beats[k]["id"], []).append((ms_r, ms_t))
+    lent = sorted(((np.mean([x[1] for x in v]), np.mean([x[0] for x in v]), pid) for pid, v in per.items()), reverse=True)
+    print("   planos mais lentos (ms/quadro total, só renderFrame): " +
+          ", ".join(f"{pid} {tt:.0f}/{tr:.0f}" for tt, tr, pid in lent[:8]))
+    FS.write_text(work / "render_tempos.json", json.dumps({pid: {"ms_total": round(float(tt), 1), "ms_render": round(float(tr), 1)}
+                                                          for tt, tr, pid in lent}, indent=1))
     lst = segdir / "lista.txt"
     lst.write_text("".join(f"file '{p.resolve()}'\n" for p in segs))
     a_ss, a_t = f0 / fps, nf / fps
@@ -786,8 +821,9 @@ def main():
         subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(out), "-vf", f"select={sel}", "-fps_mode", "passthrough",
                         str(tmp / "c%04d.png")], check=True)
         got = sorted(tmp.glob("c*.png"))
-        contact_sheet([(q, f / fps, lab) for q, (f, lab) in zip(got, sorted(set(cs)))], cs_png)
-        print(f"[contact sheet] {cs_png}")
+        uniq = sorted(set(cs))
+        outs = contact_sheets([(q, f / fps, lab) for q, (f, lab) in zip(got, uniq)], cs_png, a.cs_max)
+        print(f"[contact sheet] {', '.join(map(str, outs))}")
 
 
 if __name__ == "__main__":

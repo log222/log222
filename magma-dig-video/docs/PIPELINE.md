@@ -28,7 +28,14 @@ $PY make_video.py story/parte-01.json --so-audio          # só narração/timel
 $PY tools/verificar_narracao.py build/parte-01             # ASR de volta: palavras mal pronunciadas
 $PY tools/medir_alinhamento.py story/parte-01.json          # erro do tempo de palavra onde há verdade conhecida
 ```
-Flags: `--sem-trilha`, `--trilha musica.mp3`, `--voz`, `--velocidade`, `--narracao-audio/--narracao-tempos`, `--workers`.
+Flags: `--sem-trilha`, `--trilha musica.mp3`, `--motor`, `--voz`, `--velocidade`, `--regerar f12`, `--voz-pasta DIR`,
+`--narracao-audio/--narracao-tempos`, `--workers`.
+
+**Execuções simultâneas:** a execução completa sem `-o`/`--plano`/`--trecho` usa `build/<nome>/` e `out/<nome>.mp4`.
+Qualquer `-o`, `--plano` ou `--trecho` usa pasta própria `build/<nome>/runs/<tag>/` e saída própria
+(`out/<nome>-plano-p05-contact.png` etc.). Se a pasta estiver em uso (trava de arquivo), a execução usa `<tag>-<pid>`
+e acrescenta `-<pid>` ao nome da saída. Escritas de JSON/WAV/PNG são atômicas; caches de TTS/ASR/voz também.
+`--plano` filtra em todos os modos (vídeo, `--so-contact-sheet`, `--cs-cortes`), inclusive planos não vizinhos.
 Velocidade medida: Parte 1 inteira (107,8 s, 3233 quadros, placeholders) em 140 s de render = 23 q/s; 2 min 46 s no total.
 Cenas pesadas de canvas vão ser mais lentas; meça com `--plano`.
 
@@ -37,8 +44,12 @@ Unidade de NARRAÇÃO = **fala** (1+ frases sintetizadas juntas, prosódia natur
 que começa numa palavra da fala. Planos são contíguos: cada um vai do seu corte até o corte seguinte.
 ```jsonc
 {
-  "voz": "pm_alex", "velocidade": 1.0,
-  "pronuncia": {"DIG": "/dˈiɡ/", "Crac": "/kɾˈak/"},   // só áudio; /.../ = IPA direto (Kokoro)
+  "motor": "kokoro",          // kokoro (interno) | supertonic | qwen | qwen-design | chatterbox (CLI tools/voz)
+  "voz": "pm_alex",           // kokoro: pm_alex/pm_santa/pf_dora; supertonic: M1..M5/F1..F5; qwen/chatterbox: vozes_qwen.json
+  "velocidade": 1.0, "atempo": 1.0,
+  "pronuncia": {              // só áudio. "padrao" vale para todos; a seção do motor sobrescreve; /IPA/ só no kokoro
+    "padrao": {"Crac": "Crák", "Dia um. Mina A": "Dia um... Mina Á", "Cobre": "Cóbre"},
+    "kokoro": {"MAGMA DIG": "MAGMA /dˈiɡ/", "Crac": "/kɾˈak/"}},
   "trilha": true,                                      // true | false | "musica.mp3"
   "estilo": {"audio": {"sfx_db": -10}},                // overrides de config/estilo.json (merge profundo)
   "falas": [
@@ -50,6 +61,7 @@ que começa numa palavra da fala. Planos são contíguos: cada um vai do seu cor
       "pausa_antes": 0,          // opcional
       "duracao": 2.0,            // só fala SEM texto (plano mudo)
       "velocidade": 1.05,        // opcional, só esta fala
+      "take": 1,                 // opcional: outra tomada desta fala (motores externos autorregressivos)
       "planos": [
         {"id": "p01", "inicio": 0, "cena": "auto"},                     // 1º plano da fala: inicio 0 obrigatório
         {"id": "p02", "inicio": 5, "destaques": ["TRABALHO"],            // índice da palavra (0 = "E")
@@ -57,6 +69,7 @@ que começa numa palavra da fala. Planos são contíguos: cada um vai do seu cor
         {"id": "p03", "inicio": {"palavra": "só", "n": 0},               // ou texto da palavra + ocorrência
          "transicao": "corte", "legenda_pos": "alto",
          "sfx": [{"nome": "tictac", "palavra": "segundos", "offset": -0.2, "vol": -4, "kw": {"dur": 1, "bpm": 240}}],
+         "trilha": [{"offset": 0.9, "db": -80, "rampa": 0.02}],          // automação da trilha (abaixo)
          "roteiro": {"cenario": "C7 …", "acao": "…", "camera": "…", "ui": "…"}}   // vai para ctx.plano
       ]
     }
@@ -70,7 +83,13 @@ que começa numa palavra da fala. Planos são contíguos: cada um vai do seu cor
 - `sfx`: `offset` relativo ao início do plano, ou a uma `palavra` falada (procura no plano, depois na fala; `n` = ocorrência).
   Efeitos (`lib/sfx.py`): picareta, rachar, quebrar, moeda, ding, whoosh, ronco, tictac, sting, boom, pop, subida,
   clique, apagar, zumbido, giz, acorde (`kw.tipo`: claro|quente|recompensa|subindo|grave|dissonante), coracao, passos.
-  Ouça todos: `$PY -m lib.sfx build/sfx`.
+  vento (`kw.dur`, `kw.grilos`), folha, porta, pedrinhas, chiado (`kw.dur`). Qualquer efeito aceita `"kw": {"eco": true}`
+  (ou `{"eco": {"atraso": 0.22, "repeticoes": 4, "decai": 0.45}}`) para eco de caverna. Ouça todos: `$PY -m lib.sfx build/sfx`.
+- `trilha` (automação por dados): lista de deixas `{"db", "modo": "normal"|"suspensa", "rampa" (s), e o tempo:
+  "offset" desde o corte, ou "palavra"+"offset", ou "no_fim": true}`. Cada deixa faz rampa do estado atual para o novo e
+  vale até a próxima. `db: -80` = silêncio; `modo: "suspensa"` = acorde sus sustentado, sem bateria/arpejo, sem resolver.
+  Parte 1: p03 corte seco no zero (0,9 s), volta em p04; p44 some (suspense até "Cobre."), p48 baixa (-10 dB),
+  p49 volta; p55 suspensa até o fim.
 - `destaques`: palavras/expressões do plano em amarelo; uma expressão de várias palavras ("CENTO E SESSENTA E SETE",
   "MAGMA DIG") vira um bloco de legenda inteiro.
 - Formato antigo (`"beats": [...]`, 1 beat = 1 fala = 1 plano) continua aceito (`story/demo.json`).
@@ -122,6 +141,12 @@ drawParticles, floatText, countUp, el, set, canvas, loadImage, asset, seekCss, w
 O kit `ART.*` (art/kit) tem paleta, Zeca com poses, câmera, glow, poeira etc. (ver art/).
 
 ## Voz e tempo de palavra
+- Motor plugável: `"motor"`/`"voz"` no story (ou `--motor/--voz`). `kokoro` roda dentro do pipeline; os outros chamam
+  `tools/voz/falar.py` no venv `.cache/venv-voz`, em lote só para o que falta, com cache próprio em `.cache/tts-ext/<motor>/`
+  por (motor, voz, velocidade, atempo, take, texto falado). Geração serializada por motor (duas execuções não geram a
+  mesma fala duas vezes). `--regerar f12` regera a fala ignorando o cache (mesmo take); para outra tomada use `"take"`.
+  `--voz-pasta DIR` usa uma pasta já gerada pelo CLI (casa as falas pelo texto). Depois disso tudo é igual: alinhamento
+  por ASR, legenda, cortes.
 - `pm_alex` velocidade 1,0. `tts.py` gera WAV por frase + `tempos.json` (mesmo formato do alinhamento).
 - Tempo de palavra = **híbrido**: timestamps do Parakeet (ASR) como âncora onde a palavra reconhecida casa com o
   texto (94–95 % das palavras na Parte 1), interpolação por fonemas entre âncoras, inícios caídos em silêncio são
