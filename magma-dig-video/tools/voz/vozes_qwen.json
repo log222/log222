@@ -1,0 +1,14 @@
+{
+ "narrador-jovem": {
+  "descricao": "A young Brazilian man in his early twenties, native Brazilian Portuguese speaker with a neutral São Paulo accent, narrating a fast-paced short gaming video for social media. Energetic, informal, upbeat and confident, slightly playful, smiling voice. Fast speaking rate, crisp diction, bright mid-range timbre, short pauses between sentences.",
+  "texto_ref": "Olha só que coisa: hoje a gente vai descobrir um jogo diferente. Presta atenção, porque cada segundo conta, e no final tem surpresa!"
+ },
+ "narradora": {
+  "descricao": "A young Brazilian woman in her mid twenties, native Brazilian Portuguese speaker with a neutral São Paulo accent, narrating a fast-paced short gaming video for social media. Energetic, friendly, bright and expressive, confident, informal. Fast speaking rate, clear diction, short pauses between sentences.",
+  "texto_ref": "Olha só que coisa: hoje a gente vai descobrir um jogo diferente. Presta atenção, porque cada segundo conta, e no final tem surpresa!"
+ },
+ "narrador-grave": {
+  "descricao": "A Brazilian man in his thirties, native Brazilian Portuguese speaker with a neutral Rio de Janeiro accent, deep, warm and resonant low voice, storyteller narrating a short adventure video. Engaged and lively but relaxed, informal, a hint of humor. Brisk speaking rate, clear diction, short pauses.",
+  "texto_ref": "Olha só que coisa: hoje a gente vai descobrir um jogo diferente. Presta atenção, porque cada segundo conta, e no final tem surpresa!"
+ }
+}

@@ -139,30 +139,57 @@
   ART.cubo = (g, X0, Z0, o = {}) => {
     const pj = o.pj || PJ, sz = o.size || 1, Yb = o.y || 0;
     const p = (x, y, z) => ART.proj(X0 + x * sz, Yb + y * sz, Z0 + z * sz, pj);
-    const tex = o.tex || ART.texVoronoi("mina");
     const top = [p(0, 1, 1), p(1, 1, 1), p(1, 1, 0), p(0, 1, 0)];
     const front = [p(0, 1, 0), p(1, 1, 0), p(1, 0, 0), p(0, 0, 0)];
     const side = X0 + sz * 0.5 < 0 ? [p(1, 1, 0), p(1, 1, 1), p(1, 0, 1), p(1, 0, 0)] : [p(0, 1, 1), p(0, 1, 0), p(0, 0, 0), p(0, 0, 1)];
-    // sombra de contato (oclusão) no chão
-    { const b0 = p(-0.15, 0, -0.12), b1 = p(1.15, 0, -0.12), b2 = p(1.15, 0, 1), b3 = p(-0.15, 0, 1); g.save(); g.filter = `blur(${(b1[0] - b0[0]) * 0.05}px)`; ART.poly(g, [b0, b1, b2, b3]); g.fillStyle = 'rgba(8,6,12,.55)'; g.fill(); g.restore(); }
-    const faces = [[side, "rgba(20,14,30,.42)", 0.3], [top, "rgba(255,240,215,.10)", 0.1], [front, "rgba(20,14,30,.12)", 0.2]];
-    for (const [q, tint, off] of faces) ART.quadTex(g, q, tex, { tint, ou: (o.seed || 0) * 0.37 + off, ov: (o.seed || 0) * 0.21 });
-    // gradiente de forma na frente: luz em cima, oclusão embaixo
-    ART.poly(g, front); g.fillStyle = ART.lg(g, 0, front[0][1], 0, front[3][1], [[0, "rgba(255,235,200,.10)"], [0.55, "rgba(20,12,30,0)"], [1, "rgba(20,12,30,.45)"]]); g.fill();
-    ART.poly(g, top); g.fillStyle = ART.lg(g, 0, top[0][1], 0, top[3][1], [[0, "rgba(20,12,30,.25)"], [1, "rgba(255,235,200,.05)"]]); g.fill();
+    const all = [...top, ...front, ...side];
+    const bx = Math.floor(Math.min(...all.map(q => q[0]))) - 40, by = Math.floor(Math.min(...all.map(q => q[1]))) - 40;
+    const bw = Math.ceil(Math.max(...all.map(q => q[0]))) - bx + 80, bh = Math.ceil(Math.max(...all.map(q => q[1]))) - by + 60;
+    const key = `cubo:${X0.toFixed(3)}:${Z0.toFixed(3)}:${Yb}:${sz}:${o.seed || 0}:${o.texKey || "mina"}:${JSON.stringify(o.ores || [])}:${pj.f}:${pj.y0}:${pj.cx}`;
+    const spr = ART.cache(key, bw, bh, gg => {
+      gg.translate(-bx, -by);
+      const tex = o.tex || ART.texVoronoi("mina");
+      // sombra de contato (oclusão) no chão
+      const c0 = p(0.5, 0, 0.45), wid = front[1][0] - front[0][0];
+      gg.save(); gg.translate(c0[0], c0[1]); gg.scale(1, 0.28); ART.glow(gg, 0, 0, wid * 0.85, "#06040A", 0.9, "source-over"); gg.restore();
+      const faces = [[side, "rgba(20,14,30,.42)", 0.3], [top, "rgba(255,240,215,.10)", 0.1], [front, "rgba(20,14,30,.12)", 0.2]];
+      for (const [q, tint, off] of faces) ART.quadTex(gg, q, tex, { tint, ou: (o.seed || 0) * 0.37 + off, ov: (o.seed || 0) * 0.21 });
+      ART.poly(gg, front); gg.fillStyle = ART.lg(gg, 0, front[0][1], 0, front[3][1], [[0, "rgba(255,235,200,.10)"], [0.55, "rgba(20,12,30,0)"], [1, "rgba(20,12,30,.45)"]]); gg.fill();
+      ART.poly(gg, top); gg.fillStyle = ART.lg(gg, 0, top[0][1], 0, top[3][1], [[0, "rgba(20,12,30,.25)"], [1, "rgba(255,235,200,.05)"]]); gg.fill();
+      gg.strokeStyle = "rgba(255,236,200,.22)"; gg.lineWidth = 2; gg.beginPath(); gg.moveTo(...top[3]); gg.lineTo(...top[2]); gg.stroke();
+      for (const m of o.ores || []) {
+        const [a, b, , d] = front, u = m.u, v = m.v;
+        const x = a[0] + (b[0] - a[0]) * u + (d[0] - a[0]) * v, y = a[1] + (b[1] - a[1]) * u + (d[1] - a[1]) * v;
+        ART.pepita(gg, x, y, m.r * (b[0] - a[0]), m.tipo, m.rot || 0, { seed: m.seed || 2 });
+      }
+    });
+    g.drawImage(spr, bx, by);
     if (o.escuro) { for (const q of [front, top, side]) { ART.poly(g, q); g.fillStyle = `rgba(12,8,20,${o.escuro})`; g.fill(); } }
-    // aresta iluminada
-    g.save(); g.strokeStyle = "rgba(255,236,200,.22)"; g.lineWidth = 2; g.beginPath(); g.moveTo(...top[3]); g.lineTo(...top[2]); g.stroke(); g.restore();
-    // minérios cravados na face da frente
-    for (const m of o.ores || []) {
-      const [a, b, , d] = front, u = m.u, v = m.v;
-      const x = a[0] + (b[0] - a[0]) * u + (d[0] - a[0]) * v, y = a[1] + (b[1] - a[1]) * u + (d[1] - a[1]) * v;
-      ART.pepita(g, x, y, m.r * (b[0] - a[0]), m.tipo, m.rot || 0, { seed: m.seed || 2, brilho: m.brilho || 0 });
-    }
-    // rachaduras
+    if (o.veios) veios(g, front, top, o.veios, o.seed || 1, o.t || 0);
     if (o.crack > 0) rachar(g, front, top, o.crack, o.seed || 1, o.crackGlow);
     return { front, top, side, centro: [(front[0][0] + front[2][0]) / 2, (front[0][1] + front[2][1]) / 2] };
   };
+  /** veios de cobre incandescentes na face (plano 45–48: "a parede diferente"). k = 0..1 */
+  function veios(g, front, top, k, seed, t) {
+    const [a, b, , d] = front, map = (u, v) => [a[0] + (b[0] - a[0]) * u + (d[0] - a[0]) * v, a[1] + (b[1] - a[1]) * u + (d[1] - a[1]) * v];
+    const fw = b[0] - a[0], r = ART.rng(seed + 50);
+    g.save(); ART.poly(g, front); g.clip(); g.lineCap = "round"; g.lineJoin = "round";
+    const fl = 0.85 + 0.15 * ART.noise(t * 3, seed);
+    for (let i = 0; i < 5; i++) {
+      const pts = []; let u = r() * 0.3 + (i % 2 ? 0.55 : 0.05), v = r(); const du = 0.12 + r() * 0.08, dv = (r() - 0.5) * 0.25;
+      for (let j = 0; j < 8; j++) { pts.push(map(u, v)); u += du; v += dv + (r() - 0.5) * 0.18; }
+      const path = () => { g.beginPath(); pts.forEach((q, j) => (j ? g.lineTo(...q) : g.moveTo(...q))); };
+      path(); g.strokeStyle = ART.rgba("#FF7A1A", 0.35 * k * fl); g.lineWidth = fw * 0.09; g.stroke();
+      path(); g.strokeStyle = ART.rgba("#FFB060", 0.8 * k * fl); g.lineWidth = fw * 0.035; g.stroke();
+      path(); g.strokeStyle = ART.rgba("#FFF0C8", 0.9 * k * fl); g.lineWidth = fw * 0.012; g.stroke();
+      // pepitas de cobre no veio
+      for (let j = 1; j < pts.length; j += 3) ART.pepita(g, pts[j][0], pts[j][1], fw * 0.035 * k, "cobre", j, { seed: i * 10 + j });
+    }
+    g.restore();
+    const c = map(0.5, 0.45);
+    ART.glow(g, c[0], c[1], fw * 1.3, "#FF7A1A", 0.55 * k * fl);
+  }
+  ART.veios = veios;
   // rachaduras procedurais: 3 estágios, cada um revela mais ramos
   function crackPaths(seed) {
     const r = ART.rng(seed), paths = [];
@@ -192,7 +219,7 @@
       for (let i = 0; i <= Math.ceil(upto); i++) { const j = Math.min(i, upto); const i0 = Math.floor(j), f = j - i0; const p0 = c.pts[Math.min(i0, n)], p1 = c.pts[Math.min(i0 + 1, n)]; pts.push(map(lerp(p0[0], p1[0], f), lerp(p0[1], p1[1], f))); }
       // brilho/borda clara + traço escuro
       g.beginPath(); pts.forEach((p, i) => (i ? g.lineTo(...p) : g.moveTo(...p)));
-      if (glow) { g.strokeStyle = ART.rgba(glow, 0.7); g.lineWidth = fw * 0.04 * c.w; g.filter = `blur(${fw * 0.012}px)`; g.stroke(); g.filter = "none"; }
+      if (glow) { g.strokeStyle = ART.rgba(glow, 0.35); g.lineWidth = fw * 0.06 * c.w; g.stroke(); g.strokeStyle = ART.rgba(glow, 0.6); g.lineWidth = fw * 0.035 * c.w; g.stroke(); }
       g.strokeStyle = "rgba(255,240,220,.35)"; g.lineWidth = fw * 0.03 * c.w; g.translate(1.5, 1.5); g.stroke(); g.translate(-1.5, -1.5);
       g.strokeStyle = "#1C1518"; g.lineWidth = fw * 0.02 * c.w; g.stroke();
     }
@@ -325,7 +352,7 @@
         ART.glow(g, x - (cam.x || 0) * 0.45, y, 26, "#FFF0C8", 0.9 * fl);
       }
       // gradação de cor: sombras puxando para o roxo do jogo
-      g.save(); g.globalCompositeOperation = "soft-light"; g.fillStyle = ART.lg(g, 0, 0, 0, H, [[0, "rgba(90,60,160,.55)"], [0.6, "rgba(60,40,110,.25)"], [1, "rgba(20,10,40,.6)"]]); g.fillRect(0, 0, W, H); g.restore();
+      ART.tom(g, [[0, "rgba(40,24,80,.28)"], [0.5, "rgba(40,24,80,0)"], [1, "rgba(14,8,28,.35)"]]);
     };
     return { fundo, frente, luz, pj: PJ, tex };
   };

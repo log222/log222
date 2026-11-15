@@ -17,7 +17,8 @@
           for (const L of base.fundo) ART.withLayer(gg, cam, L.d, x => L.draw(x, 0));
           base.luz(gg, 0, cam);
         });
-        g.save(); g.filter = "blur(10px)"; g.drawImage(c, -40, -40, W + 80, H + 80); g.filter = "none";
+        const cb = ART.blurred(c, 4, "tocaDesfB");
+        g.save(); g.drawImage(cb, -40, -40, W + 80, H + 80);
         g.fillStyle = "rgba(14,11,24,.62)"; g.fillRect(0, 0, W, H); g.restore();
         ART.dust(g, t, { count: 30, seed: 8, color: "#FFE0B0", alpha: 0.35 });
       } }],
@@ -44,7 +45,7 @@
     const c = u.cartaoMinerio(g, 540, 700, { tipo: "cobre", nome: "Cobre", preco: o.preco ?? 40, varPct: o.varPct ?? 12, barras: [0.42, 0.5, 0.38, 0.55, 0.47, 0.6, 0.66], amanha: 0.82, prog: o.prog ?? 1, s: 1.55, brilhoAmanha: o.brilhoAmanha || 0 });
     if ((o.seta ?? 1) > 0) {
       const k = ART.ease.outBack(clamp(o.seta ?? 1)), sx = c.x0 + c.w - 30, sy = c.y0 - 20;
-      if (o.setaSombra) { g.save(); g.filter = "blur(4px)"; u.seta(g, sx + 26, sy + 40, { s: 0.85, dir: "baixo", cor: "#E63748", a: 0.55 * o.setaSombra }); g.restore(); }
+      if (o.setaSombra) { g.save(); u.seta(g, sx + 26, sy + 40, { s: 0.85, dir: "baixo", cor: "#E63748", a: 0.55 * o.setaSombra }); g.restore(); }
       const tr = o.tremor ? Math.sin(t * 40) * 4 * o.tremor : 0;
       u.seta(g, sx + tr, sy - 30 * k + 30, { s: 0.85 * k, dir: "cima" });
       g.save(); g.font = '900 30px "Nunito"'; g.fillStyle = "#5FD35F"; g.textAlign = "center"; g.globalAlpha = clamp(o.seta ?? 1); g.fillText("AMANHÃ", sx, sy + 90); g.restore();

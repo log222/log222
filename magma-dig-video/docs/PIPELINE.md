@@ -1,141 +1,139 @@
 # Pipeline de vídeo — MAGMA DIG (Reel 1080x1920, 30 fps)
 
 ```
-story/parte-XX.json ──► make_video.py ──► TTS (Kokoro) ─► narração + tempos por palavra
-                                     ├─► legenda em blocos (dados)  ┐
-                                     ├─► sfx por dados (sintetizados) ├─► build/<nome>/timeline.json
+roteiro/parte-XX.shots.json ──► tools/gerar_story.py ──► story/parte-XX.json  (falas + planos por palavra)
+story/parte-XX.json ──► make_video.py ─► TTS Kokoro por FALA ─► tempo de palavra (ASR Parakeet + fonemas)
+                                     ├─► planos cortados em fronteira de palavra ─┐
+                                     ├─► legenda em blocos (dados)                 ├─► build/<nome>/timeline.json
+                                     ├─► sfx por dados (19 efeitos sintetizados)   ┘
                                      ├─► mix: voz + sfx + trilha (ducking, -14 LUFS, AAC 48k)
                                      └─► render/render.js ×4 (Playwright: renderFrame(t) → JPEG → x264) ─► out/<nome>.mp4
 ```
 
 ## Instalar do zero
 ```
-./setup.sh            # cria .cache/venv, baixa Kokoro + Piper (+ ASR Whisper/Parakeet p/ avaliar vozes)
-./setup.sh --sem-asr  # só o necessário para vídeo
+./setup.sh            # .cache/venv + Kokoro + Piper + ASR (Whisper-small p/ verificação, Parakeet p/ alinhamento)
+./setup.sh --sem-asr  # só o necessário para vídeo (tempo de palavra cai para o estimador por fonemas, ~2,5x pior)
 ```
-Precisa de python3 ≥3.11, ffmpeg, node com `require('playwright')` + Chromium. Sempre rode o Python do venv: `.cache/venv/bin/python`.
+Precisa de python3 ≥3.11, ffmpeg, node com `require('playwright')` + Chromium. Python sempre do venv: `PY=.cache/venv/bin/python`.
 
 ## Rodar
 ```
-PY=.cache/venv/bin/python
-$PY make_video.py story/parte-01.json -o out/parte-01.mp4 --contact-sheet   # final
-$PY make_video.py story/parte-01.json --so-contact-sheet --zona-segura       # só 24 stills PNG (segundos), com guia da zona segura
-$PY make_video.py story/parte-01.json --beat b03,b04 --rascunho              # só esses beats, 540x960
-$PY make_video.py story/parte-01.json --trecho 12-20 --rascunho              # só esse intervalo (s)
-$PY make_video.py story/parte-01.json --sem-trilha --voz pf_dora --velocidade 1.1
-$PY make_video.py story/parte-01.json --trilha minha_musica.mp3             # música própria no lugar da sintetizada
-$PY make_video.py story/parte-01.json --so-audio                            # só timeline + build/<nome>/mix.wav
+$PY tools/gerar_story.py roteiro/parte-01.shots.json -o story/parte-01.json     # (re)gera o story do roteiro
+$PY make_video.py story/parte-01.json -o out/parte-01.mp4 --contact-sheet --cs-cortes   # vídeo + 1 quadro por plano
+$PY make_video.py story/parte-01.json --so-contact-sheet --cs-cortes --zona-segura      # só stills (s), sem vídeo
+$PY make_video.py story/parte-01.json --plano p12,p13 --rascunho                        # só esses planos, 540x960
+$PY make_video.py story/parte-01.json --trecho 40-55 --rascunho                         # intervalo (s)
+$PY make_video.py story/parte-01.json --so-audio          # só narração/timeline/mix + estatísticas de ritmo e legenda
+$PY tools/verificar_narracao.py build/parte-01             # ASR de volta: palavras mal pronunciadas
+$PY tools/medir_alinhamento.py story/parte-01.json          # erro do tempo de palavra onde há verdade conhecida
 ```
-Saídas intermediárias em `build/<nome>/`: `timeline.json` (tudo que o player recebe), `tempos.json` + `narracao.wav`
-(narração montada, tempos absolutos), `sfx.json`, `mix.wav`, `stills/`. Velocidade medida: ~16 quadros/s em 1080p com 4 workers
-(≈3 min para 100 s de vídeo); rascunho ~20 q/s.
+Flags: `--sem-trilha`, `--trilha musica.mp3`, `--voz`, `--velocidade`, `--narracao-audio/--narracao-tempos`, `--workers`.
+Velocidade medida: Parte 1 inteira (107,8 s, 3233 quadros, placeholders) em 140 s de render = 23 q/s; 2 min 46 s no total.
+Cenas pesadas de canvas vão ser mais lentas; meça com `--plano`.
 
 ## Formato `story/parte-XX.json`
+Unidade de NARRAÇÃO = **fala** (1+ frases sintetizadas juntas, prosódia natural). Unidade VISUAL = **plano**,
+que começa numa palavra da fala. Planos são contíguos: cada um vai do seu corte até o corte seguinte.
 ```jsonc
 {
-  "titulo": "Parte 1 — ...",            // livre
-  "voz": "pm_alex",                     // pm_alex | pm_santa | pf_dora | piper_faber
-  "velocidade": 1.05,                   // 0.5–2.0 (Kokoro)
-  "trilha": true,                       // true = sintetizada | false | "caminho/musica.mp3"
-  "pronuncia": {"DIG": "/dˈiɡ/"},       // grafia -> grafia falada (só áudio). Valor entre /.../ = IPA direto (Kokoro)
-  "pronuncia_arquivo": "story/pronuncia.json",  // opcional, mesmo formato
-  "estilo": { "legenda": {"tamanho": 110} },    // overrides de config/estilo.json (merge profundo)
-  "fontes": ["Bangers"],                // fontes extras que as cenas usam (pré-carregadas)
-  "beats": [
+  "voz": "pm_alex", "velocidade": 1.0,
+  "pronuncia": {"DIG": "/dˈiɡ/", "Crac": "/kɾˈak/"},   // só áudio; /.../ = IPA direto (Kokoro)
+  "trilha": true,                                      // true | false | "musica.mp3"
+  "estilo": {"audio": {"sfx_db": -10}},                // overrides de config/estilo.json (merge profundo)
+  "falas": [
     {
-      "id": "gancho",                   // obrigatório, único, [A-Za-z0-9_-]
-      "cena": "placeholder",            // obrigatório: scenes/<cena>.js
-      "params": { },                    // livre, vai para a cena
-      "narracao": "Texto falado. Pode ter várias frases.",   // vazio => exige "duracao"
-      "legenda": "Texto exibido se diferente do falado, ex. *1.500*",  // opcional
-      "enfase": ["Zeca", "1.500"],      // palavras com cor de ênfase (ou marque *palavra* no texto)
-      "sfx": [
-        {"nome": "picareta", "offset": 0.4},                 // s desde o início do beat
-        {"nome": "moeda", "palavra": "moedas", "offset": -0.1, "vol": 2, "n": 0, "seed": 3, "kw": {}}
-      ],                                // "palavra": relativo ao início dessa palavra falada (n = ocorrência)
-      "transicao": {"tipo": "fade", "dur": 0.3, "sfx": "whoosh", "sfx_vol": -10},  // ENTRADA neste beat; ou "corte"
-      "respiro": 0.35,                  // silêncio após a última frase (padrão estilo.tempo.respiro)
-      "pausa_frase": 0.28,              // entre frases do beat
-      "duracao_min": 3.0,               // estica o beat se a fala for curta
-      "duracao": 2.0,                   // só p/ beat sem narração
-      "final": 1.4,                     // só no último beat: cauda após o respiro
-      "legenda_pos": "baixo",           // baixo | centro | alto | {"centro_x": 510, "centro_y": 900}
-      "legenda_estilo": {"cor_ativa": "#ff3b1f"},   // override só deste beat
-      "sem_legenda": false
+      "id": "f01",
+      "texto": "E se o seu dia de trabalho durasse só dez segundos?",
+      "legenda": "…",            // opcional: texto exibido se diferente do falado (*palavra* = destaque)
+      "pausa_depois": 0.5,       // opcional: silêncio após a fala (padrão estilo.tempo.pausa_fala = 0,12 s)
+      "pausa_antes": 0,          // opcional
+      "duracao": 2.0,            // só fala SEM texto (plano mudo)
+      "velocidade": 1.05,        // opcional, só esta fala
+      "planos": [
+        {"id": "p01", "inicio": 0, "cena": "auto"},                     // 1º plano da fala: inicio 0 obrigatório
+        {"id": "p02", "inicio": 5, "destaques": ["TRABALHO"],            // índice da palavra (0 = "E")
+         "sfx": [{"nome": "picareta", "offset": 0.05}]},
+        {"id": "p03", "inicio": {"palavra": "só", "n": 0},               // ou texto da palavra + ocorrência
+         "transicao": "corte", "legenda_pos": "alto",
+         "sfx": [{"nome": "tictac", "palavra": "segundos", "offset": -0.2, "vol": -4, "kw": {"dur": 1, "bpm": 240}}],
+         "roteiro": {"cenario": "C7 …", "acao": "…", "camera": "…", "ui": "…"}}   // vai para ctx.plano
+      ]
     }
   ]
 }
 ```
-**A duração de cada beat vem do áudio**: `entrada_beat` (0,12 s; no 1º beat `inicio` 0,25 s) + frases + pausas + `respiro`.
-Nunca chute duração em beat narrado; use `duracao_min` se a cena precisar de mais tempo.
+- `cena`: `"auto"` (padrão) = arquivo próprio do plano (abaixo); ou o nome de um módulo em `scenes/` (ex.: `placeholder`).
+- Corte = 40 ms antes da palavra de início (`estilo.tempo.corte_antecipado`). Planos < 0,1 s geram aviso.
+- `transicao`: padrão `corte` (a referência quase só usa corte). Outros: `fade`, `flash`, `preto`, `slide`, `zoom`
+  (`{"tipo": "fade", "dur": 0.15, "sfx": "whoosh"}`), centradas na fronteira.
+- `sfx`: `offset` relativo ao início do plano, ou a uma `palavra` falada (procura no plano, depois na fala; `n` = ocorrência).
+  Efeitos (`lib/sfx.py`): picareta, rachar, quebrar, moeda, ding, whoosh, ronco, tictac, sting, boom, pop, subida,
+  clique, apagar, zumbido, giz, acorde (`kw.tipo`: claro|quente|recompensa|subindo|grave|dissonante), coracao, passos.
+  Ouça todos: `$PY -m lib.sfx build/sfx`.
+- `destaques`: palavras/expressões do plano em amarelo; uma expressão de várias palavras ("CENTO E SESSENTA E SETE",
+  "MAGMA DIG") vira um bloco de legenda inteiro.
+- Formato antigo (`"beats": [...]`, 1 beat = 1 fala = 1 plano) continua aceito (`story/demo.json`).
 
-Transições (`tipo`): `corte`, `fade`, `flash` (branco), `preto`, `slide` (de baixo), `zoom`. Ficam centradas na fronteira
-(metade em cada beat). Padrão: `config/estilo.json → transicao_padrao` (fade 0,3 s + whoosh). `corte` não toca sfx a menos que
-você ponha `"sfx"` explicitamente.
+### Ritmo (config/estilo.json → tempo)
+`inicio` 0,12 s, `pausa_fala` 0,12 s entre falas, `final` 0,9 s; pausas entre frases DENTRO da fala vêm do Kokoro
+(~0,2–0,33 s). Pausa intencional só por dado (`pausa_depois`). Parte 1 com `pm_alex` 1,0: **2,97 pal/s no total**,
+maior silêncio 0,56 s (o "Cobre.", plano 47 = 1,13 s), o resto ≤ 0,33 s.
 
-Efeitos (`lib/sfx.py`, sintetizados): `picareta`, `rachar`, `quebrar`, `moeda`, `ding`, `whoosh`, `ronco`, `tictac`,
-`sting`, `boom`, `pop`, `subida`. `kw` passa parâmetros (ex.: `{"dur": 6}` em `tictac`/`ronco`, `{"pitch": 1.2}` em
-`moeda`/`ding`/`picareta`). Ouça todos: `$PY -m lib.sfx build/sfx`.
+### Legenda (config/estilo.json → legenda, estilo medido da referência)
+Anton caixa-alta branca, 72 px (maiúsculas ≈ 62 px), contorno 4 px #161408 + sombra suave, sem karaokê
+(`destacar_ativa: false`), destaque #EBBA40 só por dados, fade-in 0,1 s, uma linha (encolhe se passar de 700 px),
+centro y = 1400 (`legenda_pos`: `baixo` 1400 | `meio` 1250 | `alto` 390 | `centro` 960 | `{"centro_y": …}`).
+Blocos: até 3 unidades e 22 caracteres; quebra em pontuação, em pausa > 0,35 s, no corte de plano, e após ~0,85 s
+com ≥ 2 palavras; não termina bloco em artigo/preposição. Pontuação é mantida.
+Zona segura: nada importante em y < 250, y > 1500, x > 960. Bloco em 1400 ocupa ~1369–1431 (+ sombra) → folga de ~65 px.
 
-### Legenda — regras de bloco
-- Blocos de até `max_palavras` (4) e `max_caracteres` (13, conta espaços); quebra também após pontuação e em pausas > 0,35 s.
-- Pontuação `.,;:` é removida na exibição; `! ? …` ficam.
-- Palavra ativa = cor `cor_ativa` + escala `escala_ativa`; ênfase = `cor_enfase`.
-- Tudo de estilo (fonte, tamanho, cores, contorno, sombra, posição, `entrada`: pop|fade|slide|nenhuma, `modo`: bloco|karaoke)
-  fica em **`config/estilo.json → legenda`**. Fontes disponíveis: Lilita One, Luckiest Guy, Bangers, Anton, Baloo 2
-  (`assets/fonts/`, todas com ã ç é õ í ú â ê).
-- Zona segura (Instagram): nada importante em y<250, y>1500 (420 px de baixo), x>960 (120 px à direita). Legenda padrão:
-  centro (510, 1300). O render avisa (`AVISO: legenda fora da zona segura`) se um bloco sair dela.
-- Se `legenda` ≠ `narracao`, as palavras iguais herdam o tempo falado e trechos diferentes ("1.500" ↔ "mil e quinhentas")
-  dividem o tempo do trecho falado correspondente.
-
-## API de cena (`scenes/<nome>.js`)
+## Um arquivo por plano: `scenes/planos/pNN.js`
+O plano com `cena: "auto"` carrega `scenes/planos/<id>.js` se existir; se não, mostra o **placeholder de animatic**
+(número, cenário, ação/câmera/UI/sfx do roteiro, barra de tempo do plano). Cada agente cria/edita só o seu arquivo.
+O kit `art/kit` (window.ART) é carregado antes (uma vez), a menos que `kit: false`.
 ```js
-MD.scene("minha_cena", {
-  css: `.x { ... }`,                       // opcional, injetado uma vez
-  setup(el, params, ctx) {                  // 1x por beat. el = div 1080x1920. Pode ser async (await MD.loadImage(...))
-    const { g } = MD.canvas(el);            // canvas 1080x1920 opcional
-    const svg = MD.el("svg", {width:1080, height:1920}, el);
-    return { g, svg };                      // "state" devolvido ao render
-  },
-  render(state, t, ctx) {                   // a cada quadro. t = tempo LOCAL do beat (0..ctx.beat.dur, travado nas transições)
-    // posicione tudo como FUNÇÃO PURA de t
+// scenes/planos/p02.js
+MD.plano("p02", {
+  render(g, t, ctx) {                       // g: canvas 2D 1080x1920 já limpo; t: s desde o corte do plano
+    g.fillStyle = ART.pal.noite1; g.fillRect(0, 0, 1080, 1920);
+    ART.zeca.draw(g, ART.zeca.pose("cavando", t, { x: 540, y: 1150, s: 2.4 }));
+    for (const m of MD.marks(ctx, "picareta")) { /* golpe sincronizado com o som em t = m */ }
   },
 });
 ```
-`ctx`: `W, H, fps, params, t, tGlobal, frame, el, beat: {id, ini, dur, index, words: [{w, ini, fim}] (locais), marks: {sfx: [t...]}}`.
+Opcional: `async setup(ctx)` (1x; o retorno chega como 4º argumento de `render`), `kit: false`.
+`ctx`: `dur` (duração do plano), `words` [{w, ini, fim}] locais ao plano, `marks` {sfx: [t]}, `plano` (dados do roteiro:
+cenario, acao, camera, ui…), `el` (div do plano, se quiser DOM), `frame`, `tGlobal`, `fps`.
+Testar: `$PY make_video.py story/parte-01.json --plano p02 --so-contact-sheet --cs-cortes` (ou `--rascunho`).
+Erro no arquivo → o plano cai no placeholder com a mensagem em vermelho e o render imprime `AVISO: plano pNN: …`.
 
-**Regras de determinismo** (o render tira quadros fora de ordem em 4 processos): não use `Date`, `requestAnimationFrame`,
-`setTimeout`, `Math.random` (está trocado por um gerador por quadro — use `MD.rng(seed)`), nem `transition`/`animation` CSS
-(desligadas). Se quiser `@keyframes`, use `MD.seekCss(el, t)`. Assets: `MD.asset('assets/img/zeca.png')`.
+## Regras de determinismo (todas as cenas e planos)
+O render tira quadros fora de ordem em 4 processos: tudo é função pura de `t`. Proibido `Date`, `requestAnimationFrame`,
+`setTimeout`, `Math.random` (trocado por gerador por quadro; use `MD.rng(seed)`/`ART.rng(seed)`), transições/animações CSS
+(use `MD.seekCss(el, t)`).
 
-Helpers (`player/helpers.js`, namespace `MD`):
-- tempo/matemática: `clamp, lerp, invLerp, prog(t,t0,t1,ease), map(t,t0,t1,v0,v1,ease), kf(t, [[t,v,ease],...]), pulse(t,t0,dur)`
-- easing `MD.ease.*`: linear, in/out/inOut Quad|Cubic, outQuart, in/outExpo, in/outBack, outElastic, outBounce
-- aleatório: `rng(seed)`, `hash(n,seed)`, `noise(x,seed)`
-- câmera: `shake(t, {t0, dur, amp, freq, seed, rot}) → {x,y,rot}`
-- partículas analíticas: `particles(t, {t0,count,x,y,speed,angle,gravity,life,size,seed,drag,spread})` + `drawParticles(g, lista, cor|fn, 'rect'|'circle')`
-- texto: `floatText(parent, chave, t, {t0,dur,text,x,y,rise,size,color})` (o "+150"), `countUp(t,t0,dur,de,ate)` → "1.500"
-- DOM: `el(tag, attrs, parent, texto)` (SVG automático), `set(el, {x,y,s,r,o})`, `canvas(parent)`, `loadImage(src)`, `seekCss(el,t)`
-- sincronia com a fala: `wordIndex(ctx,t)`, `wordTime(ctx,'moedas')`, `marks(ctx,'picareta')` (tempos dos sfx do beat)
-
-Exemplo completo: `scenes/placeholder.js`. Teste uma cena isolada com `--beat <id> --rascunho` ou `--so-contact-sheet`.
-
-## Voz
-`tts.py` (independente do vídeo): frases → `frases/NNN.wav` + `narracao.wav` + `tempos.json` (início/fim de frase e palavra).
+## API de cena genérica (`scenes/<nome>.js`, para cenas reutilizáveis)
+```js
+MD.scene("nome", { css: "...", setup(el, params, ctx) { return state }, render(state, t, ctx) {}, release(state) {} });
 ```
-$PY tts.py frases.txt -o build/tts --voz pm_alex --velocidade 1.05 --pausa 0.35 --pron story/pronuncia.json
-```
-Tempo de palavra é estimado (proporcional a fonemas sobre o trecho vozeado, preso aos limites reais da frase): mediana ~90–110 ms,
-p90 ~200 ms vs. timestamps do ASR Parakeet. Avaliar vozes: `$PY tools/avaliar_vozes.py` (gera `build/amostras/`, WER via Whisper e Parakeet).
+Helpers `MD.*` (`player/helpers.js`): `clamp, lerp, prog, map, kf, pulse, ease.*, rng, hash, noise, shake, particles,
+drawParticles, floatText, countUp, el, set, canvas, loadImage, asset, seekCss, wordIndex, wordTime, marks`.
+O kit `ART.*` (art/kit) tem paleta, Zeca com poses, câmera, glow, poeira etc. (ver art/).
+
+## Voz e tempo de palavra
+- `pm_alex` velocidade 1,0. `tts.py` gera WAV por frase + `tempos.json` (mesmo formato do alinhamento).
+- Tempo de palavra = **híbrido**: timestamps do Parakeet (ASR) como âncora onde a palavra reconhecida casa com o
+  texto (94–95 % das palavras na Parte 1), interpolação por fonemas entre âncoras, inícios caídos em silêncio são
+  empurrados para o começo da voz. Erro medido em emendas de frases (verdade conhecida): mediana 35–40 ms, p90 80–92 ms
+  (o estimador puro dava 105/250 ms).
 
 ## Trocar a narração por uma gravação
-1. Grave **um arquivo** (WAV/M4A/MP3) lendo as frases dos beats na ordem, com ~0,3 s de pausa entre frases.
+1. Grave **um arquivo** (WAV/M4A/MP3) lendo as falas na ordem. Pausas livres (o vídeo recoloca as pausas do estilo).
 2. `$PY make_video.py story/parte-01.json --narracao-audio voz.m4a`
-   → alinha automaticamente (escolhe as pausas que melhor batem com as fronteiras esperadas) e salva
-   `build/parte-01/alinhamento/tempos.json`. Confira; se errar, corrija `ini`/`fim` no JSON e rode com
-   `--narracao-tempos build/parte-01/alinhamento/tempos.json`.
-3. Cada frase gravada é recortada e reposicionada com as mesmas pausas/respiros do TTS (as pausas originais da gravação não são
-   mantidas; ajuste `respiro`/`pausa_frase` se quiser mais ar). Também dá para usar `tts.py ... --alinhar voz.m4a` só para os tempos.
-O JSON de tempos tem o mesmo formato de `tts.py` (`frases[].ini/fim/palavras`); número e ordem de frases devem casar com o story
-(uma frase = trecho terminado em `.`, `!`, `?` ou `…`).
+   → ASR do arquivo inteiro, alinhamento palavra a palavra contra o texto do story, recorte por fala
+   (início/fim encaixados na voz), salvo em `build/parte-01/alinhamento/tempos.json`.
+3. Se algo sair errado, corrija `ini/fim` nesse JSON e rode com `--narracao-tempos build/parte-01/alinhamento/tempos.json`.
+Sem o modelo ASR, cai no alinhamento antigo por pausas (exige ~0,3 s de pausa entre falas).
+Teste feito: narração inteira de outra voz como "gravação": limites de fala com erro mediano ~0 ms (após descontar
+os 30 ms de margem), máx. 200 ms em 1 de 23 falas; 95 % das palavras ancoradas.

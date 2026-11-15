@@ -166,7 +166,7 @@
     const luz = (g, t) => {
       // vaga-lumes
       ART.dust(g, t, { count: 26, seed: 11, color: "#D8FF8A", size: [2.5, 5], speed: 10, alpha: 0.75, x: 0, y: 800, w: W, h: 700 });
-      g.save(); g.globalCompositeOperation = "soft-light"; g.fillStyle = ART.lg(g, 0, 0, 0, H, [[0, "rgba(80,60,170,.5)"], [1, "rgba(20,10,50,.6)"]]); g.fillRect(0, 0, W, H); g.restore();
+      ART.tom(g, [[0, "rgba(40,30,110,.18)"], [1, "rgba(10,6,30,.3)"]]);
     };
     return { fundo, frente, luz, pos };
   };
@@ -254,7 +254,7 @@
       // feixe da janela redonda
       if ((o.janela ?? 1) > 0) ART.beam(g, 840, 330, 115, 1300, 120, 420, "#B8C6FF", 0.18 * (o.janela ?? 1));
       ART.dust(g, t, { count: 40, seed: 21, color: "#FFE6C0", size: [1.2, 3.5], alpha: 0.4, y: 300, h: 1000 });
-      g.save(); g.globalCompositeOperation = "soft-light"; g.fillStyle = ART.lg(g, 0, 0, W, 0, [[0, "rgba(255,160,70,.35)"], [1, "rgba(80,70,190,.45)"]]); g.fillRect(0, 0, W, H); g.restore();
+      ART.tom(g, [[0, "rgba(60,40,120,.18)"], [0.6, "rgba(255,150,70,.05)"], [1, "rgba(20,10,30,.25)"]]);
     };
     // lampião em cima da mesa (desenhado no plano dos móveis)
     fundo.push({ d: 1, draw(g) { const lx = 215, ly = 920; ART.rr(g, lx - 22, ly - 10, 44, 64, 10); g.fillStyle = "#3A3036"; g.fill(); ART.rr(g, lx - 15, ly, 30, 44, 8); g.fillStyle = "#FFE0A0"; g.fill(); g.fillStyle = "#2A2024"; g.fillRect(lx - 26, ly + 52, 52, 10); } });

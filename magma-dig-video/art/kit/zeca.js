@@ -24,6 +24,9 @@
     lamp: 0, cone: 0, coneAng: 8, coneLen: 900,
     rim: "#B58CFF", rimA: 0.55, key: 1, ambient: null, ball: 0, spin: 0, sweat: 0, zzz: 0, t: 0,
     shadow: 1, sit: 0,
+    // ator: alvo [x,y] px para olhar, camera 0..1 (olhar para a câmera), segura/seguraB (objeto na pata), bFrente (braço de trás na frente do corpo),
+    // costas 0/1 (vista de costas), banho {cor,k} (luz colorida no rosto), blinkSeed
+    alvo: null, camera: 0, segura: null, seguraB: null, bFrente: 0, costas: 0, banho: null, blinkSeed: 0,
   };
 
   // ---------------------------------------------------------------- utilidades de forma
@@ -70,7 +73,7 @@
   ART.drawPick = drawPick;
 
   // ---------------------------------------------------------------- olhos / boca
-  function eye(g, x, y, f, k, eyes, look, blink, side, P2) {
+  function eye(g, x, y, f, k, eyes, look, blink, side, P2, banho) {
     // f = encurtamento (0..1); k = escala
     const rx = 12.5 * k * Math.max(0.3, f), ry = 14.5 * k;
     const lid = clamp(blink);
@@ -95,6 +98,7 @@
       ART.ell(g, x + lx * f, y + ly + 2 * k, rx * 0.62, ry * 0.6); g.fillStyle = "rgba(120,90,160,.22)"; g.fill();
       ART.circ(g, x + (4.2 * k + lx) * f, y - 5.2 * k + ly, 4.6 * k); g.fillStyle = "#fff"; g.fill();
       ART.circ(g, x + (-4 * k + lx) * f, y + 5 * k + ly, 2 * k); g.fillStyle = "rgba(255,255,255,.85)"; g.fill();
+      if (banho && banho.k > 0) { ART.circ(g, x + (5 * k + lx) * f, y + 4 * k + ly, 3.4 * k); g.fillStyle = ART.rgba(banho.cor || "#FF8A3C", 0.9 * banho.k); g.fill(); }
       // pálpebra (meio / piscada / preocupado / determinado)
       let top = lid;
       if (eyes === "meio") top = Math.max(top, 0.48);
@@ -181,6 +185,16 @@
   function draw(g, pose = {}) {
     const p = Object.assign({}, BASE, pose);
     const A = {};
+    if (pose.blink === undefined && /aberto|preocupado|determinado|espanto/.test(p.eyes)) p.blink = blinkAt(p.t + p.blinkSeed);
+    if (p.alvo) {
+      const fl0 = p.turn < 0 ? -1 : 1, hx0 = p.x + fl0 * 8 * p.s, hy0 = p.y - (150 + p.bob) * p.s;
+      const dx = (p.alvo[0] - hx0) * fl0, dy = p.alvo[1] - hy0;
+      p.look = [clamp(dx / 260, -1, 1), clamp(dy / 260, -1, 1)];
+      if (pose.headTurn === undefined) p.headTurn = clamp(dx / 1400, -0.3, 0.25) - (dx < 0 ? Math.abs(p.turn) * clamp(-dx / 500, 0, 1) * 0.8 : 0);
+      if (pose.headTilt === undefined) p.headTilt = (p.headTilt || 0) + clamp(dy / 40, -9, 9);
+    }
+    if (p.camera > 0) { const tt0 = Math.abs(p.turn); p.headTurn = lerp(p.headTurn, -tt0 * 0.9, p.camera); p.look = [lerp(p.look[0], 0, p.camera), lerp(p.look[1], 0, p.camera)]; }
+    const costas = p.costas > 0.5;
     const flip = p.turn < 0 ? -1 : 1;
     const tt = Math.abs(p.turn), th = tt * Math.PI / 2, sT = Math.sin(th), cT = Math.cos(th);
     g.save();
@@ -204,8 +218,8 @@
     if (p.ball > 0.5) { drawBall(g, p, A); g.restore(); return A; }
 
     const darkF = c => ART.shade(c, -0.16);
-    const BY = -72 + p.sit * 14, BRX = 64 + p.sit * 4, BRY = 57 - p.sit * 4; // corpo
-    const hipY = BY + 40;
+    const BY = -86 + p.sit * 16, BRX = 64 + p.sit * 4, BRY = 57 - p.sit * 4; // corpo
+    const hipY = BY + 44;
 
     // ----- cauda (atrás)
     if (sT > 0.15) {
@@ -217,20 +231,28 @@
       for (let i = 1; i < 4; i++) { const xx = -tl * i / 4.2; g.beginPath(); g.moveTo(xx + 1, -10 + i * 3.2); g.quadraticCurveTo(xx - 2, 0, xx + 1, 10 - i * 0.8); g.stroke(); }
       g.restore();
     }
-    // ----- pernas
+    // ----- pernas (mais longas e legíveis; sentado: sola do pé virada para a câmera)
     const leg = (side, a, lift, near) => {
-      const lat = side * 24 * cT * p.legSpread, hx = lat + sT * 4;
-      const len = 26, ax = deg(a);
-      const fx = hx + Math.sin(ax) * len * (0.4 + 0.6 * sT), fy = hipY + Math.cos(ax) * len - lift;
+      const lat = side * 23 * cT * p.legSpread, hx = lat + sT * 2;
+      const len = 36, ax = deg(a);
+      const fx = hx + Math.sin(ax) * len * (0.35 + 0.65 * sT), fy = hipY + Math.cos(ax) * len - lift;
       const col = near ? P.pele : darkF(P.pele);
-      g.lineCap = "round";
-      ART.capsule(g, hx, hipY - 10, fx, fy - 6, 13); g.fillStyle = col; g.fill();
-      // pé
-      const fl = 13 + 6 * sT;
-      ART.ell(g, fx + sT * 5, fy - 4, fl, 9, deg(a * 0.3 * sT));
-      g.fillStyle = near ? ART.shade(P.pele, -0.05) : darkF(P.peleEsc); g.fill();
-      // dedinhos
-      if (near && sT > 0.25) { g.fillStyle = "rgba(90,50,40,.35)"; for (let i = 0; i < 3; i++) ART.circ(g, fx + sT * 5 + fl * 0.75, fy - 7 + i * 3.4, 1.5), g.fill(); }
+      ART.capsule(g, hx, hipY - 14, fx, fy - 8, 15); g.fillStyle = col; g.fill();
+      ART.capsule(g, hx - 5, hipY - 12, fx - 5, fy - 9, 5); g.fillStyle = "rgba(255,240,220,.18)"; g.fill();
+      if (p.sit > 0.5 && cT > 0.45) {
+        // sola do pé para a câmera: almofada rosa + dedinhos
+        ART.ell(g, fx, fy - 4, 17, 19); g.fillStyle = near ? ART.shade(P.pele, 0.05) : darkF(P.pele); g.fill();
+        ART.ell(g, fx, fy, 9, 8); g.fillStyle = ART.rgba(P.bochecha, 0.85); g.fill();
+        for (let i = -1; i <= 1; i++) { ART.circ(g, fx + i * 7, fy - 14, 3.6); g.fillStyle = ART.rgba(P.bochecha, 0.85); g.fill(); }
+        return [fx, fy];
+      }
+      const fl = 16 + 8 * sT;
+      ART.ell(g, fx + sT * 8, fy - 5, fl, 10.5, deg(a * 0.25 * sT));
+      g.fillStyle = near ? ART.shade(P.pele, -0.04) : darkF(P.peleEsc); g.fill();
+      ART.ell(g, fx + sT * 8, fy - 1, fl * 0.9, 4); g.fillStyle = "rgba(60,30,30,.22)"; g.fill();
+      // garrinhas na ponta do pé
+      if (sT > 0.25) { g.fillStyle = near ? "rgba(80,45,35,.7)" : "rgba(60,35,30,.6)"; for (let i = 0; i < 3; i++) { ART.ell(g, fx + sT * 8 + fl * 0.92, fy - 9 + i * 3.6, 3.2, 1.6, 0.2); g.fill(); } }
+      else { g.fillStyle = "rgba(80,45,35,.6)"; for (let i = -1; i <= 1; i++) { ART.ell(g, fx + i * 6, fy + 3, 1.8, 3); g.fill(); } }
       return [fx, fy];
     };
     const nearSide = 1; // lado +1 (direita da tela quando turn>0) está mais perto
@@ -240,7 +262,7 @@
     // ----- braços (função), ombros na lateral do corpo
     const shY = BY - 22;
     const armPts = (side, a, e) => {
-      const sx = side * (BRX - 8) * cT + sT * (side > 0 ? 18 : -6), sy = shY + (1 - cT) * 4;
+      const sx = side > 0 ? (BRX - 8) * cT + sT * 18 : -(BRX - 2) * cT - sT * 10, sy = shY + (1 - cT) * 4;
       const a1 = deg(a), a2 = deg(a + e);
       const ex = sx + Math.sin(a1) * 22, ey = sy + Math.cos(a1) * 22;
       const hx = ex + Math.sin(a2) * 21, hy = ey + Math.cos(a2) * 21;
@@ -258,7 +280,8 @@
       }
     };
     const armF = armPts(nearSide, p.aF, p.eF), armB = armPts(-nearSide, p.aB, p.eB);
-    drawArm(armB, false);
+    const bFront = p.bFrente > 0.5 || costas;
+    if (!bFront) drawArm(armB, false);
     A.maoTras = g.getTransform().transformPoint(new DOMPoint(armB.hx, armB.hy));
 
     // ----- corpo (casco)
@@ -277,16 +300,25 @@
       for (let j = -3; j <= 3; j++) { const xx = j * 19 + (i % 2) * 9 - sT * 12, yv = yy + 6 + 7 * (1 - (xx / BRX) * (xx / BRX)); ART.ell(g, xx, yv, 3.4, 2.2); g.fill(); }
     }
     // barriga (pele clara) só na frente, estreita
+    if (!costas) {
     const bx = sT * 40, brx = 27 * (0.5 + 0.5 * cT) + 7, bry = 40;
     ART.ell(g, bx + 1, BY + 16, brx + 6, bry + 5); g.fillStyle = ART.rgba(P.cascoEsc, 0.9); g.fill();
     blob(g, ellPath(g, bx, BY + 16, brx, bry), P.rosto, { bx: bx - brx, by: BY + 16 - bry, bw: brx * 2, bh: bry * 2, hi: 0.28, lo: 0.25 });
     g.strokeStyle = ART.rgba(P.peleEsc, 0.35); g.lineWidth = 2;
     for (let i = 0; i < 3; i++) { g.beginPath(); g.moveTo(bx - brx * 0.6, BY + 4 + i * 16); g.quadraticCurveTo(bx, BY + 9 + i * 16, bx + brx * 0.6, BY + 4 + i * 16); g.stroke(); }
+    }
     // sombra da cabeça sobre o corpo
-    g.filter = "blur(7px)"; ART.ell(g, sT * 10 + p.headDx, BY - BRY + 16 + p.headDy, 62, 18); g.fillStyle = "rgba(40,15,30,.42)"; g.fill(); g.filter = "none";
+    { const hx0 = sT * 10 + p.headDx, hy0 = BY - BRY + 16 + p.headDy; g.save(); g.translate(hx0, hy0); g.scale(1, 0.32); g.fillStyle = ART.rg(g, 0, 0, 0, 72, [[0, "rgba(40,15,30,.48)"], [0.6, "rgba(40,15,30,.25)"], [1, "rgba(40,15,30,0)"]]); g.fillRect(-72, -72, 144, 144); g.restore(); }
     g.restore();
 
     if (sitting) { leg(-nearSide, p.lB, p.liftB, false); leg(nearSide, p.lF, p.liftF, true); }
+    if (costas) {
+      g.save(); g.translate(sT * 10, BY + 46); g.rotate(deg(Math.sin(p.t * 2.2) * 6));
+      g.beginPath(); g.moveTo(-12, -8); g.quadraticCurveTo(-8, 22, 0, 34); g.quadraticCurveTo(8, 22, 12, -8); g.closePath(); g.fillStyle = darkF(P.casco); g.fill();
+      g.strokeStyle = ART.rgba(P.cascoEsc, 0.8); g.lineWidth = 2.4; for (let i = 1; i < 4; i++) { g.beginPath(); g.moveTo(-10 + i * 1.5, -4 + i * 9); g.quadraticCurveTo(0, i * 9, 10 - i * 1.5, -4 + i * 9); g.stroke(); }
+      g.restore();
+    }
+    if (bFront) drawArm(armB, !costas ? false : true);
     // ----- ferramenta atrás do braço da frente
     let toolInfo = null;
     const drawTool = () => {
@@ -299,7 +331,7 @@
     };
 
     // ----- cabeça
-    const HX = sT * 8 + p.headDx, HY = BY - BRY - 18 + p.headDy + 6;
+    const HX = sT * 8 + p.headDx, HY = BY - BRY - 12 + p.headDy + 6;
     const th2 = clamp(th + deg(p.headTurn * 90), -0.2, Math.PI / 2), s2 = Math.sin(th2), c2 = Math.cos(th2);
     g.save(); g.translate(HX, HY + 40); g.rotate(deg(p.headTilt)); g.translate(-HX, -HY - 40);
     const HRX = 62, HRY = 52;
@@ -321,6 +353,9 @@
     blob(g, headPath, faceCol, { bx: HX - HRX, by: HY - HRY, bw: HRX * 2, bh: HRY * 2, rim: p.rim, rimA: p.rimA * 0.28, hi: 0.3, lo: 0.3 });
     // bochechas
     const thF = th2 * 0.72;
+    const eyesPos = [];
+    let mx = HX, my = HY + 22;
+    if (!costas) {
     const feat = (phi) => ({ x: HX + Math.sin(phi + thF) * HRX * 0.9, f: Math.cos(phi + thF) });
     g.save(); headPath(); g.clip();
     for (const side of [-1, 1]) {
@@ -331,7 +366,7 @@
     g.globalAlpha = 1;
     g.restore();
     // focinho (projeta para a frente quando vira)
-    const mx = HX + Math.sin(th2 * 0.85) * HRX * 0.66, my = HY + 22;
+    mx = HX + Math.sin(th2 * 0.85) * HRX * (0.66 + 0.12 * s2);
     const mrx = 25 + 4 * s2, mry = 19;
     blob(g, ellPath(g, mx, my, mrx, mry), P.focinho, { bx: mx - mrx, by: my - mry, bw: mrx * 2, bh: mry * 2, hi: 0.35, lo: 0.22 });
     // nariz
@@ -342,13 +377,12 @@
     mouth(g, mx + s2 * 12, my + 6, 1, p.mouth, 0.6 + 0.4 * c2);
     // olhos
     const eyeK = p.eyes === "espanto" ? 1.05 : 1;
-    const eyesPos = [];
     for (const side of [-1, 1]) {
       const q = feat(side * 0.42);
       if (q.f < 0.18) continue;
-      const ex = q.x, ey = HY - 5;
+      const ex = q.x - s2 * 7, ey = HY - 5 - s2 * 4;
       eyesPos.push([ex, ey]);
-      eye(g, ex, ey, clamp(q.f * 1.15, 0, 1), eyeK, p.eyes, p.look, p.blink, side, faceCol);
+      eye(g, ex, ey, clamp(q.f * 1.15, 0, 1), eyeK, p.eyes, p.look, p.blink, side, faceCol, p.banho);
       // sobrancelhas
       if (p.brows !== "nenhum") {
         const tilt = { preocupado: 0.42, bravo: -0.45, surpreso: 0.0, triste: 0.35 }[p.brows] || 0;
@@ -358,6 +392,13 @@
         const bw2 = 9 * Math.max(0.4, q.f);
         g.beginPath(); g.moveTo(-bw2, 0); g.quadraticCurveTo(0, -3, bw2, 0); g.stroke(); g.restore();
       }
+    }
+    }
+    // luz colorida batendo no rosto (ex.: brilho laranja do cobre)
+    if (p.banho && p.banho.k > 0) {
+      g.save(); headPath(); g.clip(); g.globalCompositeOperation = "lighter";
+      g.fillStyle = ART.rg(g, HX + 50, HY + 40, 0, 130, [[0, ART.rgba(p.banho.cor || "#FF8A3C", 0.55 * p.banho.k)], [1, ART.rgba(p.banho.cor || "#FF8A3C", 0)]]);
+      g.fillRect(HX - 80, HY - 70, 160, 140); g.restore();
     }
     A.olhos = eyesPos.map(([x, y]) => g.getTransform().transformPoint(new DOMPoint(x, y)));
 
@@ -390,10 +431,12 @@
     // lanterna
     const lx = domeCx + Math.sin(th2 * 0.95) * drx * 0.84, ly = brimY - 30;
     const lf = Math.max(0.28, Math.cos(th2));
+    if (!costas) {
     if (s2 > 0.55) { ART.rr(g, lx - 6, ly - 13, 18 * s2, 26, 6); g.fillStyle = "#77768A"; g.fill(); }
     ART.ell(g, lx + s2 * 6, ly, 17 * lf, 17); g.fillStyle = "#8C8A9E"; g.fill();
     ART.ell(g, lx + s2 * 7, ly, 13 * lf, 13); g.fillStyle = p.lamp > 0.05 ? "#FFFDF0" : "#D8D6E4"; g.fill();
     ART.ell(g, lx + s2 * 7 - 3 * lf, ly - 4, 4 * lf, 3.5); g.fillStyle = "rgba(255,255,255,.9)"; g.fill();
+    }
     A.lanterna = g.getTransform().transformPoint(new DOMPoint(lx + s2 * 9, ly));
     A.cabeca = g.getTransform().transformPoint(new DOMPoint(HX, HY));
     A.topo = g.getTransform().transformPoint(new DOMPoint(HX, brimY - dry));
@@ -406,7 +449,9 @@
     g.restore(); // cabeça
 
     drawTool();
+    if (p.seguraB && bFront) objeto(g, p.seguraB, armB, p);
     drawArm(armF, true);
+    if (p.segura) objeto(g, p.segura, armF, p);
     A.mao = g.getTransform().transformPoint(new DOMPoint(armF.hx, armF.hy));
     if (toolInfo) { A.ponta = toolInfo.tip; A.pontaB = toolInfo.tipB; }
     g.restore();
@@ -418,6 +463,18 @@
     return A;
   }
 
+  // ---------------------------------------------------------------- objetos na pata
+  function objeto(g, o, q, p) {
+    const x = q.hx + Math.sin(q.a2) * 8, y = q.hy + Math.cos(q.a2) * 8;
+    if (typeof o === "function") { o(g, x, y); }
+    else if (o === "moeda") ART.ui.moeda(g, x + 4, y - 2, 13, 0.3 + p.t * 0.0);
+    else if (o === "pilha") { for (let i = 0; i < 4; i++) { g.save(); g.translate(x, y + 6 - i * 5); g.scale(1, 0.4); ART.circ(g, 0, 0, 14); g.fillStyle = i === 3 ? "#FFD23F" : "#C88A10"; g.fill(); g.restore(); } }
+    else if (o === "pepita") { ART.pepita(g, x + 4, y - 4, 17, "cobre", 0.3, { seed: 7 }); if (p.banho) ART.glow(g, x, y, 60, "#FF8A3C", 0.6 * (p.banho.k || 0)); }
+    else if (o === "giz") { g.save(); g.translate(x, y); g.rotate(-q.a2 + Math.PI * 0.75); ART.rr(g, -4, -16, 8, 26, 3); g.fillStyle = "#F4F0E6"; g.fill(); g.restore(); }
+    // dedão por cima do objeto
+    ART.circ(g, q.hx + Math.sin(q.a2 + 0.9) * 9, q.hy + Math.cos(q.a2 + 0.9) * 9, 6); g.fillStyle = ART.shade(P.pele, 0.06); g.fill();
+  }
+
   // ---------------------------------------------------------------- luz da lanterna
   function lampLight(g, p, A) {
     const { x, y } = A.lanterna, k = p.lamp, sc = p.s / 2;
@@ -425,14 +482,16 @@
     // halo
     ART.glow(g, x, y, 70 * sc, "#FFF2C4", 0.9 * k);
     ART.glow(g, x, y, 22 * sc, "#FFFFFF", 0.9 * k);
-    if (p.cone > 0 && tt > 0.2) {
-      const ang = p.turn > 0 ? p.coneAng : 180 - p.coneAng; // graus, 0 = direita
-      g.save(); g.translate(x, y); g.rotate(deg(ang));
-      g.globalCompositeOperation = "lighter"; g.globalAlpha = 0.55 * p.cone * k;
+    if (p.cone > 0 && (tt > 0.2 || p.coneLivre)) {
+      const ang = p.coneLivre ? p.coneAng : p.turn > 0 ? p.coneAng : 180 - p.coneAng; // graus, 0 = direita
+      const spr = ART.cache("cone", 256, 128, gg => {
+        gg.translate(0, 64); gg.beginPath(); gg.moveTo(0, -4); gg.lineTo(236, -50); gg.lineTo(236, 50); gg.lineTo(0, 4); gg.closePath();
+        gg.fillStyle = ART.rg(gg, 0, 0, 0, 240, [[0, "rgba(255,236,170,.75)"], [0.35, "rgba(255,214,120,.25)"], [1, "rgba(255,200,100,0)"]]);
+        gg.filter = "blur(5px)"; gg.fill();
+      });
       const L = p.coneLen * sc;
-      g.beginPath(); g.moveTo(0, -10 * sc); g.lineTo(L, -L * 0.36); g.lineTo(L, L * 0.36); g.lineTo(0, 10 * sc); g.closePath();
-      g.fillStyle = ART.rg(g, 0, 0, 0, L, [[0, "rgba(255,236,170,.75)"], [0.35, "rgba(255,214,120,.25)"], [1, "rgba(255,200,100,0)"]]);
-      g.filter = `blur(${10 * sc}px)`; g.fill();
+      g.save(); g.translate(x, y); g.rotate(deg(ang)); g.globalCompositeOperation = "lighter"; g.globalAlpha = 0.55 * p.cone * k;
+      g.drawImage(spr, 0, -L * 0.5 * (p.coneAbre || 1), L * 256 / 236, L * (p.coneAbre || 1));
       g.restore();
     }
   }
@@ -460,12 +519,12 @@
 
   // ---------------------------------------------------------------- poses e ciclos
   const breathe = t => Math.sin(t * 2.4);
+  const lt = (t, o) => t - (o.t0 || 0); // tempo local de poses de evento
   const POSES = {
-    parado: t => ({ bob: breathe(t) * 1.6, sq: 1 + breathe(t) * 0.012, headDy: breathe(t + 0.4) * 1.2, aF: 14 + breathe(t) * 3, aB: -10 - breathe(t) * 2, blink: blinkAt(t) }),
-    /** ciclo de picaretada: período P (s). Fases: preparo (antecipação) → golpe → impacto → volta. */
+    parado: t => ({ bob: breathe(t) * 1.6, sq: 1 + breathe(t) * 0.012, headDy: breathe(t + 0.4) * 1.2, aF: 14 + breathe(t) * 3, aB: -22 - breathe(t) * 2 }),
+    /** ciclo de picaretada: período P (s). Fases: preparo (antecipação) → golpe → impacto → volta. Impacto em 66% do ciclo. */
     cavando: (t, o = {}) => {
       const Pd = o.periodo || 0.9, ph = ((t - (o.t0 || 0)) % Pd + Pd) % Pd / Pd;
-      // chaves em fração do ciclo
       const a = kf(ph, [[0, 40], [0.42, 205, "outCubic"], [0.56, 212], [0.66, 78, "inQuart"], [0.78, 74], [1, 40, "inOutSine"]]);
       const e = kf(ph, [[0, 10], [0.42, -20], [0.56, -24], [0.66, 6, "inQuart"], [1, 10]]);
       const lean = kf(ph, [[0, 3], [0.42, -9, "outCubic"], [0.56, -11], [0.66, 13, "inQuart"], [0.78, 12], [1, 3]]);
@@ -474,46 +533,115 @@
       return {
         aF: a, eF: e, aB: a - 14, eB: e + 4, lean, sq, bob: kf(ph, [[0, 0], [0.42, 6], [0.66, -2], [1, 0]]),
         headTilt: kf(ph, [[0, 0], [0.42, -6], [0.66, 7, "inQuart"], [1, 0]]),
-        tool: "picareta", toolOff: 0, eyes: impact ? "determinado" : "determinado", mouth: impact ? "esforco" : "neutro", brows: "bravo",
-        lF: kf(ph, [[0, 6], [0.66, 14], [1, 6]]), lB: -10, blink: 0,
+        tool: "picareta", toolOff: 0, eyes: "determinado", mouth: impact ? "esforco" : "neutro", brows: "bravo",
+        lF: kf(ph, [[0, 8], [0.66, 18], [1, 8]]), lB: -14, blink: 0,
       };
     },
+    /** andar: passada com pé plantado, quique duplo, braços em oposição, balanço do corpo */
     andando: (t, o = {}) => {
-      const Pd = o.periodo || 0.62, ph = (t / Pd) * Math.PI * 2;
-      return { lF: Math.sin(ph) * 28, lB: -Math.sin(ph) * 28, liftF: Math.max(0, Math.cos(ph)) * 8, liftB: Math.max(0, -Math.cos(ph)) * 8,
-        bob: Math.abs(Math.sin(ph)) * 6, aF: -Math.sin(ph) * 30 + 8, aB: Math.sin(ph) * 30 - 8, lean: 4, headTilt: Math.sin(ph * 2) * 1.5, blink: blinkAt(t) };
+      const Pd = o.periodo || 0.6, ph = (t / Pd) * Math.PI * 2;
+      return { lF: Math.sin(ph) * 32, lB: -Math.sin(ph) * 32, liftF: Math.max(0, Math.cos(ph)) * 10, liftB: Math.max(0, -Math.cos(ph)) * 10,
+        bob: Math.abs(Math.sin(ph)) * 7, sq: 1 + Math.cos(ph * 2) * 0.02, aF: -Math.sin(ph) * 34 + 10, eF: 18 + Math.cos(ph) * 10, aB: Math.sin(ph) * 34 - 12, eB: 18,
+        lean: 5 + Math.sin(ph * 2) * 1.2, headTilt: Math.sin(ph * 2 + 0.6) * 2, headDy: Math.abs(Math.sin(ph + 0.4)) * 2 };
     },
     bola: (t, o = {}) => ({ ball: 1, spin: (o.vel ?? 360) * t, bob: Math.abs(Math.sin(t * 6)) * (o.quica ?? 0) }),
-    sentado: t => ({ sit: 1, bob: -20 + breathe(t) * 1.2, lF: 75, lB: 70, liftF: 4, aF: 40, eF: 30, aB: 30, eB: 30, legSpread: 1.15, blink: blinkAt(t) }),
-    dormindo: t => ({ sit: 1, bob: -22 + Math.sin(t * 1.6) * 1.8, sq: 1 + Math.sin(t * 1.6) * 0.02, lF: 75, lB: 70, aF: 25, eF: 40, aB: 20, eB: 40,
-      headTilt: 12 + Math.sin(t * 1.6) * 2, headDy: 6, eyes: "fechado", mouth: "dormindo", zzz: 1, legSpread: 1.15 }),
+    sentado: t => ({ sit: 1, bob: -24 + breathe(t) * 1.2, lF: 80, lB: 76, liftF: 2, aF: 34, eF: 36, aB: -30, eB: 30, legSpread: 1.2 }),
+    dormindo: t => ({ sit: 1, bob: -26 + Math.sin(t * 1.6) * 1.8, sq: 1 + Math.sin(t * 1.6) * 0.02, lF: 80, lB: 76, aF: 25, eF: 40, aB: -20, eB: 40,
+      headTilt: 12 + Math.sin(t * 1.6) * 2, headDy: 6, eyes: "fechado", mouth: "dormindo", zzz: 1, legSpread: 1.2, blink: 0 }),
+    /** deitado na cama (use ART.cobertor por cima). Rotaciona o corpo; cabeça para a esquerda quando turn>0 */
+    deitado: (t, o = {}) => ({ lean: -84, bob: 0, sq: 1 + Math.sin(t * 1.6) * 0.015, aF: 60, eF: 70, aB: 40, eB: 80, lF: 10, lB: -6, shadow: 0,
+      eyes: o.acordado ? "meio" : "fechado", mouth: o.acordado ? "neutro" : "dormindo", zzz: o.acordado ? 0 : 1, headTilt: 6, blink: o.acordado ? undefined : 0 }),
+    /** comemoração: antecipação, pulo, braços alternados com atraso, cabeça atrasada, pés encolhidos no ar, aterrissagem amassada */
     comemorando: (t, o = {}) => {
-      const Pd = o.periodo || 0.8, ph = ((t % Pd) + Pd) % Pd / Pd;
-      const jump = Math.max(0, Math.sin(ph * Math.PI * 2 - 0.3)) ;
-      return { bob: jump * 46, sq: 1 - jump * 0.06 + (jump < 0.05 ? 0.06 : 0), aF: 160 + Math.sin(ph * Math.PI * 4) * 12, eF: -10, aB: -160 - Math.sin(ph * Math.PI * 4) * 12, eB: 10,
-        eyes: "feliz", mouth: "aberto", lF: jump * 20, lB: -jump * 20, liftF: jump * 6, liftB: jump * 6, headTilt: Math.sin(ph * Math.PI * 2) * 5 };
+      const Pd = o.periodo || 0.75, ph = ((t % Pd) + Pd) % Pd / Pd;
+      const air = Math.max(0, Math.sin((ph - 0.12) / 0.7 * Math.PI)) * (ph > 0.12 && ph < 0.82 ? 1 : 0);
+      const squash = ph < 0.12 ? Math.sin(ph / 0.12 * Math.PI) : ph > 0.82 ? Math.sin((ph - 0.82) / 0.18 * Math.PI) : 0;
+      const w = ph * Math.PI * 2;
+      return { bob: air * 52, sq: 1 + squash * 0.09 - air * 0.05, aF: 150 + Math.sin(w) * 26, eF: -18 + Math.sin(w + 1) * 22, aB: -150 + Math.sin(w + Math.PI) * 26, eB: 18 - Math.sin(w + 1) * 22,
+        eyes: "feliz", mouth: "aberto", lF: air * 26, lB: -air * 18, liftF: air * 14, liftB: air * 8, headTilt: Math.sin(w - 0.8) * 6, headDy: -air * 4 + squash * 5, lean: Math.sin(w) * 3, blink: 0 };
     },
-    espantado: (t, o = {}) => {
-      const k = ART.prog(t, 0, 0.18, "outBack");
-      return { bob: kf(t, [[0, 0], [0.12, 28, "outQuad"], [0.3, 0, "inQuad"], [0.4, 0]]), sq: kf(t, [[0, 1], [0.12, 0.92], [0.3, 1.08], [0.45, 1]]),
-        lean: -8 * k, aF: lerp(14, 128, k), eF: lerp(20, 40, k), aB: lerp(-10, -128, k), eB: lerp(15, -40, k), eyes: "espanto", mouth: "grito", brows: "surpreso",
-        headTilt: -5 * k, headDy: -4 * k, sweat: k };
+    /** susto com antecipação (t0 = instante do susto): encolhe → pula para trás → treme */
+    susto: (t, o = {}) => {
+      const u = lt(t, o), k = ART.prog(u, 0.12, 0.26, "outBack");
+      return { bob: kf(u, [[0, 0], [0.12, -5], [0.26, 36, "outQuad"], [0.42, 0, "inQuad"], [0.5, 0]]), sq: kf(u, [[0, 1], [0.12, 1.1], [0.26, 0.9], [0.44, 1.07], [0.6, 1]]),
+        lean: kf(u, [[0, 0], [0.12, 4], [0.3, -12], [0.6, -6]]), aF: lerp(14, 128, k), eF: lerp(20, 40, k), aB: lerp(-22, -128, k), eB: lerp(15, -40, k),
+        eyes: u < 0.12 ? "meio" : "espanto", mouth: u < 0.12 ? "neutro" : "grito", brows: "surpreso", headTilt: -6 * k, headDy: -4 * k,
+        headDx: u > 0.4 ? Math.sin(u * 60) * 1.5 * Math.max(0, 1 - (u - 0.4)) : 0, sweat: k, lF: -10 * k, liftF: kf(u, [[0.2, 0], [0.3, 8], [0.42, 0]]), blink: 0 };
     },
+    espantado: (t, o = {}) => POSES.susto(t + 0.12, o),
     preocupado: t => ({ bob: breathe(t * 0.6) * 1.2 - 3, lean: 5, headTilt: 9 + Math.sin(t * 0.9) * 2, headDy: 8, eyes: "preocupado", mouth: "triste", brows: "preocupado",
-      look: [0.1, 0.9], aF: 30, eF: 50, aB: 25, eB: 55, blink: blinkAt(t + 1.3), blush: 0.6 }),
-    feliz: t => ({ ...POSES.parado(t), eyes: "feliz", mouth: "aberto" }),
+      look: [0.1, 0.9], aF: 30, eF: 60, aB: 25, eB: 65, bFrente: 1, blush: 0.6 }),
+    /** cansado / ofegando depois do dia */
+    cansado: t => ({ bob: -3 + Math.sin(t * 7) * 2.2, sq: 1 + Math.sin(t * 7) * 0.025, lean: 11, headTilt: 13 + Math.sin(t * 7 + 0.5) * 1.5, headDy: 9,
+      eyes: "meio", mouth: Math.sin(t * 7) > 0 ? "aberto" : "o", brows: "triste", aF: 4, eF: 8, aB: -6, eB: 6, sweat: 1, look: [0.2, 0.6] }),
+    /** contando moedas com as duas patas na frente do peito */
+    contando: (t, o = {}) => {
+      const Pd = o.periodo || 0.55, ph = ((t % Pd) + Pd) % Pd / Pd, pass = Math.sin(ph * Math.PI);
+      return { aF: lerp(48, 72, pass), eF: lerp(80, 60, pass), aB: 58, eB: 70, bFrente: 1, segura: "moeda", seguraB: "pilha",
+        headTilt: 11 + pass * 2, headDy: 5, look: [0.4, 1], eyes: "aberto", mouth: "sorriso", bob: breathe(t) * 1.2 };
+    },
+    /** segurando um objeto na frente (ex.: pepita) */
+    segurando: (t, o = {}) => ({ aF: 62, eF: 60, aB: 50, eB: 70, bFrente: 1, segura: o.objeto || "pepita", headTilt: 8, look: [0.4, 0.8], eyes: "aberto", mouth: "sorriso", bob: breathe(t) * 1.4 }),
+    /** apontando para frente/parede (pata esticada); combine com alvo:[x,y] */
+    apontando: (t) => ({ aF: 104 + Math.sin(t * 3) * 2, eF: -6, aB: -26, eB: 20, lean: -2, mouth: "aberto", bob: breathe(t) * 1.2 }),
+    /** de costas riscando a parede com giz (plano por cima do ombro) */
+    riscando: (t, o = {}) => ({ costas: 1, aF: 152 + Math.sin(t * 15) * 9, eF: -16 + Math.cos(t * 15) * 8, aB: -24, eB: 20, segura: "giz", headTilt: Math.sin(t * 15) * 1.5, bob: breathe(t) * 1.2 }),
   };
   function blinkAt(t) {
     // piscadas determinísticas a cada ~3,1 s
     const per = 3.1, ph = ((t + 1.7) % per + per) % per;
     return ph < 0.14 ? Math.sin((ph / 0.14) * Math.PI) : 0;
   }
-
-  ART.zeca = {
-    BASE, draw, poses: POSES, blinkAt,
-    /** pose(nome, t, extras): extras sobrescreve qualquer campo (x, y, s, turn, eyes...) */
-    pose: (name, t, extra = {}, opts = {}) => Object.assign({ t }, (POSES[name] || POSES.parado)(t, opts), extra),
-    /** mistura duas poses numéricas (strings vêm de b se k>=.5) */
-    mix: (a, b, k) => { const o = {}; for (const key of new Set([...Object.keys(a), ...Object.keys(b)])) { const va = a[key] ?? BASE[key], vb = b[key] ?? BASE[key]; o[key] = typeof va === "number" && typeof vb === "number" ? lerp(va, vb, k) : (k < 0.5 ? va : vb); } return o; },
+  const mix = (a, b, k) => {
+    const o = {};
+    for (const key of new Set([...Object.keys(a), ...Object.keys(b)])) {
+      const va = a[key] ?? BASE[key], vb = b[key] ?? BASE[key];
+      if (typeof va === "number" && typeof vb === "number") o[key] = lerp(va, vb, k);
+      else if (Array.isArray(va) && Array.isArray(vb)) o[key] = va.map((v, i) => lerp(v, vb[i], k));
+      else o[key] = k < 0.5 ? va : vb;
+    }
+    return o;
   };
+  const pose = (name, t, extra = {}, opts = {}) => Object.assign({ t }, (POSES[name] || POSES.parado)(t, opts), extra);
+  /** sequência de ações num plano, com transição suave entre elas.
+   *  keys = [[t0, nome, extras?, opts?], ...]; o = {base: extras comuns, blend: s de transição (0,25)}.
+   *  opts.t0 recebe o início do trecho (poses de evento como 'susto' usam tempo local). */
+  const seq = (t, keys, o = {}) => {
+    const bl = o.blend ?? 0.25; let i = 0;
+    for (let j = 0; j < keys.length; j++) if (t >= keys[j][0]) i = j;
+    const mk = j => { const [t0, nome, ex = {}, op = {}] = keys[j]; return pose(nome, t, Object.assign({}, o.base || {}, ex), Object.assign({ t0 }, op)); };
+    const cur = mk(i);
+    if (i === 0 || t - keys[i][0] >= bl) return cur;
+    return Object.assign(mix(mk(i - 1), cur, ART.ease.inOutQuad((t - keys[i][0]) / bl)), { t });
+  };
+  /** Zeca no escuro: silhueta escurecida, só os olhos brilham (plano 8). k = 0..1 */
+  let ESC = null;
+  const drawEscuro = (g, p, k = 1, o = {}) => {
+    const c = g.canvas; if (!ESC || ESC.width !== c.width || ESC.height !== c.height) ESC = ART.canvas(c.width, c.height);
+    const e = ESC.getContext("2d"); e.setTransform(1, 0, 0, 1, 0, 0); e.clearRect(0, 0, ESC.width, ESC.height);
+    e.setTransform(g.getTransform());
+    const A = draw(e, Object.assign({}, p, { lamp: p.lamp ?? 0 }));
+    e.setTransform(1, 0, 0, 1, 0, 0); e.globalCompositeOperation = "source-atop"; e.fillStyle = `rgba(6,4,12,${0.94 * k})`; e.fillRect(0, 0, ESC.width, ESC.height); e.globalCompositeOperation = "source-over";
+    g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(ESC, 0, 0);
+    for (const q of A.olhos || []) { ART.glow(g, q.x, q.y, 34 * p.s / 2, o.cor || "#CFE8FF", 0.7 * k); ART.circ(g, q.x + 3, q.y - 4, 4.5 * p.s / 2); g.fillStyle = `rgba(255,255,255,${k})`; g.fill(); ART.circ(g, q.x - 3, q.y + 4, 2 * p.s / 2); g.fill(); }
+    g.restore(); return A;
+  };
+  /** enquadramentos prontos do Zeca sozinho na tela (sem cenário em perspectiva): retorna {x, y, s}.
+   *  'geral' corpo inteiro pequeno; 'inteiro' corpo inteiro ocupando ~350–1250; 'medio' da cintura pra cima; 'close' rosto. */
+  const quadro = (nome = "inteiro", x = 540) => ({
+    geral: { x, y: 1250, s: 1.5 }, inteiro: { x, y: 1260, s: 3.6 }, medio: { x, y: 1560, s: 5.2 }, close: { x, y: 2050, s: 8 },
+  }[nome]);
+  /** cobertor por cima do Zeca deitado (x,y = centro, w = largura) */
+  ART.cobertor = (g, x, y, w = 360, o = {}) => {
+    g.save(); g.translate(x, y);
+    g.beginPath(); g.moveTo(-w / 2, -30); g.quadraticCurveTo(-w * 0.1, -70, w / 2, -36); g.lineTo(w / 2 + 10, 50); g.quadraticCurveTo(0, 64, -w / 2 - 10, 50); g.closePath();
+    g.fillStyle = ART.lg(g, 0, -60, 0, 60, [[0, o.cor || "#6E4FB0"], [1, ART.shade(o.cor || "#6E4FB0", -0.35)]]); g.fill();
+    g.fillStyle = "#FFD23F"; for (let i = 0; i < 6; i++) { g.save(); g.translate(-w * 0.38 + i * w * 0.15, -8 + (i % 2) * 22); g.rotate(0.78); g.fillRect(-7, -7, 14, 14); g.restore(); }
+    g.beginPath(); g.moveTo(-w / 2, -30); g.quadraticCurveTo(-w * 0.1, -70, w / 2, -36); g.lineWidth = 10; g.strokeStyle = "#E9DCC6"; g.stroke();
+    g.restore();
+  };
+  /** lanterna falhando (determinística): intensidade 0..1 */
+  const falha = (t, k = 1, seed = 3) => { const n = ART.noise(t * 18, seed), m = ART.noise(t * 3, seed + 1); return clamp(1 - k * (n > 0.35 ? 0.9 : 0) - k * Math.max(0, -m) * 0.6); };
+
+  ART.zeca = { BASE, draw, poses: POSES, blinkAt, pose, mix, seq, drawEscuro, quadro, falha };
 })();

@@ -1,0 +1,5 @@
+{
+ "_doc": "grafia -> grafia falada (só o áudio). 'padrao' vale para todos os motores; seções por motor sobrescrevem. No kokoro, valor entre /.../ é IPA.",
+ "padrao": {"MAGMA DIG": "Mágma Díg", "Zeca": "Zéca", "Crac": "Crák"},
+ "kokoro": {"MAGMA DIG": "/mˈaɡmɐ dˈiɡ/", "Crac": "/kɾˈak/"}
+}
