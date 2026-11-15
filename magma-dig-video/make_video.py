@@ -580,6 +580,15 @@ def build_sfx(falas, planos, laid, pstart, st, pend=None):
             if s.get("no_fim") and pend is not None:      # relativo ao fim do plano (offset negativo)
                 base = pend[k]
             t = base + float(s.get("offset", 0))
+            if s.get("ate_palavra"):
+                # distribuído: frac 0..1 do intervalo [início do plano + offset, palavra - antes]
+                hits = [w for w in pw if nk(w["w"]) == nk(s["ate_palavra"])] or \
+                       [w for w in fw if nk(w["w"]) == nk(s["ate_palavra"])]
+                if not hits:
+                    die(f"plano {pl['id']}: sfx '{s['nome']}' até a palavra '{s['ate_palavra']}' ausente")
+                fim_ = hits[0]["ini"] - float(s.get("antes", 0.2))
+                t0_ = a + float(s.get("offset", 0))
+                t = t0_ + float(s.get("frac", 0)) * max(0.0, fim_ - t0_)
             kw = dict(s.get("kw", {}))
             if kw.get("dur") == "plano" and pend is not None:   # dura até o corte (acompanha o plano esticado)
                 kw["dur"] = round(max(0.3, pend[k] - t), 2)

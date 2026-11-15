@@ -147,7 +147,7 @@ def main():
     ap.add_argument("--voz", default=None, help="voz pronta (ex.: M1, F2, pm_alex, Ryan) ou nome em vozes_qwen.json")
     ap.add_argument("--velocidade", type=float, default=1.0, help="velocidade nativa do motor (Supertonic/Kokoro)")
     ap.add_argument("--atempo", type=float, default=1.0, help="acelera depois (ffmpeg atempo, 0.9–1.15 sem mexer no timbre)")
-    ap.add_argument("--pausa", type=float, default=0.35, help="pausa entre frases em narracao.wav (s); ponto pede >= 0,3 s")
+    ap.add_argument("--pausa", type=float, default=0.28, help="pausa entre frases em narracao.wav (s); com as bordas dá ~0,34 s (ponto pede >= 0,3 s)")
     ap.add_argument("--inicio", type=float, default=0.10)
     ap.add_argument("--pron", default=str(HERE / "pronuncia.json"))
     ap.add_argument("--seed", type=int, default=0)

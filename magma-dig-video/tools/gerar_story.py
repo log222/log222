@@ -28,6 +28,11 @@ SFX_AJUSTE = {
     9: {"remover": ["ronco", "folha"], "adicionar": [{"nome": "ronco", "palavra": "dorme", "offset": 0.05, "vol": -8},
                                                     {"nome": "folha", "palavra": "aprende", "offset": 0.0}]},
     26: {"remover": ["porta"], "adicionar": []},
+    29: {"remover": ["moeda"], "adicionar": [{"nome": "moeda", "palavra": "Uma", "offset": 0.0, "vol": -2},
+                                            {"nome": "moeda", "palavra": "Duas", "offset": 0.0, "vol": -2}]},
+    # 4 golpes distribuídos do início do plano até 0,2 s antes de "Quatro" (acompanha a duração real)
+    40: {"remover": ["picareta"], "adicionar": [{"nome": "picareta", "offset": 0.05, "ate_palavra": "Quatro",
+                                                 "antes": 0.2, "frac": k / 3, "seed": k} for k in range(4)]},
     30: {"remover": ["*"], "adicionar": [{"nome": "apagar", "offset": 0.1},
                                          {"nome": "moeda", "palavra": "Seis", "offset": 0.0, "vol": -2}]},
     31: {"remover": ["acorde"], "adicionar": [{"nome": "acorde", "palavra": "sete", "offset": 0.1, "vol": -6, "kw": {"tipo": "grave"}}]},

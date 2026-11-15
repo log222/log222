@@ -19,7 +19,7 @@ $PY tools/voz/falar.py --motor chatterbox --voz narrador-jovem -t "Crac. Uma moe
 ```
 Entrada: `.txt` (1 frase/linha), `.json` (lista de strings ou `{texto, grupo, pausa_depois}`) ou `-t` repetido.
 Saída: `frases/NNN.wav` (48 kHz mono, 16 bits, sem silêncio nas pontas, teto -1 dBFS), `narracao.wav`
-(frases + `--pausa`, padrão 0,35 s) e `tempos.json` no formato do `tts.py` (`frases[i].texto/falado/wav/ini/fim/palavras`)
+(frases + `--pausa`, padrão 0,28 s; com as bordas de cada frase o silêncio no ponto fica ~0,34 s) e `tempos.json` no formato do `tts.py` (`frases[i].texto/falado/wav/ini/fim/palavras`)
 com `sr: 48000`, `motor`, `licenca`, `duracao` por frase e `geracao_s`. Tempos de palavra são estimados (proporcionais às letras).
 Cache por frase em `.cache/voz-cache` (motor+voz+velocidade+seed+texto); `--sem-cache` regera. `--seed N` (ou `"seed"` por frase no JSON) muda a tomada
 (motores autorregressivos: Qwen, Chatterbox) — útil para regerar uma frase ruim.
