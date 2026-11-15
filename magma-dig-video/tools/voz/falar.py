@@ -96,11 +96,13 @@ def trim(a, sr, keep=0.03, rel_db=-38.0):
 
 
 def pos(a, sr, atempo):
-    """Reamostra para 48 kHz (soxr) e muda o ritmo com Rubber Band (formantes preservados,
-    sem mudar a altura) — melhor que atempo para desacelerar."""
+    """Reamostra para 48 kHz (soxr) e muda o ritmo sem mudar a altura (ffmpeg atempo)."""
     af = [f"aresample={SR}:resampler=soxr"]
     if abs(atempo - 1.0) > 1e-3:
-        af.append(f"rubberband=tempo={atempo:.4f}:formant=preserved:pitchq=quality:window=standard")
+        # atempo (WSOLA): nas medições, o Rubber Band do ffmpeg derrubou o UTMOS de 3,84 para 2,04 a 0,86x;
+        # atempo manteve 3,85. Para testar outro: VOZ_ESTICA="rubberband=tempo={t}"
+        filtro = os.environ.get("VOZ_ESTICA", "atempo={t}")
+        af.append(filtro.format(t=f"{atempo:.4f}"))
     r = subprocess.run(["ffmpeg", "-v", "error", "-f", "f32le", "-ar", str(sr), "-ac", "1", "-i", "-",
                         "-af", ",".join(af), "-f", "f32le", "-ar", str(SR), "-ac", "1", "-"],
                        input=a.astype(np.float32).tobytes(), capture_output=True, check=True)
@@ -148,7 +150,7 @@ def main():
     ap.add_argument("--motor", default="supertonic", choices=sorted(M.MOTORES))
     ap.add_argument("--voz", default=None, help="voz pronta (ex.: M1, F2, pm_alex, Ryan) ou nome em vozes_qwen.json")
     ap.add_argument("--velocidade", type=float, default=1.0, help="velocidade nativa do motor (Supertonic/Kokoro)")
-    ap.add_argument("--atempo", type=float, default=1.0, help="muda o ritmo depois da síntese (Rubber Band, formantes preservados): <1 desacelera")
+    ap.add_argument("--atempo", type=float, default=1.0, help="muda o ritmo depois da síntese (ffmpeg atempo, altura preservada): <1 desacelera (0,87 = voz A2)")
     ap.add_argument("--pausa", type=float, default=0.32, help="pausa entre frases em narracao.wav (s); ponto pede >= 0,3 s")
     ap.add_argument("--inicio", type=float, default=0.10)
     ap.add_argument("--pron", default=str(HERE / "pronuncia.json"))
