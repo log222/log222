@@ -234,8 +234,8 @@
       return [fx, fy];
     };
     const nearSide = 1; // lado +1 (direita da tela quando turn>0) está mais perto
-    leg(-nearSide, p.lB, p.liftB, false);
-    leg(nearSide, p.lF, p.liftF, true);
+    const sitting = p.sit > 0.5;
+    if (!sitting) { leg(-nearSide, p.lB, p.liftB, false); leg(nearSide, p.lF, p.liftF, true); }
 
     // ----- braços (função), ombros na lateral do corpo
     const shY = BY - 22;
@@ -286,6 +286,7 @@
     g.filter = "blur(7px)"; ART.ell(g, sT * 10 + p.headDx, BY - BRY + 16 + p.headDy, 62, 18); g.fillStyle = "rgba(40,15,30,.42)"; g.fill(); g.filter = "none";
     g.restore();
 
+    if (sitting) { leg(-nearSide, p.lB, p.liftB, false); leg(nearSide, p.lF, p.liftF, true); }
     // ----- ferramenta atrás do braço da frente
     let toolInfo = null;
     const drawTool = () => {

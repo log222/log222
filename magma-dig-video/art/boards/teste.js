@@ -58,7 +58,7 @@ ART.boards.teste = (() => {
       g.save(); g.translate(790, 340); g.scale(intro, intro); UI.cronometro(g, 0, 0, { valor: v, icone: "sol", s: 0.9 }); g.restore();
       const lastArr = coins > 0 ? BURST + 0.05 + (coins - 1) * 0.07 + 1.0 : -9;
       g.save(); g.translate(260, 340); g.scale(intro, intro); UI.contador(g, 0, 0, { valor: hitsDone >= 3 ? 3 + coins : hitsDone, icone: "moeda", pulso: Math.max(ART.pulse(t, lastArr, 0.25), ...HITS.slice(0, 3).map(h => ART.pulse(t, h + 0.05, 0.25))) }); g.restore();
-      for (let i = 0; i < 3; i++) UI.flutua(g, 300, 420, t, HITS[i] + 0.05, { texto: "+1", s: 0.7 });
+      for (let i = 0; i < 3; i++) UI.flutua(g, 400, 470, t, HITS[i] + 0.05, { texto: "+1", s: 0.7 });
     },
   };
 })();

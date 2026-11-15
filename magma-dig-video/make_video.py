@@ -42,6 +42,8 @@ from lib import sfx as X  # noqa: E402
 from lib import tts_engine as T  # noqa: E402
 
 PUNCT_BREAK = re.compile(r"[.,!?;:…]$")
+FUNC = {"a", "o", "as", "os", "e", "de", "da", "do", "das", "dos", "em", "no", "na", "nos", "nas", "um", "uma",
+        "que", "pra", "por", "com", "se", "seu", "sua", "ao", "mais", "mas", "ou"}
 ASR_CACHE = ROOT / ".cache" / "asr_cache"
 
 
@@ -192,6 +194,34 @@ def fala_clips(falas, voice, speed, pron, rec_audio=None, rec_tempos=None, workd
             phrases = [{"texto": falas[i]["texto"].replace("*", ""), "grupo": falas[i]["id"]} for i in idx]
             d = N.realign(rec_audio, phrases, workdir / "alinhamento", pron=pron)
             spans = [(f["ini"], f["fim"], [(p["w"], p["ini"], p["fim"]) for p in f["palavras"]]) for f in d["frases"]]
+        # fim de cada fala pelo ASR é impreciso (fim do último token): encaixa no início do 1º silêncio
+        # >= 0,12 s depois do início da última palavra (limitado pelo começo da próxima fala)
+        snapped = []
+        VM = T.voiced_mask(full)            # limiar global (relativo à fala do arquivo inteiro)
+        vm = lambda a0, a1: VM[int(a0 * 100): int(a1 * 100)]
+        for q, (ini, fim, ws) in enumerate(spans):
+            lim = spans[q + 1][0] if q + 1 < len(spans) else len(full) / T.SR
+            w0 = ws[-1][1]
+            m = vm(w0, lim) if lim - w0 > 0.1 else np.ones(1, bool)
+            end, run = None, 0
+            for k, v in enumerate(m):
+                run = 0 if v else run + 1
+                if run >= 12 and k * 0.01 > 0.1:
+                    end = w0 + (k - run + 1) * 0.01; break
+            if end is None:
+                end = min(fim, lim)
+            ws = ws[:-1] + [(ws[-1][0], ws[-1][1], max(ws[-1][1] + 0.05, end))]
+            # início: 1º trecho vozeado (>= 30 ms) entre o fim da fala anterior e a 1ª palavra + 0,15 s
+            lo = snapped[-1][1] + 0.02 if snapped else max(0.0, ini - 0.5)
+            hi = max(ws[0][2], ws[0][1] + 0.3)
+            if hi - lo > 0.1:
+                m = vm(lo, hi)
+                for k in range(len(m) - 3):
+                    if m[k] and m[k + 1] and m[k + 2]:
+                        ini = lo + k * 0.01; break
+            ws = [(ws[0][0], min(ws[0][1], ini) if ini < ws[0][1] else ini, ws[0][2])] + ws[1:]
+            snapped.append((ini, end, ws))
+        spans = snapped
         al = {"versao": 1, "audio": str(rec_audio), "frases": []}
         for i, (ini, fim, ws) in zip(idx, spans):
             a0, a1 = max(0, ini - 0.04), fim + 0.06
@@ -349,11 +379,17 @@ def build_captions(falas, planos, laid, pstart, pend, st):
                 if cur:
                     prev = cur[-1]["ws"][-1]
                     chars = sum(len(w["w"]) + 1 for x in cur for w in x["ws"]) + sum(len(w["w"]) + 1 for w in u["ws"]) - 1
-                    if (len(cur) >= maxu or chars > maxc or
-                            (L.get("quebrar_em_pontuacao", True) and PUNCT_BREAK.search(prev["w"])) or
-                            u["ws"][0]["ini"] - prev["fim"] > 0.35 or
-                            (len(cur) >= 2 and u["ws"][0]["ini"] - cur[0]["ws"][0]["ini"] >= alvo)):
+                    hard = ((L.get("quebrar_em_pontuacao", True) and PUNCT_BREAK.search(prev["w"])) or
+                            u["ws"][0]["ini"] - prev["fim"] > 0.35)
+                    if hard or len(cur) >= maxu or chars > maxc or \
+                            (len(cur) >= 2 and u["ws"][0]["ini"] - cur[0]["ws"][0]["ini"] >= alvo):
+                        # não deixa artigo/preposição pendurado no fim do bloco ("QUEM MARCA A")
+                        carry = None
+                        if not hard and len(cur) >= 2 and not cur[-1]["enfase"] and nk(cur[-1]["ws"][-1]["w"]) in FUNC:
+                            carry = cur.pop()
                         flush()
+                        if carry:
+                            cur.append(carry)
                 cur.append(u)
             flush()
     for i, bl in enumerate(blocks):

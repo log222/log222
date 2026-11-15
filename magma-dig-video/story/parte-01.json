@@ -2,7 +2,7 @@
  "titulo": "MAGMA DIG · Parte 1",
  "_gerado_por": "tools/gerar_story.py a partir de roteiro/parte-01.shots.json",
  "voz": "pm_alex",
- "velocidade": 1.1,
+ "velocidade": 1.0,
  "trilha": true,
  "pronuncia": {
   "DIG": "/dˈiɡ/",

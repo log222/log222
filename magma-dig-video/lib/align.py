@@ -143,6 +143,16 @@ def hybrid_times(audio: np.ndarray, words: list[str], spoken: list[str] | None =
             for q, (x, y) in zip(range(i, j), sub):
                 times[q] = [lo + x, lo + y]
         i = j
+    # início que caiu em silêncio (timestamp do ASR adiantado, comum na 1ª palavra após pausa):
+    # empurra para o começo da voz, se a voz começar antes do fim da palavra
+    vm = T.voiced_mask(audio, sr)
+    for q in range(n):
+        f0 = int(times[q][0] * 100)
+        if f0 < len(vm) and not vm[f0:f0 + 3].any():
+            f1 = int(times[q][1] * 100)
+            on = np.nonzero(vm[f0:max(f0 + 1, f1)])[0]
+            if len(on):
+                times[q][0] = (f0 + on[0]) / 100
     # consistência: monotônico, fim = início da próxima (sem buraco dentro da fala contínua)
     for q in range(n):
         times[q][0] = max(times[q][0], times[q - 1][0] + 0.02 if q else 0.0)

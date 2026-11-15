@@ -16,7 +16,7 @@
     "fonte": "Anton",
     "max_palavras": 3,
     "max_caracteres": 22,
-    "dur_alvo_bloco": 0.75,
+    "dur_alvo_bloco": 0.85,
     "quebrar_em_pontuacao": true,
     "segurar_fim": 0.25,
     "remover_pontuacao": "",

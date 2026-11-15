@@ -3,7 +3,7 @@
  * Depois: await ART.ready()
  */
 window.ART_LOAD = async function (base = "../art/kit/") {
-  const files = ["core.js", "zeca.js", "mundo.js", "ui.js", "gameplay.js"];
+  const files = ["core.js", "zeca.js", "mundo.js", "cenas.js", "cenas2.js", "ui.js", "gameplay.js"];
   const css = document.createElement("link"); css.rel = "stylesheet"; css.href = base + "../fonts/fonts.css"; document.head.appendChild(css);
   for (const f of files) {
     if (window.ART && window.ART["_mod_" + f]) continue;

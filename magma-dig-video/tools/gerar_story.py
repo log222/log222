@@ -111,7 +111,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("shots")
     ap.add_argument("-o", "--out", required=True)
-    ap.add_argument("--velocidade", type=float, default=1.1)
+    ap.add_argument("--velocidade", type=float, default=1.0)
     ap.add_argument("--max-palavras", type=int, default=20)
     a = ap.parse_args()
     d = json.loads(Path(a.shots).read_text())

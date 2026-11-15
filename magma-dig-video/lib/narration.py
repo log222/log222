@@ -46,7 +46,8 @@ def synth_cached(text: str, voice: str, speed: float) -> np.ndarray:
 def phrase_entry(i, texto, grupo, audio, offset, pron):
     words = T.tokenize(texto)
     spoken = T.apply_pronunciation(words, pron)
-    wt = T.estimate_word_times(audio, words, spoken)
+    from . import align as AL
+    wt = AL.hybrid_times(audio, words, spoken) if AL.available() else T.estimate_word_times(audio, words, spoken)
     return {
         "i": i, "grupo": grupo, "texto": texto,
         "falado": " ".join(w for w in spoken if w),
