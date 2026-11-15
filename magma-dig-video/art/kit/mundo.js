@@ -11,17 +11,32 @@
 
   // ================================================================== palco
   ART.palco = (g, t, cam, cena, atores, o = {}) => {
-    const all = cena.fundo || [];
-    for (const L of all) ART.withLayer(g, cam, L.d, gg => L.draw(gg, t));
+    for (const L of mesclar(cena.fundo || [])) ART.withLayer(g, cam, L.d, gg => L.draw(gg, t));
     if (atores) ART.withLayer(g, cam, 1, gg => atores(gg, t));
-    for (const L of cena.frente || []) ART.withLayer(g, cam, L.d, gg => L.draw(gg, t));
+    for (const L of mesclar(cena.frente || [])) ART.withLayer(g, cam, L.d, gg => L.draw(gg, t));
     if (cena.luz) cena.luz(g, t, cam);
-    if (o.post !== false) ART.post(g, o.frame ?? Math.round(t * 30), o);
+    if (o.post !== false) ART.post(g, o.frame ?? Math.round(t * 30), Object.assign({ tom: cena.tom }, o));
   };
+  /** junta camadas estáticas consecutivas de mesma profundidade num só canvas (menos desenhos escalados por quadro) */
+  function mesclar(ls) {
+    const out = [];
+    for (let i = 0; i < ls.length; i++) {
+      const L = ls[i];
+      if (!L.estatica) { out.push(L); continue; }
+      const grp = [L]; while (i + 1 < ls.length && ls[i + 1].estatica && ls[i + 1].d === L.d) grp.push(ls[++i]);
+      if (grp.length === 1) { out.push(L); continue; }
+      const key = "mescla:" + grp.map(q => q.estatica).join("+"), m = 160;
+      out.push({ d: L.d, estatica: key, draw(g) { const c = ART.cache(key, W + 2 * m, H + 2 * m, gg => { gg.translate(m, m); for (const q of grp) q.draw(gg, 0); }); g.drawImage(c, -m, -m); } });
+    }
+    return out;
+  }
+  ART.mesclar = mesclar;
   /** pós-processamento comum: vinheta + grão + faixa de legenda opcional */
   ART.post = (g, frame, o = {}) => {
-    ART.vignette(g, o.vinheta ?? 0.62);
-    if (o.legenda !== false) ART.faixaLegenda(g, o.legendaK ?? 0.38);
+    const v = o.vinheta ?? 0.62, lk = o.legenda !== false ? (o.legendaK ?? 0.38) : 0, tom = o.tom || null;
+    const key = `post:${v}:${lk}:${tom ? JSON.stringify(tom) : ""}`;
+    const c = ART.cache(key, W / 4, H / 4, gg => { gg.scale(0.25, 0.25); if (tom) ART.tom(gg, tom); ART.vignette(gg, v); if (lk > 0) ART.faixaLegenda(gg, lk); });
+    g.drawImage(c, 0, 0, W, H);
     ART.grain(g, frame, o.grao ?? 0.07);
   };
   /** escurece suavemente a faixa da legenda (≈66–80% da altura) para dar contraste */
@@ -37,12 +52,13 @@
   ART.camadaEstatica = (key, d, paint, o = {}) => {
     const m = o.margem ?? 160, sc = o.res ?? 1;
     return {
-      d, draw(g) {
+      d, estatica: key, draw(g) {
         const c = ART.cache(key, (W + 2 * m) * sc, (H + 2 * m) * sc, (gg) => {
           gg.scale(sc, sc); gg.translate(m, m); paint(gg);
         });
         const img = o.blur ? ART.blurred(c, o.blur * sc, key + ":b" + o.blur) : c;
-        g.drawImage(img, -m, -m, W + 2 * m, H + 2 * m);
+        if (o.y0 != null || o.y1 != null) { const a = (o.y0 ?? -m) + m, b = (o.y1 ?? H + m) + m; g.drawImage(img, 0, a * sc, img.width, (b - a) * sc, -m, a - m, W + 2 * m, b - a); }
+        else g.drawImage(img, -m, -m, W + 2 * m, H + 2 * m);
       },
     };
   };
@@ -316,9 +332,9 @@
         for (const [cx, rows] of [[-5, 3], [-4, 2], [4, 2], [5, 3]]) for (let rr2 = 0; rr2 < rows; rr2++) ART.cubo(gg, cx, ZW - 1.0, { tex: texW, y: rr2, seed: cx * 3 + rr2 });
         // névoa na base da parede
         gg.fillStyle = ART.lg(gg, 0, yb - 260, 0, yb + 40, [[0, "rgba(150,130,120,0)"], [1, "rgba(150,130,120,.28)"]]); gg.fillRect(-160, yb - 260, W + 320, 300);
-      }, { blur: 2.2, res: 0.75 }),
+      }, { blur: 2.2, res: 0.75, y1: 1000 }),
       // chão em grade (perspectiva): parte de trás nítida, parte da frente desfocada (profundidade de campo)
-      ART.camadaEstatica("mina:chao", 1, gg => chao(gg, 1.9, ZW, tex)),
+      ART.camadaEstatica("mina:chao", 1, gg => chao(gg, 1.9, ZW, tex), { y0: 740 }),
     ];
     const chaoPerto = ART.camadaEstatica("mina:chaoPerto", 1, gg => {
       chao(gg, 0.6, 2.9, tex);
@@ -328,30 +344,30 @@
       gg.globalCompositeOperation = "destination-in";
       gg.fillStyle = ART.lg(gg, 0, yb - 20, 0, yb + 110, [[0, "rgba(0,0,0,0)"], [1, "rgba(0,0,0,1)"]]); gg.fillRect(-160, -160, W + 320, H + 320);
       gg.globalCompositeOperation = "source-over";
-    }, { blur: 5, res: 0.6 });
+    }, { blur: 5, res: 0.6, y0: 740 });
     fundo.push(chaoPerto);
     // carrinho de mina ao fundo (mid)
-    if (o.carrinho !== false) fundo.splice(1, 0, ART.camadaEstatica("mina:carrinho", 0.7, gg => {
+    if (o.carrinho !== false) fundo.splice(1, 0, ART.camadaEstatica("mina:carrinho", 0.45, gg => {
       const [x, y] = ART.proj(-3.2, 0, 6.2), s = ART.projEscala(6.2);
       carrinho(gg, x, y, s * 1.05);
       // pilha de pedras/minério
       for (let i = 0; i < 9; i++) ART.pepita(gg, x + 30 + (i % 3) * 22 - 20, y - s * 0.62 - Math.floor(i / 3) * 14, s * 0.1, i % 4 ? "pedra" : "prata", i, { seed: i });
-    }, { blur: 1.2, res: 0.8 }));
+    }, { blur: 1.2, res: 0.8, y1: 1000 }));
     const frente = [
       // pedras desfocadas no primeiro plano (cantos)
-      ART.camadaEstatica("mina:frente", 1.6, gg => {
-        for (const [x, y, r, s] of [[-40, 1880, 260, 3], [1130, 1760, 230, 4], [980, 1960, 300, 5], [60, 1700, 120, 6]]) {
-          rocha(gg, x, y, r, s);
+      { d: 1.6, draw(g) {
+        for (const [x, y, r, sd] of [[-40, 1880, 260, 3], [1130, 1760, 230, 4], [980, 1960, 300, 5], [60, 1700, 120, 6]]) {
+          const sp = ART.cache("mina:pedraFrente" + sd, (r * 2.6) / 2, (r * 2.6) / 2, gg => { gg.scale(0.5, 0.5); gg.filter = "blur(16px)"; rocha(gg, r * 1.3, r * 1.3, r, sd); });
+          g.drawImage(sp, x - r * 1.3, y - r * 1.3, r * 2.6, r * 2.6);
         }
-      }, { blur: 16, res: 0.5 }),
+      } },
     ];
     const luz = (g, t, cam) => {
       // feixe de luz de cima (do buraco do fosso)
       const k = o.luz ?? 1;
       if (k > 0) {
-        const sway = Math.sin(t * 0.4) * 1.5;
-        ART.beam(g, 200 - (cam.x || 0) * 0.3, -150, 70 + sway, 1750, 240, 700, "#FFE3B0", 0.5 * k);
-        ART.beam(g, 470 - (cam.x || 0) * 0.3, -150, 74 + sway, 1500, 120, 380, "#FFE3B0", 0.32 * k);
+        const fx = ART.cache("mina:feixes", W / 4, H / 4, gg => { gg.scale(0.25, 0.25); ART.beam(gg, 200, -150, 70, 1750, 240, 700, "#FFE3B0", 0.5); ART.beam(gg, 470, -150, 74, 1500, 120, 380, "#FFE3B0", 0.32); });
+        g.save(); g.globalCompositeOperation = "lighter"; g.globalAlpha = k * (0.9 + 0.1 * Math.sin(t * 0.8)); g.drawImage(fx, -(cam.x || 0) * 0.3, 0, W, H); g.restore();
       }
       ART.dust(g, t, { count: 70, seed: 3, color: "#FFE6B8", y: 0, h: 1400, alpha: 0.5 });
       // lanternas penduradas (bokeh) na parede do fundo
@@ -361,9 +377,9 @@
         ART.glow(g, x - (cam.x || 0) * 0.45, y, 26, "#FFF0C8", 0.9 * fl);
       }
       // gradação de cor: sombras puxando para o roxo do jogo
-      ART.tom(g, [[0, "rgba(40,24,80,.28)"], [0.5, "rgba(40,24,80,0)"], [1, "rgba(14,8,28,.35)"]]);
+
     };
-    return { fundo, frente, luz, pj: PJ, tex };
+    return { fundo, frente, luz, pj: PJ, tex, tom: [[0, "rgba(40,24,80,.28)"], [0.5, "rgba(40,24,80,0)"], [1, "rgba(14,8,28,.35)"]] };
   };
 
   function chao(gg, z0, z1, tex) {

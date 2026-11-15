@@ -45,8 +45,13 @@
     inBack: k => c3 * k * k * k - c1 * k * k,
     outBack: k => 1 + c3 * Math.pow(k - 1, 3) + c1 * Math.pow(k - 1, 2),
     outElastic: k => (k === 0 ? 0 : k === 1 ? 1 : Math.pow(2, -10 * k) * Math.sin((k * 10 - 0.75) * (2 * Math.PI / 3)) + 1),
+    inSine: k => 1 - Math.cos((k * Math.PI) / 2), outSine: k => Math.sin((k * Math.PI) / 2),
+    inOutQuart: k => (k < 0.5 ? 8 * k * k * k * k : 1 - Math.pow(-2 * k + 2, 4) / 2),
+    inExpo: k => (k === 0 ? 0 : Math.pow(2, 10 * k - 10)), inOutExpo: k => (k === 0 ? 0 : k === 1 ? 1 : k < 0.5 ? Math.pow(2, 20 * k - 10) / 2 : (2 - Math.pow(2, -20 * k + 10)) / 2),
+    inOutBack: k => { const c2 = c1 * 1.525; return k < 0.5 ? (Math.pow(2 * k, 2) * ((c2 + 1) * 2 * k - c2)) / 2 : (Math.pow(2 * k - 2, 2) * ((c2 + 1) * (k * 2 - 2) + c2) + 2) / 2; },
+    outBounce: k => { const n1 = 7.5625, d1 = 2.75; if (k < 1 / d1) return n1 * k * k; if (k < 2 / d1) return n1 * (k -= 1.5 / d1) * k + 0.75; if (k < 2.5 / d1) return n1 * (k -= 2.25 / d1) * k + 0.9375; return n1 * (k -= 2.625 / d1) * k + 0.984375; },
   };
-  ART.prog = (t, t0, t1, e) => { const k = ART.clamp(ART.inv(t0, t1, t)); return e ? ART.ease[e](k) : k; };
+  ART.prog = (t, t0, t1, e) => { const k = ART.clamp(ART.inv(t0, t1, t)); const f = typeof e === "function" ? e : e && (ART.ease[e] || (window.MD && MD.ease && MD.ease[e])); return f ? f(k) : k; };
   ART.map = (t, t0, t1, v0, v1, e) => ART.lerp(v0, v1, ART.prog(t, t0, t1, e));
   /** keyframes: ART.kf(t, [[t0, v0], [t1, v1, 'outBack'], ...]); valores número ou array */
   ART.kf = (t, keys) => {
@@ -232,7 +237,7 @@
   };
   /** transição-assinatura: tela preta com uma linha de luz horizontal que abre como um olho (k 0..1) */
   ART.aberturaOlho = (g, k, o = {}) => {
-    const clamp = ART.clamp, y = o.y ?? ART.H * 0.45, W = ART.W, H = ART.H, e = ART.ease.inOutCubic(clamp(k)), h = e * H * 1.2;
+    const clamp = ART.clamp, y = o.y ?? ART.H * 0.45, W = ART.W, H = ART.H, e = ART.ease.inOutCubic(clamp(k)), h = e * H * 2.4;
     g.save(); g.fillStyle = "#000";
     g.beginPath(); g.rect(0, 0, W, H); g.moveTo(0, y); g.bezierCurveTo(W * 0.3, y - h * 0.6, W * 0.7, y - h * 0.6, W, y); g.bezierCurveTo(W * 0.7, y + h * 0.6, W * 0.3, y + h * 0.6, 0, y); g.fill("evenodd");
     const lk = clamp(1 - Math.abs(k - 0.12) / 0.3);

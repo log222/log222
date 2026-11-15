@@ -1,0 +1,1 @@
+ART.boards.h_veios = { dur: 3, async setup() { window.__K__ = 0; await new Promise(r => { const s = document.createElement("script"); s.src = "../boards/novos.js"; s.onload = r; document.head.appendChild(s); }); }, render(g, t, f) { ART.boards.novos.render(g, t, f); } };

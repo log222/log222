@@ -28,6 +28,8 @@
   GP.RECORTES = {
     mina: [470, 108, 810, 482],       // 0–5 s: mina de pedra; mantém buraco + picareta; corta a caixa do topo e o 13,2
     minaLarga: [110, 108, 1170, 482],
+    minaAlta: [560, 108, 640, 482],   // vertical-ish: buraco + mão com a picareta, bem maior na tela
+    mapaAlto: [60, 100, 520, 380],
     vermelha: [80, 108, 1120, 482],   // 5–9 s
     guardiao: [80, 70, 1120, 440],    // 9–13,5 s (caixa embaixo)
     menu: [90, 60, 1100, 500],        // 13,5–25 s: telas da Toca
@@ -57,11 +59,11 @@
     // 1) extensão desfocada em tela cheia (mesmo quadro)
     g.save();
     if (img) {
-      const sm = GP._sm || (GP._sm = ART.canvas(60, 107)), sg = sm.getContext("2d"), sc = (H / rh) * 1.15 / 18;
-      sg.clearRect(0, 0, 60, 107); sg.drawImage(img, rx, ry, rw, rh, 30 - (rw * sc) / 2, 53 - (rh * sc) / 2, rw * sc, rh * sc);
+      const sm = GP._sm || (GP._sm = ART.canvas(24, 43)), sg = sm.getContext("2d"), sc = (H / rh) * 1.15 / 45;
+      sg.clearRect(0, 0, 24, 43); sg.drawImage(img, rx, ry, rw, rh, 12 - (rw * sc) / 2, 21.5 - (rh * sc) / 2, rw * sc, rh * sc);
       g.drawImage(sm, 0, 0, W, H);
     }
-    g.fillStyle = "rgba(20,14,36,.48)"; g.fillRect(0, 0, W, H);
+    g.fillStyle = "rgba(20,14,36,.6)"; g.fillRect(0, 0, W, H);
     g.fillStyle = "rgba(70,40,140,.25)"; g.fillRect(0, 0, W, H);
     g.restore();
     // 2) quadro nítido

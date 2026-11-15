@@ -267,31 +267,27 @@
     const faixa = 520; // altura de cada estrato em px
     const total = faixa * ESTRATOS.length;
     const tex = ART.texVoronoi("prof", { seed: 44, n: 22, cores: ["#9A9A9A", "#B8B8B8", "#7A7A7A"], junta: "#444" });
-    const draw = (g, t, d) => {
+    const estrato = i => ART.cache("prof:" + i, W + 400, faixa + 2, g => {
+      const [l, c] = ESTRATOS[i]; g.translate(200, 0);
+      g.fillStyle = ART.lg(g, 0, 0, 0, faixa, [[0, ART.shade(c, 0.05)], [1, ART.shade(c, -0.45)]]); g.fillRect(-200, 0, W + 400, faixa + 2);
+      g.save(); g.globalCompositeOperation = "multiply"; g.globalAlpha = 0.55; g.fillStyle = g.createPattern(tex, "repeat"); g.translate(i * 97, 0); g.fillRect(-300 - i * 97, 0, W + 600, faixa); g.restore();
+      const heat = i / (ESTRATOS.length - 1);
+      if (heat > 0.5) { g.save(); g.globalCompositeOperation = "lighter"; g.globalAlpha = (heat - 0.5) * 1.2; const r = ART.rng(i + 3); g.strokeStyle = "#FF7A1A"; g.lineWidth = 4; g.shadowColor = "#FF7A1A"; g.shadowBlur = 16; for (let k = 0; k < 6; k++) { let x = r() * W, yy = r() * faixa; g.beginPath(); g.moveTo(x, yy); for (let j = 0; j < 5; j++) { x += (r() - 0.5) * 120; yy += r() * 60; g.lineTo(x, yy); } g.stroke(); } g.restore(); }
+      g.fillStyle = "rgba(0,0,0,.45)"; g.fillRect(-200, faixa - 8, W + 400, 10);
+      g.font = '400 120px "Lilita One"'; g.textAlign = "left"; g.textBaseline = "middle"; g.fillStyle = "rgba(255,255,255,.88)"; g.shadowColor = "rgba(0,0,0,.6)"; g.shadowBlur = 20; if (o.letras !== false) g.fillText(l, 70, faixa / 2);
+    });
+    const draw = (g, t) => {
       const off = (o.desce ?? 0) * (total - H + 300);
-      ESTRATOS.forEach(([l, c], i) => {
-        const y = i * faixa - off; if (y > H + 200 || y + faixa < -200) return;
-        g.save(); g.beginPath(); g.rect(-200, y, W + 400, faixa + 2); g.clip();
-        g.fillStyle = ART.lg(g, 0, y, 0, y + faixa, [[0, ART.shade(c, 0.05)], [1, ART.shade(c, -0.45)]]); g.fillRect(-200, y, W + 400, faixa);
-        g.globalCompositeOperation = "multiply"; g.globalAlpha = 0.55; g.fillStyle = g.createPattern(tex, "repeat"); g.translate(i * 97, y); g.fillRect(-300, 0, W + 600, faixa);
-        g.restore();
-        // veios e brilho quente crescendo com a profundidade
-        const heat = i / (ESTRATOS.length - 1);
-        if (heat > 0.5) { g.save(); g.globalCompositeOperation = "lighter"; g.globalAlpha = (heat - 0.5) * 1.2; const r = ART.rng(i + 3); g.strokeStyle = "#FF7A1A"; g.lineWidth = 4; g.shadowColor = "#FF7A1A"; g.shadowBlur = 16; for (let k = 0; k < 6; k++) { let x = r() * W, yy = y + r() * faixa; g.beginPath(); g.moveTo(x, yy); for (let j = 0; j < 5; j++) { x += (r() - 0.5) * 120; yy += r() * 60; g.lineTo(x, yy); } g.stroke(); } g.restore(); }
-        // borda entre estratos
-        g.fillStyle = "rgba(0,0,0,.45)"; g.fillRect(-200, y + faixa - 8, W + 400, 10);
-        if (o.letras !== false && d === 1) {
-          g.save(); g.font = '400 120px "Lilita One"'; g.textAlign = "left"; g.textBaseline = "middle"; g.fillStyle = "rgba(255,255,255,.88)"; g.shadowColor = "rgba(0,0,0,.6)"; g.shadowBlur = 20; g.fillText(l, 70, y + faixa / 2); g.restore();
-        }
-      });
+      ESTRATOS.forEach((_, i) => { const y = i * faixa - off; if (y > H + 200 || y + faixa < -200) return; g.drawImage(estrato(i), -200, y); });
     };
+    const pedra = i => ART.cache("prof:pedra" + i, 260, 260, g => { g.filter = "blur(6px)"; ART.rocha(g, 130, 130, 50 + (i % 3) * 20, i); });
     return {
-      fundo: [{ d: 1, draw: (g, t) => draw(g, t, 1) }],
+      fundo: [{ d: 1, draw: (g, t) => draw(g, t) }],
       frente: [{ d: 1.25, draw(g, t) { // poeira/pedrinhas passando rápido em primeiro plano
         const r = ART.rng(2), off = (o.desce ?? 0) * 6000;
-        g.save(); g.filter = "blur(6px)"; for (let i = 0; i < 18; i++) { const x = r() * W, y = ((r() * 3000 - off) % 2400 + 2400) % 2400 - 240; ART.rocha(g, x, y, 30 + r() * 60, i); } g.restore();
+        for (let i = 0; i < 18; i++) { const x = r() * W, y = ((r() * 3000 - off) % 2400 + 2400) % 2400 - 240; r(); g.drawImage(pedra(i % 6), x - 130, y - 130); }
       } }],
-      luz: (g, t) => { const heat = clamp((o.desce ?? 0) * 1.3 - 0.3); g.save(); g.globalCompositeOperation = "soft-light"; g.fillStyle = `rgba(255,110,40,${0.5 * heat})`; g.fillRect(0, 0, W, H); g.restore(); },
+      luz: (g, t) => { const heat = clamp((o.desce ?? 0) * 1.3 - 0.3); if (heat > 0) { g.save(); g.fillStyle = `rgba(255,110,40,${0.18 * heat})`; g.fillRect(0, 0, W, H); g.restore(); } },
     };
   };
   /** Coração de Magma: criatura/coração de rocha rachada, lava pulsando nas fendas. Mesma assinatura de antes.

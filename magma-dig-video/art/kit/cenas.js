@@ -81,7 +81,7 @@
         for (const [y, a] of [[620, 0.18], [740, 0.12]]) { gg.fillStyle = `rgba(120,100,180,${a})`; gg.beginPath(); gg.ellipse(400, y, 900, 50, -0.05, 0, Math.PI * 2); gg.fill(); }
       }),
       // morros distantes com pinheiros
-      ART.camadaEstatica("vila:morros", 0.22, gg => {
+      ART.camadaEstatica("vila:morros", 0.05, gg => {
         gg.fillStyle = "#1E1838";
         gg.beginPath(); gg.moveTo(-160, 900); for (let x = -160; x <= W + 160; x += 40) gg.lineTo(x, 840 - Math.sin(x * 0.006) * 60 - Math.sin(x * 0.017) * 20); gg.lineTo(W + 160, 1300); gg.lineTo(-160, 1300); gg.fill();
         const r = ART.rng(8); for (let i = 0; i < 40; i++) { const x = r() * (W + 320) - 160; pinheiro(gg, x, 860 - Math.sin(x * 0.006) * 60 + 10, 70 + r() * 70, "#241C44"); }
@@ -98,7 +98,7 @@
           gg.fillStyle = "#2A2034"; gg.fillRect(x + s * 0.2, y - s * 1.0, s * 0.12, s * 0.25);
         }
         for (let i = 0; i < 12; i++) pinheiro(gg, 470 + i * 60 + (i % 3) * 13, 1010 + (i % 2) * 10, 110 + (i % 4) * 25, "#2E2450");
-      }, { blur: 2, res: 0.7 }),
+      }, { blur: 2, res: 0.7, y0: 700, y1: 1350 }),
       // morro da mina + portal de madeira
       ART.camadaEstatica("vila:mina", 0.85, gg => {
         // morro de pedra low-poly
@@ -125,7 +125,7 @@
         madeira(gg, x - w / 2 - 6, y - h + 46, 30, 120, { cor: "#5E3A24", vert: true, seed: 6 });
         // pedras na base
         for (const [px, pr] of [[x - w / 2 - 50, 50], [x + w / 2 + 60, 60], [x + w / 2 + 130, 36]]) ART.rocha(gg, px, y + 10, pr, px);
-      }, { blur: 0.8, res: 0.85 }),
+      }, { blur: 0.8, res: 0.85, y0: 520, y1: 1450 }),
       // chão
       ART.camadaEstatica("vila:chao", 1, gg => {
         gg.fillStyle = ART.lg(gg, 0, gy - 60, 0, H + 160, [[0, "#2E2638"], [0.25, "#221C2C"], [1, "#0C0A12"]]); gg.fillRect(-160, gy - 40, W + 320, H);
@@ -143,8 +143,9 @@
       const r = ART.rng(9);
       for (const [cx, cy] of [[-20, 1820], [1060, 1700]]) for (let i = 0; i < 26; i++) { const x = cx + (r() - 0.5) * 300, y = cy + r() * 200; gg.fillStyle = "#151A1C"; gg.beginPath(); gg.moveTo(x, y); gg.lineTo(x + (r() - 0.5) * 80, y - 160 - r() * 160); gg.lineTo(x + 26, y); gg.fill(); }
       madeira(gg, 980, 1380, 60, 600, { cor: "#3A2618", vert: true });
-    }, { blur: 14, res: 0.5 })];
+    }, { blur: 14, res: 0.5, y0: 1250 })];
     const pos = { chao: gy, portal, placa: [portal.x, portal.y - portal.h - 10] };
+    const tomV = [[0, "rgba(40,30,110,.18)"], [1, "rgba(10,6,30,.3)"]];
     // elementos dinâmicos (placa balançando, lampião, brilho de dentro) ficam numa camada d=0.85 desenhada por função
     fundo.push({
       d: 0.85, draw(g, t) {
@@ -166,9 +167,8 @@
     const luz = (g, t) => {
       // vaga-lumes
       ART.dust(g, t, { count: 26, seed: 11, color: "#D8FF8A", size: [2.5, 5], speed: 10, alpha: 0.75, x: 0, y: 800, w: W, h: 700 });
-      ART.tom(g, [[0, "rgba(40,30,110,.18)"], [1, "rgba(10,6,30,.3)"]]);
     };
-    return { fundo, frente, luz, pos };
+    return { fundo, frente, luz, pos, tom: tomV };
   };
 
   // ================================================================= TOCA (C4)
@@ -237,28 +237,30 @@
         gg.save(); gg.translate(470, gy - 20); gg.rotate(0.22); ART.drawPick(gg, "ferro", 150); gg.restore();
       }),
     ];
-    const frente = [ART.camadaEstatica("toca:frente", 1.5, gg => {
-      // raízes penduradas e borda de pedra desfocadas
-      gg.strokeStyle = "#2A1A1A"; gg.lineCap = "round"; const r = ART.rng(4);
-      for (let i = 0; i < 7; i++) { const x = r() * 260 - 40 + (i > 3 ? 880 : 0); gg.lineWidth = 10 + r() * 14; gg.beginPath(); gg.moveTo(x, -160); gg.bezierCurveTo(x + 40, 100, x - 30, 200, x + 10, 300 + r() * 200); gg.stroke(); }
-      ART.rocha(gg, -60, 1900, 300, 2); ART.rocha(gg, 1140, 1950, 320, 3);
-    }, { blur: 12, res: 0.5 })];
+    const frente = [
+      ART.camadaEstatica("toca:frenteTopo", 1.5, gg => {
+        gg.strokeStyle = "#2A1A1A"; gg.lineCap = "round"; const r = ART.rng(4);
+        for (let i = 0; i < 7; i++) { const x = r() * 260 - 40 + (i > 3 ? 880 : 0); gg.lineWidth = 10 + r() * 14; gg.beginPath(); gg.moveTo(x, -160); gg.bezierCurveTo(x + 40, 100, x - 30, 200, x + 10, 300 + r() * 200); gg.stroke(); }
+      }, { blur: 12, res: 0.5, y1: 560 }),
+      ART.camadaEstatica("toca:frenteBase", 1.5, gg => { ART.rocha(gg, -60, 1900, 300, 2); ART.rocha(gg, 1140, 1950, 320, 3); }, { blur: 12, res: 0.5, y0: 1500 }),
+    ];
     const luz = (g, t) => {
       const L = o.luminaria ?? 1;
       // luminária (vela/lampião) sobre a mesa
       const lx = 215, ly = gy - 330;
       if (L > 0) {
         const f = 0.92 + 0.08 * ART.noise(t * 4, 9);
-        ART.glow(g, lx, ly, 700, "#FFB548", 0.32 * L * f); ART.glow(g, lx, ly, 70, "#FFF2C8", 0.9 * L * f);
+        const sp = ART.cache("toca:lamp", W / 4, H / 4, gg => { gg.scale(0.25, 0.25); ART.glow(gg, lx, ly, 700, "#FFB548", 0.32); });
+        g.save(); g.globalCompositeOperation = "lighter"; g.globalAlpha = L * f; g.drawImage(sp, 0, 0, W, H); g.restore();
+        ART.glow(g, lx, ly, 70, "#FFF2C8", 0.9 * L * f);
       }
       // feixe da janela redonda
-      if ((o.janela ?? 1) > 0) ART.beam(g, 840, 330, 115, 1300, 120, 420, "#B8C6FF", 0.18 * (o.janela ?? 1));
+      if ((o.janela ?? 1) > 0) { const sp = ART.cache("toca:janela", W / 4, H / 4, gg => { gg.scale(0.25, 0.25); ART.beam(gg, 840, 330, 115, 1300, 120, 420, "#B8C6FF", 0.18); }); g.save(); g.globalCompositeOperation = "lighter"; g.globalAlpha = o.janela ?? 1; g.drawImage(sp, 0, 0, W, H); g.restore(); }
       ART.dust(g, t, { count: 40, seed: 21, color: "#FFE6C0", size: [1.2, 3.5], alpha: 0.4, y: 300, h: 1000 });
-      ART.tom(g, [[0, "rgba(60,40,120,.18)"], [0.6, "rgba(255,150,70,.05)"], [1, "rgba(20,10,30,.25)"]]);
     };
     // lampião em cima da mesa (desenhado no plano dos móveis)
     fundo.push({ d: 1, draw(g) { const lx = 215, ly = 920; ART.rr(g, lx - 22, ly - 10, 44, 64, 10); g.fillStyle = "#3A3036"; g.fill(); ART.rr(g, lx - 15, ly, 30, 44, 8); g.fillStyle = "#FFE0A0"; g.fill(); g.fillStyle = "#2A2024"; g.fillRect(lx - 26, ly + 52, 52, 10); } });
-    return { fundo, frente, luz, pos: { chao: gy, parede, cama: [900, gy - 190] } };
+    return { fundo, frente, luz, pos: { chao: gy, parede, cama: [900, gy - 190] }, tom: [[0, "rgba(60,40,120,.18)"], [0.6, "rgba(255,150,70,.05)"], [1, "rgba(20,10,30,.25)"]] };
   };
 
   // ---------------------------------------------------------------- giz na parede (meta)
@@ -266,7 +268,7 @@
   ART.giz = (g, x, y, t, m = {}) => {
     const s = m.s || 1, prog = m.prog ?? 1;
     g.save(); g.translate(x, y); g.scale(s, s);
-    const chalk = (fn, k) => { if (k <= 0) return; g.save(); g.globalAlpha *= clamp(k); g.strokeStyle = "rgba(244,240,230,.92)"; g.fillStyle = "rgba(244,240,230,.92)"; g.lineCap = "round"; g.lineJoin = "round"; g.shadowColor = "rgba(255,255,255,.35)"; g.shadowBlur = 6; fn(); g.restore(); };
+    const chalk = (fn, k) => { if (k <= 0) return; g.save(); g.globalAlpha *= clamp(k); g.strokeStyle = "rgba(244,240,230,.92)"; g.fillStyle = "rgba(244,240,230,.92)"; g.lineCap = "round"; g.lineJoin = "round"; fn(); g.restore(); };
     // título
     chalk(() => { g.font = '400 64px "Lilita One"'; g.textAlign = "center"; g.letterSpacing = "6px"; g.fillText("META", 0, -230); }, prog * 3);
     chalk(() => {

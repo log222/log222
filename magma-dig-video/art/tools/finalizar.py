@@ -15,7 +15,8 @@ NOMES = {"a_vila": "a-vila-noite", "b_toca": "b-toca-meta", "c_mina": "c-mina-te
          "d_habilidades": "d2-habilidades-ramos", "e_ciencia": "e-ciencia-planeta", "e_kola": "e2-ciencia-kola",
          "f_lanterna": "f-objeto-lanterna", "f_cobre": "f2-objeto-pepita-cobre", "f_objetos": "f3-objeto-picareta-velha",
          "g_profundezas": "g-coracao-de-magma", "g_estratos": "g2-profundezas-estratos", "zeca_poses": "prancha-zeca-poses",
-         "overlays": "prancha-overlays", "gameplay": "gameplay-visor", "legenda": "legenda-exemplo"}
+         "overlays": "prancha-overlays", "gameplay": "gameplay-visor", "legenda": "legenda-exemplo",
+         "zeca_ator": "prancha-zeca-ator", "h_veios": "h-parede-veios-cobre", "h_braco": "h2-braco-forte-no-escuro", "h_fantasma": "h3-fantasma-de-ontem"}
 os.makedirs(FR, exist_ok=True)
 for k, nome in NOMES.items():
     src = os.path.join(BUILD, f"sf_{k}.png")
