@@ -50,23 +50,23 @@
   // ================================================================== textura de pedra (Voronoi)
   /** tile de Voronoi (cacheado): cores = [base, varA, varB], borda = cor da junta */
   ART.texVoronoi = (key, o = {}) => ART.cache("vor:" + key, o.size || 384, o.size || 384, (g, w, h) => {
-    const n = o.n || 34, r = ART.rng(o.seed || 7), pts = [];
-    for (let i = 0; i < n; i++) pts.push([r() * w, r() * h, r()]);
+    const gx = Math.max(3, Math.round(Math.sqrt(o.n || 34))), cs = w / gx, r = ART.rng(o.seed || 7), pts = [];
+    for (let j = 0; j < gx; j++) for (let i = 0; i < gx; i++) pts.push([(i + 0.15 + r() * 0.7) * cs, (j + 0.15 + r() * 0.7) * cs, r()]);
     const cols = (o.cores || [P.pedra1, P.pedra2, P.pedra0]).map(ART.hex), edge = ART.hex(o.junta || "#3A3836");
     const im = g.createImageData(w, h), d = im.data;
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const ci = Math.floor(x / cs), cj = Math.floor(y / cs);
       let b1 = 1e9, b2 = 1e9, bi = 0;
-      for (let i = 0; i < n; i++) {
-        for (let ox = -1; ox <= 1; ox++) for (let oy = -1; oy <= 1; oy++) {
-          const dx = x - pts[i][0] - ox * w, dy = y - pts[i][1] - oy * h, dd = dx * dx + dy * dy;
-          if (dd < b1) { b2 = b1; b1 = dd; bi = i; } else if (dd < b2) b2 = dd;
-        }
+      for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) {
+        const ii = (ci + di + gx) % gx, jj = (cj + dj + gx) % gx, q = pts[jj * gx + ii];
+        const px = q[0] + Math.floor((ci + di) / gx) * w * 0 + (ci + di < 0 ? -w : ci + di >= gx ? w : 0), py = q[1] + (cj + dj < 0 ? -h : cj + dj >= gx ? h : 0);
+        const dx = x - px, dy = y - py, dd = dx * dx + dy * dy;
+        if (dd < b1) { b2 = b1; b1 = dd; bi = jj * gx + ii; } else if (dd < b2) b2 = dd;
       }
       const e = Math.sqrt(b2) - Math.sqrt(b1), v = pts[bi][2];
       const c = v < 0.45 ? cols[0] : v < 0.8 ? cols[1] : cols[2];
-      const shade = 0.92 + 0.16 * ((pts[bi][0] / w) * 0.5 + (1 - pts[bi][1] / h) * 0.5) ;
-      const k = e < 2.2 ? 1 - e / 2.2 : 0;
-      const i4 = (y * w + x) * 4;
+      const shade = 0.9 + 0.2 * ART.hash(bi, (o.seed || 7));
+      const k = e < 2.2 ? 1 - e / 2.2 : 0, i4 = (y * w + x) * 4;
       for (let j = 0; j < 3; j++) d[i4 + j] = lerp(c[j] * shade, edge[j], k * 0.85);
       d[i4 + 3] = 255;
     }
@@ -244,17 +244,25 @@
       g.fillRect(x - rad * 2.2, y - rad * 2.2, rad * 4.4, rad * 4.4);
     }
     g.restore();
-    // lascas (pedaços com cor de pedra)
-    const shards = ART.burst(t, { t0: o.t0, count: 26, x: cx, y: cy, w: sz * 0.9, h: sz * 0.8, speed: [sz * 1.6, sz * 4.2], angle: [-170, -10], gravity: sz * 9, life: [0.7, 1.3], seed: o.seed || 5, spin: 540 });
-    const cols = o.cores || [P.pedra1, P.pedra2, P.pedra0, P.pedra3];
-    for (const s of shards) {
-      g.save(); g.globalAlpha = clamp(s.alpha * 1.5); g.translate(s.x, s.y); g.rotate(ART.deg(s.rot));
-      const rr = ART.rng(s.i + 40), ss = s.size / 22 * sz * 0.14;
-      const pts = [[-ss, -ss * 0.6], [ss * (0.4 + rr() * 0.6), -ss], [ss, ss * (0.2 + rr() * 0.6)], [-ss * 0.3, ss]];
-      ART.poly(g, pts); g.fillStyle = cols[s.i % cols.length]; g.fill();
-      ART.poly(g, [pts[0], pts[1], [0, 0]]); g.fillStyle = "rgba(255,245,225,.3)"; g.fill();
-      g.restore();
-    }
+    // lascas: pedaços grandes texturizados + médios + cascalho, quicando no chão
+    const floorY = (a[1] + c2[1]) / 2 + sz * 0.62, cols = o.cores || [P.pedra1, P.pedra2, P.pedra0, P.pedra3];
+    const grupos = [[8, [sz * 1.4, sz * 3.2], [0.9, 1.5], 0.22, 300], [16, [sz * 1.8, sz * 4.2], [0.7, 1.3], 0.13, 540], [30, [sz * 1.2, sz * 3.6], [0.5, 1.0], 0.05, 720]];
+    grupos.forEach(([n, spd, life, tam, spin], gi) => {
+      const sh = ART.burst(t, { t0: o.t0, count: n, x: cx, y: cy, w: sz * 0.9, h: sz * 0.8, speed: spd, angle: [-172, -8], gravity: sz * 9, life, seed: (o.seed || 5) + gi * 11, spin });
+      for (const q of sh) {
+        let y = q.y, rot = q.rot;
+        if (y > floorY) { y = floorY - (y - floorY) * 0.25; rot *= 0.4; }
+        g.save(); g.globalAlpha = clamp(q.alpha * 1.6); g.translate(q.x, y); g.rotate(ART.deg(rot));
+        const rr = ART.rng(q.i + 40 + gi * 100), ss = sz * tam * (0.6 + rr() * 0.8);
+        const pts = []; const nv = 4 + Math.floor(rr() * 3);
+        for (let k = 0; k < nv; k++) { const an = (k / nv) * Math.PI * 2 + rr() * 0.6; pts.push([Math.cos(an) * ss * (0.6 + rr() * 0.5), Math.sin(an) * ss * (0.5 + rr() * 0.5)]); }
+        ART.poly(g, pts); g.fillStyle = cols[(q.i + gi) % cols.length]; g.fill();
+        if (gi < 2) { ART.poly(g, [pts[0], pts[1], [0, 0]]); g.fillStyle = "rgba(255,245,225,.35)"; g.fill(); ART.poly(g, [pts[nv - 1], pts[nv - 2] || pts[0], [0, 0]]); g.fillStyle = "rgba(20,12,24,.35)"; g.fill(); }
+        g.restore();
+      }
+    });
+    // poeira que fica pairando depois
+    if (dt > 0.3) { g.save(); g.globalAlpha = 0.35 * clamp(1 - (dt - 0.3) / 1.9); ART.glow(g, cx, floorY - sz * 0.25, sz * 1.3, "#BDB3A0", 0.6, "source-over"); g.restore(); }
     // faíscas
     const sp = ART.burst(t, { t0: o.t0, count: 18, x: cx, y: cy - sz * 0.2, speed: [sz * 3, sz * 6], angle: [-160, -20], gravity: sz * 6, life: [0.25, 0.5], seed: (o.seed || 5) + 3 });
     g.save(); g.globalCompositeOperation = "lighter";
@@ -287,6 +295,7 @@
   ART.cenas.mina = (o = {}) => {
     const tex = ART.texVoronoi("mina", { seed: 7, n: 34 });
     const texW = ART.texVoronoi("minaParede", { seed: 21, n: 30, cores: ["#6E6A62", "#8A8373", "#4F4C4A"], junta: "#2E2B2C" });
+    const texG = ART.texVoronoi("minaParedeG", { size: 1024, seed: 23, n: 400, cores: ["#6E6A62", "#8A8373", "#4F4C4A"], junta: "#2E2B2C" });
     const ZW = 8.2; // parede do fundo
     const fundo = [
       // céu/fundo escuro + parede de blocos do fosso
@@ -297,7 +306,7 @@
           const x0 = ART.proj(col, 0, ZW)[0], y0 = yb - (row + 1) * s;
           const q = [[x0, y0], [x0 + s, y0], [x0 + s, y0 + s], [x0, y0 + s]];
           const dark = clamp(row / 7);
-          ART.quadTex(gg, q, texW, { ou: col * 0.31 + row * 0.17, ov: row * 0.23, tint: `rgba(14,10,26,${0.3 + dark * 0.6})` });
+          ART.quadTex(gg, q, texG, { rep: 0.25, ou: (col + 8) * 0.25 + ART.hash(col, row) * 0.05, ov: row * 0.25, tint: `rgba(14,10,26,${0.26 + dark * 0.6 + ART.hash(col * 7, row) * 0.12})` });
           gg.strokeStyle = "rgba(10,8,16,.55)"; gg.lineWidth = 3; gg.strokeRect(x0, y0, s, s);
           // minério na parede
           const h = ART.hash(col * 13 + row * 7, 2);

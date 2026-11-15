@@ -210,6 +210,37 @@
     return cam;
   };
 
+  /** câmera que enquadra o ponto (X,Y) do plano d=1 na posição de tela (sx, sy) com zoom z.
+   *  Ex.: plano médio do Zeca na mina: ART.enquadrar(400, 1040, 1.9). Some com ART.camera para empurrão/tremor. */
+  ART.enquadrar = (X, Y, z = 1, o = {}) => {
+    const cx = o.cx ?? ART.W / 2, cy = o.cy ?? ART.H / 2, sx = o.sx ?? 540, sy = o.sy ?? 820;
+    return { zoom: z, x: X - cx - (sx - cx) / z, y: Y - cy - (sy - cy) / z, cx, cy, sx: 0, sy: 0, rot: 0 };
+  };
+  /** soma uma câmera de movimento (ART.camera) a um enquadramento */
+  ART.camMais = (base, mov) => ({ ...base, zoom: base.zoom * (mov.zoom || 1), x: base.x + (mov.x || 0), y: base.y + (mov.y || 0), sx: (base.sx || 0) + (mov.sx || 0), sy: (base.sy || 0) + (mov.sy || 0), rot: (base.rot || 0) + (mov.rot || 0) });
+  /** dupla exposição: desenha(gg) num canvas à parte e sobrepõe em transparência, frio e deslocado (plano 42: "ontem") */
+  let DUP = null;
+  ART.duplaExposicao = (g, desenha, k = 0.5, o = {}) => {
+    if (k <= 0) return;
+    if (!DUP) DUP = ART.canvas(ART.W, ART.H);
+    const d = DUP.getContext("2d"); d.setTransform(1, 0, 0, 1, 0, 0); d.globalCompositeOperation = "source-over"; d.globalAlpha = 1; d.clearRect(0, 0, ART.W, ART.H);
+    desenha(d);
+    d.setTransform(1, 0, 0, 1, 0, 0); if (o.tint) { d.globalCompositeOperation = "source-atop"; d.fillStyle = o.tint; d.fillRect(0, 0, ART.W, ART.H); d.globalCompositeOperation = "source-over"; }
+    g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = k; g.globalCompositeOperation = o.modo || "source-over";
+    const dx = o.dx ?? 14, dy = o.dy ?? 0, sc = o.escala ?? 1.03;
+    g.translate(ART.W / 2 + dx, ART.H / 2 + dy); g.scale(sc, sc); g.drawImage(DUP, -ART.W / 2, -ART.H / 2); g.restore();
+  };
+  /** transição-assinatura: tela preta com uma linha de luz horizontal que abre como um olho (k 0..1) */
+  ART.aberturaOlho = (g, k, o = {}) => {
+    const clamp = ART.clamp, y = o.y ?? ART.H * 0.45, W = ART.W, H = ART.H, e = ART.ease.inOutCubic(clamp(k)), h = e * H * 1.2;
+    g.save(); g.fillStyle = "#000";
+    g.beginPath(); g.rect(0, 0, W, H); g.moveTo(0, y); g.bezierCurveTo(W * 0.3, y - h * 0.6, W * 0.7, y - h * 0.6, W, y); g.bezierCurveTo(W * 0.7, y + h * 0.6, W * 0.3, y + h * 0.6, 0, y); g.fill("evenodd");
+    const lk = clamp(1 - Math.abs(k - 0.12) / 0.3);
+    g.globalCompositeOperation = "lighter"; g.globalAlpha = lk; g.fillStyle = ART.lg(g, 0, 0, W, 0, [[0, "rgba(255,230,180,0)"], [0.5, "rgba(255,245,220,1)"], [1, "rgba(255,230,180,0)"]]);
+    g.fillRect(0, y - 3 - h * 0.05, W, 6 + h * 0.1); ART.glow(g, W / 2, y, 300, "#FFE6B0", lk);
+    g.restore();
+  };
+
   // ------------------------------------------------------------------ texto
   ART.font = (px, fam = "Nunito", w = 900) => `${w} ${px}px "${fam}"`;
   /** texto com contorno e sombra (para CRAC!, números, etiquetas) */

@@ -21,6 +21,8 @@
     return Promise.all(ps);
   };
   GP.frame = tv => ART.imgs[key(GP.idx(tv))];
+  /** carrega um screenshot (assets/game/shot_N.jpg) para usar com visor({img:'shot_4'}) */
+  GP.preloadShot = nome => ART.loadImg(nome, (ART.base || "../art/kit/") + `../../assets/game/${nome}.jpg`);
 
   /** recortes prontos (px do trailer 1280x590): tiram a caixa de texto de marketing e o cronômetro original */
   GP.RECORTES = {
@@ -29,6 +31,9 @@
     vermelha: [80, 108, 1120, 482],   // 5–9 s
     guardiao: [80, 70, 1120, 440],    // 9–13,5 s (caixa embaixo)
     menu: [90, 60, 1100, 500],        // 13,5–25 s: telas da Toca
+    mapa: [60, 110, 860, 460],        // 19,5–22 s: Mapa da Jornada (trilha A→B)
+    mercado: [90, 110, 820, 470],     // 13,5–14,5 s: lista do Mercado (use tapar para o VENDER TUDO)
+    botaoRank: [765, 190, 420, 95],   // img: 'shot_4' — só o botão SUBIR DE RANK (esconde 10,4BI e o rank E)
   };
 
   /** retrato pixel art do Zeca (assets/game/zeca.png, 4 quadros: 0 normal, 1 feliz, 2 espantado, 3 dormindo) */
@@ -46,14 +51,18 @@
   GP.visor = (g, t, o = {}) => {
     const de = o.de ?? 0, ate = o.ate ?? de + 1, dur = o.dur ?? ate - de;
     const tv = Math.min(ate, de + t * ((ate - de) / dur));
-    const img = GP.frame(tv);
+    const img = o.img ? ART.imgs[o.img] : GP.frame(tv);
     const [rx, ry, rw, rh] = o.recorte || GP.RECORTES.mina;
     const W = 1080, H = 1920;
     // 1) extensão desfocada em tela cheia (mesmo quadro)
     g.save();
-    if (img) { g.filter = "blur(28px) saturate(1.25)"; const sc = H / rh * 1.15; g.drawImage(img, rx, ry, rw, rh, W / 2 - (rw * sc) / 2, H / 2 - (rh * sc) / 2, rw * sc, rh * sc); g.filter = "none"; }
+    if (img) {
+      const sm = GP._sm || (GP._sm = ART.canvas(60, 107)), sg = sm.getContext("2d"), sc = (H / rh) * 1.15 / 18;
+      sg.clearRect(0, 0, 60, 107); sg.drawImage(img, rx, ry, rw, rh, 30 - (rw * sc) / 2, 53 - (rh * sc) / 2, rw * sc, rh * sc);
+      g.drawImage(sm, 0, 0, W, H);
+    }
     g.fillStyle = "rgba(20,14,36,.48)"; g.fillRect(0, 0, W, H);
-    g.globalCompositeOperation = "soft-light"; g.fillStyle = "rgba(110,70,200,.6)"; g.fillRect(0, 0, W, H);
+    g.fillStyle = "rgba(70,40,140,.25)"; g.fillRect(0, 0, W, H);
     g.restore();
     // 2) quadro nítido
     const w = o.largura || 1000, h = w * rh / rw, x0 = (W - w) / 2, cy = o.y ?? 800, y0 = cy - h / 2;
@@ -76,20 +85,27 @@
     if (lk > 0) {
       g.fillStyle = ART.rg(g, x0 + w * 0.5, y0 + h * 0.48, h * 0.25, w * 0.75, [[0, "rgba(255,220,150,0)"], [0.6, `rgba(30,16,40,${0.25 * lk})`], [1, `rgba(12,8,20,${0.75 * lk})`]]);
       g.fillRect(x0, y0, w, h);
-      g.globalCompositeOperation = "soft-light"; g.fillStyle = `rgba(255,190,90,${0.35 * lk})`; g.fillRect(x0, y0, w, h); g.globalCompositeOperation = "source-over";
+      g.fillStyle = `rgba(255,190,90,${0.08 * lk})`; g.fillRect(x0, y0, w, h);
     }
     g.restore();
     // moldura: borda fina amarela + cantos de visor
     ART.rr(g, x0, y0, w, h, 34); g.lineWidth = 4; g.strokeStyle = "rgba(255,210,63,.75)"; g.stroke();
     ART.rr(g, x0 - 10, y0 - 10, w + 20, h + 20, 42); g.lineWidth = 2; g.strokeStyle = "rgba(255,210,63,.2)"; g.stroke();
     g.restore();
-    // aba do capacete do Zeca fora de foco no topo (POV de dentro do capacete)
+    // aba do capacete do Zeca no topo (POV de dentro do capacete), com a lanterna acesa no meio
     if (o.aba !== false) {
-      g.save(); g.filter = "blur(14px)";
-      g.beginPath(); g.ellipse(W / 2, -330, 900, 520, 0, 0, Math.PI); g.fillStyle = ART.lg(g, 0, 0, 0, 200, [[0, "#6E4C10"], [1, "#C99A22"]]); g.fill();
-      g.beginPath(); g.ellipse(W / 2, -360, 860, 500, 0, 0, Math.PI); g.fillStyle = "#3A2808"; g.fill();
-      g.filter = "none"; g.restore();
-      ART.glow(g, W / 2, 210, 520, "#FFE2A0", 0.22);
+      const aba = ART.cache("gp:aba", W, 420, gg => {
+        gg.beginPath(); gg.moveTo(-40, 0); gg.lineTo(W + 40, 0); gg.lineTo(W + 40, 120); gg.quadraticCurveTo(W / 2, 330, -40, 120); gg.closePath();
+        gg.fillStyle = ART.lg(gg, 0, 0, 0, 260, [[0, "#8A6410"], [0.6, "#E0A920"], [1, "#FFD23F"]]); gg.fill();
+        gg.beginPath(); gg.moveTo(-40, 120); gg.quadraticCurveTo(W / 2, 330, W + 40, 120); gg.lineWidth = 16; gg.strokeStyle = "#FFE58A"; gg.stroke();
+        gg.beginPath(); gg.moveTo(-40, 140); gg.quadraticCurveTo(W / 2, 350, W + 40, 140); gg.lineWidth = 10; gg.strokeStyle = "rgba(60,40,6,.5)"; gg.stroke();
+        // nervura e suporte da lanterna
+        gg.fillStyle = "rgba(90,60,8,.45)"; gg.fillRect(W / 2 - 30, 0, 60, 200);
+        ART.rr(gg, W / 2 - 70, 150, 140, 70, 24); gg.fillStyle = "#4A4656"; gg.fill();
+      });
+      g.save(); g.filter = "none"; g.drawImage(ART.blurred(aba, 5, "gp:abaB"), 0, -60); g.restore();
+      ART.glow(g, W / 2, 140, 380, "#FFE2A0", 0.4);
+      ART.beam(g, W / 2, 150, 90, y0 - 140, 120, w * 0.9, "#FFE6B0", 0.16);
     }
     // 3) rótulo + retrato
     if (o.rotulo !== null) {

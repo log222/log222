@@ -5,6 +5,7 @@
   const ART = window.ART, P = ART.pal, UI = () => ART.ui;
   const { clamp, lerp } = ART;
   const W = 1080, H = 1920;
+  ART.obj = ART.obj || {};
 
   // ================================================================= fundo "noite na Toca" desfocado (para painéis)
   /** cena de fundo para painéis: a Toca bem desfocada e escurecida (cacheada) */
@@ -293,26 +294,99 @@
       luz: (g, t) => { const heat = clamp((o.desce ?? 0) * 1.3 - 0.3); g.save(); g.globalCompositeOperation = "soft-light"; g.fillStyle = `rgba(255,110,40,${0.5 * heat})`; g.fillRect(0, 0, W, H); g.restore(); },
     };
   };
-  /** Coração de Magma: só a silhueta pulsando. o = {pulso (0..1 intensidade), x, y, s} */
+  /** Coração de Magma: criatura/coração de rocha rachada, lava pulsando nas fendas. Mesma assinatura de antes.
+   *  o = {pulso (0..1 intensidade), x, y, s, revela (0..1: 0 = só silhueta/contorno, 1 = fendas visíveis)} */
+  const CORACAO = () => {
+    const S = 1100, c = S / 2, r = ART.rng(31);
+    // contorno orgânico: dois lobos + "aorta"/raízes, ruído na borda
+    const outline = [];
+    for (let i = 0; i < 200; i++) {
+      const a = (i / 200) * Math.PI * 2;
+      const hx = 16 * Math.pow(Math.sin(a), 3), hy = -(13 * Math.cos(a) - 5 * Math.cos(2 * a) - 2 * Math.cos(3 * a) - Math.cos(4 * a));
+      const n = 1 + 0.07 * ART.noise(i * 0.3, 4) + 0.035 * ART.noise(i * 1.4, 9);
+      const rot = -0.14, X = hx * 21 * n * (hx < 0 ? 1.08 : 0.95), Y = hy * 21 * n;
+      outline.push([c + X * Math.cos(rot) - Y * Math.sin(rot), c + X * Math.sin(rot) + Y * Math.cos(rot) + 20]);
+    }
+    const path = new Path2D(); outline.forEach((q, i) => (i ? path.lineTo(...q) : path.moveTo(...q))); path.closePath();
+    // tubos (artérias de rocha) no topo e raízes embaixo
+    const tubos = [[-60, -150, -120, -500, 92], [70, -170, 140, -470, 70], [180, -150, 330, -330, 46], [-250, -60, -470, -240, 40], [-200, 160, -470, 330, 34], [220, 150, 470, 300, 38]];
+    const rocha = ART.canvas(S, S), gr = rocha.getContext("2d"), lava = ART.canvas(S, S), gl = lava.getContext("2d");
+    gr.lineCap = "round"; gl.lineCap = "round"; gl.lineJoin = "round";
+    for (const [x0, y0, x1, y1, w] of tubos) {
+      gr.beginPath(); gr.moveTo(c + x0, c + y0); gr.quadraticCurveTo(c + (x0 + x1) / 2 + 40, c + (y0 + y1) / 2, c + x1, c + y1);
+      gr.lineWidth = w; gr.strokeStyle = "#140808"; gr.stroke(); gr.lineWidth = w * 0.5; gr.strokeStyle = "#1E0C0A"; gr.stroke();
+      gl.beginPath(); gl.moveTo(c + x0, c + y0); gl.quadraticCurveTo(c + (x0 + x1) / 2 + 40, c + (y0 + y1) / 2, c + x1, c + y1); gl.lineWidth = w * 0.18; gl.strokeStyle = "#FF8A2A"; gl.stroke();
+    }
+    gr.fillStyle = ART.rg(gr, c - 80, c - 120, 30, 420, [[0, "#2A1210"], [1, "#0A0405"]]); gr.fill(path);
+    // placas de rocha (Voronoi grosseiro dentro do contorno): fendas = bordas das placas
+    gr.save(); gr.clip(path); gl.save(); gl.clip(path);
+    const sites = []; for (let i = 0; i < 46; i++) sites.push([c + (r() - 0.5) * 680, c + (r() - 0.5) * 700]);
+    const step = 6;
+    for (let y = c - 380; y < c + 400; y += step) for (let x = c - 380; x < c + 380; x += step) {
+      let b1 = 1e9, b2 = 1e9, bi = 0;
+      for (let i = 0; i < sites.length; i++) { const dx = x - sites[i][0], dy = y - sites[i][1], dd = dx * dx + dy * dy; if (dd < b1) { b2 = b1; b1 = dd; bi = i; } else if (dd < b2) b2 = dd; }
+      const e = Math.sqrt(b2) - Math.sqrt(b1);
+      if (e < 7) { gl.fillStyle = e < 3 ? "#FFE0A0" : "#FF6A1A"; gl.globalAlpha = e < 3 ? 1 : 0.7; gl.fillRect(x, y, step, step); }
+      else { gr.fillStyle = `rgba(${40 + ART.hash(bi, 2) * 30},${14 + ART.hash(bi, 3) * 10},${12},${0.35 + 0.3 * ART.hash(bi, 5)})`; gr.fillRect(x, y, step, step); }
+    }
+    gr.restore(); gl.restore();
+    // borda de luz (recorte)
+    gr.save(); gr.strokeStyle = "rgba(255,120,40,.35)"; gr.lineWidth = 6; gr.stroke(path); gr.restore();
+    return { S, rocha, lava: ART.blurred(lava, 1.5), halo: ART.blurred(lava, 18), path };
+  };
   ART.coracaoMagma = (g, t, o = {}) => {
-    const x = o.x ?? 540, y = o.y ?? 880, s = o.s ?? 1, beat = Math.pow(Math.max(0, Math.sin(t * Math.PI * 1.3)), 6), k = (o.pulso ?? 1) * (0.55 + 0.45 * beat);
-    // fundo escuro com brilho laranja atrás
-    g.fillStyle = ART.rg(g, x, y, 50, 1200, [[0, "#3A0E06"], [0.5, "#160604"], [1, "#050203"]]); g.fillRect(0, 0, W, H);
-    ART.glow(g, x, y, 900 * s, "#FF5A1A", 0.55 * k);
-    ART.glow(g, x, y, 420 * s, "#FFB060", 0.35 * k);
-    // silhueta: coração de rocha com câmaras (formas facetadas) + "braços" de rocha
-    g.save(); g.translate(x, y); g.scale(s * (1 + 0.03 * beat), s * (1 + 0.03 * beat));
-    const hp = new Path2D("M30,360 L-120,250 L-250,120 L-320,-30 L-300,-170 L-210,-250 L-150,-250 L-150,-380 L-90,-400 L-80,-270 L-20,-230 L20,-330 L60,-430 L130,-420 L110,-300 L190,-290 L300,-200 L340,-50 L290,110 L190,240 Z");
-    g.fillStyle = "#0A0405"; g.fill(hp);
-    // rachaduras incandescentes no contorno (rim)
-    g.save(); g.clip(hp); g.strokeStyle = ART.rgba("#FF7A1A", 0.8 * k); g.lineWidth = 28; g.filter = "blur(10px)"; g.stroke(hp); g.filter = "none";
-    const r = ART.rng(5); g.strokeStyle = ART.rgba("#FFB060", 0.9 * k); g.lineWidth = 4; g.shadowColor = "#FF7A1A"; g.shadowBlur = 20;
-    for (let i = 0; i < 8; i++) { let px = (r() - 0.5) * 400, py = (r() - 0.5) * 400; g.beginPath(); g.moveTo(px, py); for (let j = 0; j < 4; j++) { px += (r() - 0.5) * 120; py += (r() - 0.5) * 120; g.lineTo(px, py); } g.globalAlpha = 0.25 + 0.4 * k; g.stroke(); }
+    const x = o.x ?? 540, y = o.y ?? 880, s = o.s ?? 1, beat = Math.pow(Math.max(0, Math.sin(t * Math.PI * 1.3)), 6), k = (o.pulso ?? 1) * (0.5 + 0.5 * beat);
+    const C = ART._coracao || (ART._coracao = CORACAO()), rv = o.revela ?? 0.6;
+    g.fillStyle = ART.rg(g, x, y, 50, 1200, [[0, "#3A0E06"], [0.5, "#160604"], [1, "#050203"]]); g.fillRect(0, 0, ART.W, ART.H);
+    ART.glow(g, x, y, 950 * s, "#FF5A1A", 0.55 * k);
+    g.save(); g.translate(x, y); const sc = s * (1 + 0.025 * beat); g.scale(sc, sc);
+    g.drawImage(C.rocha, -C.S / 2, -C.S / 2);
+    g.globalCompositeOperation = "lighter";
+    g.globalAlpha = clamp(rv * (0.35 + 0.65 * k)); g.drawImage(C.lava, -C.S / 2, -C.S / 2);
+    g.globalAlpha = clamp((0.3 + 0.7 * rv) * k); g.drawImage(C.halo, -C.S / 2, -C.S / 2);
     g.restore();
-    // rochas/garras ao redor
-    for (const [ax, ay, rr, a] of [[-430, 120, 120, 0.4], [440, 90, 130, -0.5], [-380, -260, 90, -0.3], [400, -300, 100, 0.6], [0, 470, 140, 0]]) { g.save(); g.translate(ax, ay); g.rotate(a); ART.rocha(g, 0, 0, rr, ax); g.restore(); }
-    g.restore();
+    // rochas soltas orbitando devagar
+    for (const [ax, ay, rr, a] of [[-470, 160, 110, 0.4], [480, 120, 120, -0.5], [-430, -330, 80, -0.3], [440, -360, 90, 0.6]]) { g.save(); g.translate(x + ax * s, y + ay * s + Math.sin(t + ax) * 8); g.rotate(a + t * 0.05); ART.rocha(g, 0, 0, rr * s, ax); g.restore(); }
     ART.dust(g, t, { count: 50, seed: 6, color: "#FF9A50", size: [2, 5], speed: 40, alpha: 0.7 });
+  };
+
+  /** braço forte golpeando no escuro (plano 37): silhueta musculosa com picareta enorme que não acerta nada.
+   *  o = {t0 (início do golpe), x, y (ombro), s, rim (cor da luz de recorte)} */
+  ART.obj.bracoForte = (g, t, o = {}) => {
+    const x = o.x ?? 1080, y = o.y ?? 700, s = o.s ?? 1, u = t - (o.t0 ?? 0.3);
+    const rot = ART.kf(u, [[-0.5, -70], [0, -88, "outCubic"], [0.16, 28, "inQuart"], [0.45, 38, "outCubic"], [1.2, 34]]);
+    const rim = o.rim || "#8E7BD8", body = "#15121F";
+    g.save(); g.translate(x, y); g.scale(-s, s);
+    if (u > 0.04 && u < 0.5) { g.save(); g.globalAlpha = 0.3 * (1 - (u - 0.04) / 0.46); g.strokeStyle = "#C9BFFF"; g.lineWidth = 90; g.lineCap = "round"; g.beginPath(); g.arc(0, 0, 820, ART.deg(-80), ART.deg(rot), false); g.stroke(); g.restore(); }
+    g.rotate(ART.deg(rot));
+    const arm = new Path2D("M-120,-110 C40,-190 260,-170 360,-90 C420,-40 460,-70 520,-60 C600,-50 640,-10 640,40 C640,90 600,110 540,110 C470,110 430,80 360,100 C240,140 60,160 -60,120 C-160,90 -200,-60 -120,-110 Z");
+    g.save(); g.translate(640, 30); g.rotate(ART.deg(90)); g.scale(4, 4); ART.drawPick(g, "ferro", 230); g.restore();
+    g.fillStyle = body; g.fill(arm);
+    g.save(); g.clip(arm); g.strokeStyle = rim; g.globalAlpha = 0.85; g.lineWidth = 18; g.translate(0, -9); g.stroke(arm); g.restore();
+    g.strokeStyle = "rgba(142,123,216,.3)"; g.lineWidth = 7; g.beginPath(); g.moveTo(80, -125); g.quadraticCurveTo(200, -60, 330, -100); g.stroke();
+    ART.circ(g, 610, 30, 74); g.fillStyle = body; g.fill(); g.save(); ART.circ(g, 610, 30, 74); g.clip(); g.strokeStyle = rim; g.lineWidth = 14; g.translate(0, -7); ART.circ(g, 610, 30, 74); g.stroke(); g.restore();
+    g.restore();
+    // a picareta no breu: escurece tudo menos o recorte
+    g.save(); g.fillStyle = `rgba(6,4,12,${o.breu ?? 0.35})`; g.fillRect(0, 0, ART.W, ART.H); g.restore();
+  };
+  /** ampulheta dourada em close (ramo Tempo). o = {x, y, s, areia (0..1 caindo), brilho} */
+  ART.obj.ampulheta = (g, t, o = {}) => {
+    const x = o.x ?? 540, y = o.y ?? 860, s = o.s ?? 1, ar = clamp(o.areia ?? ((t * 0.2) % 1));
+    if (o.brilho) ART.glow(g, x, y, 420 * s, "#FFD23F", 0.5 * o.brilho);
+    g.save(); g.translate(x, y); g.scale(s, s);
+    const vidro = new Path2D("M-120,-230 C-120,-90 -20,-40 -14,0 C-20,40 -120,90 -120,230 L120,230 C120,90 20,40 14,0 C20,-40 120,-90 120,-230 Z");
+    g.fillStyle = "rgba(200,230,255,.12)"; g.fill(vidro);
+    g.save(); g.clip(vidro);
+    // areia de cima (diminui) e de baixo (cresce)
+    const topH = 190 * (1 - ar), botH = 190 * ar;
+    g.fillStyle = "#FFC94A"; g.fillRect(-130, -20 - topH, 260, topH); g.beginPath(); g.moveTo(-130, 230); g.lineTo(130, 230); g.lineTo(130, 230 - botH * 0.6); g.lineTo(0, 230 - botH * 1.1); g.lineTo(-130, 230 - botH * 0.6); g.closePath(); g.fill();
+    if (ar < 1) { g.fillStyle = "#FFE08A"; g.fillRect(-3, -10, 6, 240 - botH); }
+    g.restore();
+    g.lineWidth = 6; g.strokeStyle = "rgba(255,255,255,.55)"; g.stroke(vidro);
+    ART.ell(g, -70, -150, 14, 60, 0.15); g.fillStyle = "rgba(255,255,255,.3)"; g.fill();
+    for (const yy of [-250, 250]) { ART.rr(g, -170, yy - 22, 340, 44, 14); g.fillStyle = ART.lg(g, 0, yy - 22, 0, yy + 22, [[0, "#FFE58A"], [1, "#B07A0C"]]); g.fill(); }
+    for (const xx of [-140, 140]) { ART.rr(g, xx - 12, -230, 24, 460, 10); g.fillStyle = "#C3954F"; g.fill(); }
+    g.restore();
   };
 
   // ================================================================= C7: closes de objeto em holofote
@@ -326,7 +400,7 @@
     g.save(); g.translate(x, yc); g.scale(1, 0.18); ART.glow(g, 0, 0, 520, cor, 0.55 * k); g.restore();
     ART.dust(g, t, { count: 40, seed: 17, color: cor, alpha: 0.5 * k, x: x - 340, w: 680, y: 0, h: yc });
   };
-  ART.obj = {};
+  ART.obj = ART.obj || {};
   /** close frontal da lanterna do capacete. o = {on: 0..1, flare, s, x, y} — planos 1, 43, 57 */
   ART.obj.lanterna = (g, t, o = {}) => {
     const x = o.x ?? 540, y = o.y ?? 820, s = o.s ?? 1, on = clamp(o.on ?? 1);
