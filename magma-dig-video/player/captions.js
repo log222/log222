@@ -28,7 +28,7 @@
     const b = blocks[i], st = styleFor(b), p = posFor(b, st);
     const el = MD.el("div", { class: "md-cap" }, root);
     el.style.cssText = `position:absolute;left:${p.centro_x}px;top:${p.centro_y}px;width:${st.largura_max}px;` +
-      `margin-left:${-st.largura_max / 2}px;text-align:center;white-space:normal;transform-origin:50% 50%;` + css(st);
+      `margin-left:${-st.largura_max / 2}px;text-align:center;white-space:${st.uma_linha ? "nowrap" : "normal"};transform-origin:50% 50%;` + css(st);
     const line = MD.el("div", {}, el);
     line.style.cssText = `display:inline-block;` +
       (st.fundo ? `background:${st.fundo};padding:0.08em 0.3em;border-radius:0.25em;` : "");
@@ -40,8 +40,13 @@
     });
     curEl = el; cur = i;
     el.style.transform = "translateY(-50%)";
+    // uma linha só: se o bloco passar da largura máxima, reduz a fonte até caber
+    let r = line.getBoundingClientRect();
+    if (st.uma_linha && r.width > st.largura_max) {
+      el.style.fontSize = `${Math.floor(st.tamanho * st.largura_max / r.width)}px`;
+      r = line.getBoundingClientRect();
+    }
     // checagem de zona segura (mede sem a animação de entrada)
-    const r = line.getBoundingClientRect();
     const scale = window.__SCALE__ || 1;
     const box = { l: r.left / scale, r: r.right / scale, t: r.top / scale, b: r.bottom / scale };
     const bad = box.l < Z.esquerda - 1 || box.r > MD.W - Z.direita + 1 || box.t < Z.topo - 1 || box.b > MD.H - Z.base + 1;
@@ -80,7 +85,7 @@
       // palavra ativa
       b.palavras.forEach((w, j) => {
         const s = spans[j];
-        const active = t >= w.ini && (t < w.fim || j === b.palavras.length - 1 || t < b.palavras[j + 1].ini);
+        const active = st.destacar_ativa !== false && t >= w.ini && (t < w.fim || j === b.palavras.length - 1 || t < b.palavras[j + 1].ini);
         const spoken = t >= w.ini;
         const base = w.enfase ? st.cor_enfase : st.cor;
         s.style.color = active ? st.cor_ativa : base;

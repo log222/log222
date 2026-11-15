@@ -213,9 +213,103 @@ def subida(seed=0, dur=1.5, **_):
     return _norm((tone + nz) * k ** 2 * np.minimum(1, (dur - t) / 0.03), 0.7)
 
 
+def clique(seed=0, pitch=1.0, **_):
+    """clique de interruptor/lanterna acendendo: dois estalos curtos + leve zumbido de partida."""
+    r = np.random.default_rng(seed)
+    n = int(0.35 * SR); t = np.arange(n) / SR; x = np.zeros(n)
+    for st, a in [(0, 1.0), (int(0.018 * SR), 0.55)]:
+        m = int(0.006 * SR)
+        x[st:st + m] += _bp(r.standard_normal(m), 2500 * pitch, 9000) * np.exp(-np.arange(m) / m * 4) * a
+        x[st:st + m] += np.sin(2 * np.pi * 1400 * pitch * np.arange(m) / SR) * np.exp(-np.arange(m) / m * 3) * 0.4 * a
+    hum = (np.sin(2 * np.pi * 120 * t) + 0.4 * np.sin(2 * np.pi * 240 * t)) * np.minimum(1, t / 0.05) * np.exp(-t * 6) * 0.08
+    hum[: int(0.02 * SR)] = 0
+    return _norm(_room(x + hum, 0.15, 0.1, seed), 0.8)
+
+
+def apagar(seed=0, **_):
+    """lanterna apagando: clique + zumbido caindo de tom e morrendo."""
+    n = int(0.6 * SR); t = np.arange(n) / SR
+    c = clique(seed, pitch=0.8).astype(np.float64)
+    f = 120 * (1 - 0.5 * t / 0.6)
+    hum = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * 7) * 0.25
+    x = hum.copy(); x[: len(c)] += c[:n] * 0.9
+    return _norm(x, 0.8)
+
+
+def zumbido(seed=0, dur=1.2, **_):
+    """zumbido elétrico de lâmpada (60/120 Hz + chiado), entra e sai suave."""
+    r = np.random.default_rng(seed)
+    n = int(dur * SR); t = np.arange(n) / SR
+    x = np.sin(2 * np.pi * 120 * t) + 0.5 * np.sin(2 * np.pi * 240 * t) + 0.25 * np.sin(2 * np.pi * 360 * t)
+    x += _bp(r.standard_normal(n), 3000, 7000) * 0.15 * (1 + 0.5 * np.sin(2 * np.pi * 7 * t))
+    env = np.minimum(1, t / 0.08) * np.minimum(1, (dur - t) / 0.3)
+    return _norm(x * env, 0.5)
+
+
+def giz(seed=0, dur=0.7, **_):
+    """giz riscando na parede: ruído agudo granulado em 2-3 traços."""
+    r = np.random.default_rng(seed)
+    n = int(dur * SR); x = np.zeros(n)
+    strokes = [(0.0, 0.28), (0.33, 0.62)] if dur >= 0.6 else [(0.0, dur * 0.9)]
+    for a, b in strokes:
+        s0, s1 = int(a * SR), min(n, int(b * SR)); m = s1 - s0
+        tt = np.arange(m) / SR
+        grain = (r.random(m) < 0.25) * r.standard_normal(m)
+        y = _bp(grain + 0.3 * r.standard_normal(m), 1800, 7500) * (0.6 + 0.4 * np.sin(2 * np.pi * 23 * tt))
+        x[s0:s1] += y * np.sin(np.pi * np.arange(m) / m) ** 0.5
+    return _norm(_room(x, 0.2, 0.12, seed), 0.6)
+
+
+def acorde(seed=0, tipo="claro", **_):
+    """acorde curto (tipo: claro=maior, quente=maior grave, recompensa=arpejo brilhante,
+    subindo=arpejo ascendente, grave=nota grave, dissonante=cluster)."""
+    chords = {"claro": [523.25, 659.25, 783.99], "quente": [261.63, 329.63, 392.0, 523.25],
+              "recompensa": [783.99, 987.77, 1174.66, 1567.98], "subindo": [392.0, 493.88, 587.33, 783.99],
+              "grave": [65.41, 98.0], "dissonante": [233.08, 246.94, 349.23, 369.99]}
+    fs = chords.get(tipo, chords["claro"])
+    dur = 2.2 if tipo != "grave" else 1.8
+    n = int(dur * SR); t = np.arange(n) / SR; x = np.zeros(n)
+    arp = tipo in ("recompensa", "subindo")
+    for i, f in enumerate(fs):
+        st = int(i * 0.07 * SR) if arp else 0
+        tt = t[: n - st]
+        tone = np.sin(2 * np.pi * f * tt) + 0.3 * np.sin(2 * np.pi * 2 * f * tt) + 0.1 * np.sin(2 * np.pi * 3.01 * f * tt)
+        env = np.minimum(1, tt / (0.01 if arp else 0.06)) * np.exp(-tt * (2.2 if arp else 1.6))
+        x[st:] += tone * env
+    if tipo == "grave":
+        x = np.tanh(x * 1.5)
+    return _norm(_room(x, 0.8, 0.25, seed), 0.75)
+
+
+def coracao(seed=0, batidas=2, bpm=60, **_):
+    """batida de coração grave (tum-tum)."""
+    beat = 60 / bpm
+    n = int((batidas * beat + 0.6) * SR); x = np.zeros(n)
+    for b in range(batidas):
+        for off, a in [(0, 1.0), (0.18, 0.7)]:
+            p = int((b * beat + off) * SR); m = int(0.25 * SR)
+            tt = np.arange(m) / SR
+            x[p:p + m] += np.sin(2 * np.pi * (48 + 30 * np.exp(-tt * 25)) * tt) * np.exp(-tt * 14) * a
+    return _norm(_room(x, 0.5, 0.15, seed), 0.9)
+
+
+def passos(seed=0, n=4, intervalo=0.28, **_):
+    """passinhos na terra/cascalho."""
+    r = np.random.default_rng(seed)
+    N = int((n * intervalo + 0.3) * SR); x = np.zeros(N)
+    for i in range(n):
+        p = int((i * intervalo + r.uniform(-0.02, 0.02)) * SR) + 100; m = int(0.09 * SR)
+        tt = np.arange(m) / SR
+        y = _bp(r.standard_normal(m), 300, 3500) * np.exp(-tt * 45) * r.uniform(0.6, 1)
+        y += np.sin(2 * np.pi * 90 * tt) * np.exp(-tt * 40) * 0.5
+        x[p:p + m] += y
+    return _norm(_room(x, 0.25, 0.12, seed), 0.7)
+
+
 LIB = {"picareta": picareta, "rachar": rachar, "quebrar": quebrar, "moeda": moeda, "ding": ding,
        "whoosh": whoosh, "ronco": ronco, "tictac": tictac, "sting": sting, "boom": boom, "pop": pop,
-       "subida": subida}
+       "subida": subida, "clique": clique, "apagar": apagar, "zumbido": zumbido, "giz": giz,
+       "acorde": acorde, "coracao": coracao, "passos": passos}
 NAMES = sorted(LIB)
 
 _cache: dict = {}

@@ -1,52 +1,83 @@
 {
   "_doc": "ÚNICO lugar do estilo visual global. Um story pode sobrescrever qualquer chave em story.estilo (merge profundo). Coordenadas em px do quadro 1080x1920.",
-  "video": {"largura": 1080, "altura": 1920, "fps": 30},
-  "zona_segura": {"topo": 250, "base": 420, "direita": 120, "esquerda": 60},
+  "video": {
+    "largura": 1080,
+    "altura": 1920,
+    "fps": 30
+  },
+  "zona_segura": {
+    "topo": 250,
+    "base": 420,
+    "direita": 120,
+    "esquerda": 60
+  },
   "legenda": {
-    "fonte": "Lilita One",
-    "max_palavras": 4,
-    "max_caracteres": 13,
+    "_doc": "Estilo medido da referência (docs/REFERENCIA.md §4). tamanho 72 px de Anton => maiúsculas ~62 px. destacar_ativa=false: sem karaokê; amarelo só nos destaques por dados.",
+    "fonte": "Anton",
+    "max_palavras": 3,
+    "max_caracteres": 22,
+    "dur_alvo_bloco": 0.75,
     "quebrar_em_pontuacao": true,
-    "segurar_fim": 0.3,
+    "segurar_fim": 0.25,
+    "remover_pontuacao": "",
     "modo": "bloco",
+    "uma_linha": true,
     "caixa_alta": true,
-    "tamanho": 100,
-    "altura_linha": 1.02,
+    "tamanho": 72,
+    "altura_linha": 1.1,
     "espaco_letras": "0.01em",
-    "espaco_palavras": "0.22em",
+    "espaco_palavras": "0.12em",
     "cor": "#FFFFFF",
-    "cor_ativa": "#FFD21F",
-    "cor_enfase": "#FF7A1A",
-    "contorno": 16,
-    "cor_contorno": "#111111",
-    "sombra": "0 9px 0 rgba(0,0,0,0.9), 0 16px 30px rgba(0,0,0,0.55)",
-    "escala_ativa": 1.12,
+    "cor_ativa": "#FFFFFF",
+    "cor_enfase": "#EBBA40",
+    "destacar_ativa": false,
+    "contorno": 4,
+    "cor_contorno": "#161408",
+    "sombra": "0 3px 2px rgba(0,0,0,0.55), 0 6px 18px rgba(0,0,0,0.45)",
+    "escala_ativa": 1.0,
     "escala_enfase": 1.0,
     "centro_x": 510,
-    "centro_y": 1300,
-    "largura_max": 860,
-    "entrada": "pop",
-    "dur_entrada": 0.14,
+    "centro_y": 1400,
+    "largura_max": 700,
+    "entrada": "fade",
+    "dur_entrada": 0.1,
     "saida": "nenhuma",
     "fundo": null,
     "posicoes": {
-      "baixo": {"centro_y": 1300},
-      "centro": {"centro_y": 960},
-      "alto": {"centro_y": 520}
+      "baixo": {
+        "centro_y": 1400
+      },
+      "meio": {
+        "centro_y": 1250
+      },
+      "alto": {
+        "centro_y": 390
+      },
+      "centro": {
+        "centro_y": 960
+      }
     }
   },
-  "transicao_padrao": {"tipo": "fade", "dur": 0.3, "sfx": "whoosh", "sfx_vol": -10},
+  "transicao_padrao": {
+    "tipo": "corte",
+    "dur": 0,
+    "sfx": null,
+    "sfx_vol": -10
+  },
   "tempo": {
-    "inicio": 0.25,
+    "_doc": "Ritmo medido da referência: ~2,95 palavras/s no total, nenhuma pausa > 0,55 s. pausa_fala = silêncio entre unidades de narração (além das pausas internas do TTS). Pausas intencionais: 'pausa_depois' na fala.",
+    "inicio": 0.12,
+    "pausa_fala": 0.1,
+    "final": 0.9,
+    "corte_antecipado": 0.04,
     "entrada_beat": 0.12,
     "pausa_frase": 0.28,
-    "respiro": 0.35,
-    "final": 0.9
+    "respiro": 0.35
   },
   "audio": {
     "lufs": -14.0,
     "pico_dbtp": -1.0,
-    "trilha_db": -20.0,
+    "trilha_db": -21.0,
     "ducking_db": 9.0,
     "sfx_db": -6.0,
     "voz_db": 0.0

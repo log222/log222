@@ -24,6 +24,11 @@
     });
   }
 
+  MD.loadScript = loadScript;
+  /** carrega o kit de arte (art/kit) uma vez; resolve com window.ART */
+  let kitP = null;
+  MD.loadKit = () => (kitP = kitP || loadScript("../art/kit/art.js").then(() => window.ART_LOAD("../art/kit/")));
+
   const beats = [];
   let TL, flashEl, stage;
 
@@ -54,7 +59,8 @@
 
   function makeCtx(b, el) {
     return { W: TL.largura, H: TL.altura, fps: TL.fps, el, params: b.params || {}, t: 0, tGlobal: 0, frame: 0,
-      beat: { id: b.id, ini: b.ini, dur: b.dur, words: b.palavras || [], marks: b.marks || {}, index: b.index } };
+      beat: { id: b.id, ini: b.ini, dur: b.dur, words: b.palavras || [], marks: b.marks || {}, index: b.index },
+      dur: b.dur, words: b.palavras || [], marks: b.marks || {}, plano: b.roteiro || {} };
   }
 
   function drawSafeZone(z) {
@@ -80,6 +86,13 @@
     el.style.transform = `translate(${tr.x || 0}px, ${tr.y || 0}px) scale(${tr.s || 1})`;
   }
 
+  /** esconde o plano e, se a cena tiver release(state), libera recursos (canvas grandes etc.) */
+  function hide(B) {
+    B.el.style.display = "none";
+    if (B.live && B.def.release) B.def.release(B.state, B.ctx);
+    B.live = false;
+  }
+
   window.renderFrame = function (t, frame = 0) {
     FRAME_T = t; _r = MD.rng(frame + 1);
     let flash = null;
@@ -90,7 +103,7 @@
       const dOut = i < beats.length - 1 ? (beats[i + 1].b.transicao.dur || 0) : 0;
       const t0 = b.ini - dIn / 2, t1 = b.ini + b.dur + dOut / 2;
       if (t >= t0 && t < t1 || (i === beats.length - 1 && t >= t1)) active.push(i);
-      else B.el.style.display = "none";
+      else hide(B);
     }
     for (const i of active) {
       const B = beats[i], b = B.b;
@@ -99,7 +112,7 @@
       if (i > 0 && b.transicao.dur > 0 && t < b.ini + b.transicao.dur / 2) {
         const d = b.transicao.dur, k = MD.clamp((t - (b.ini - d / 2)) / d);
         const r = (TR[b.transicao.tipo] || TR.fade)(k);
-        if (r.cut && t < b.ini) { B.el.style.display = "none"; continue; }
+        if (r.cut && t < b.ini) { hide(B); continue; }
         layer = r.inn || {}; if (r.flash) flash = r.flash;
       }
       // transição de SAÍDA (fronteira no fim deste beat)
@@ -108,11 +121,12 @@
         if (d > 0 && t >= end - d / 2) {
           const k = MD.clamp((t - (end - d / 2)) / d);
           const r = (TR[nb.transicao.tipo] || TR.fade)(k);
-          if (r.cut && t >= end) { B.el.style.display = "none"; continue; }
+          if (r.cut && t >= end) { hide(B); continue; }
           layer = Object.assign({}, layer, r.out || {}); if (r.flash) flash = r.flash;
-        } else if (d === 0 && t >= end) { B.el.style.display = "none"; continue; }
+        } else if (d === 0 && t >= end) { hide(B); continue; }
       }
       applyLayer(B.el, layer, z);
+      B.live = true;
       const lt = MD.clamp(t - b.ini, 0, b.dur);
       B.ctx.t = lt; B.ctx.tGlobal = t; B.ctx.frame = frame;
       B.def.render(B.state, lt, B.ctx);
