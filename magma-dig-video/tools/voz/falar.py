@@ -197,6 +197,10 @@ def main():
         e = {"i": i, "grupo": ph.get("grupo"), "texto": texto, "falado": falado, "wav": wav,
              "duracao": round(dur, 3), "ini": round(t, 3), "fim": round(t + dur, 3),
              "palavras": palavras_estimadas(texto, t, dur), "geracao_s": round(el, 2)}
+        # duração fora do esperado (letras/s) = provável palavra engolida, repetição ou cauda alucinada
+        cps = len(re.sub(r"[^\w]", "", falado)) / max(dur * a.atempo, 1e-3)
+        if len(falado) > 8 and not (6.0 <= cps <= 22.0):
+            e["suspeita"] = f"{cps:.1f} letras/s"
         entries.append(e)
         print(f"[{i + 1}/{len(frases)}] {dur:5.2f}s (gerado em {el:5.1f}s) {texto}", flush=True)
         gap = float(ph.get("pausa_depois", a.pausa)) if i < len(frases) - 1 else 0.25
