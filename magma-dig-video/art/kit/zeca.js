@@ -21,7 +21,7 @@
     lF: 0, lB: 0, liftF: 0, liftB: 0, legSpread: 1,
     eyes: "aberto", mouth: "sorriso", brows: "nenhum", blush: 1, look: [0.15, 0], blink: 0,
     tool: null, toolMat: "ferro", toolOff: 0, toolHand: "F",
-    lamp: 0, cone: null, coneAng: 8, coneLen: 900,
+    lamp: 0, cone: null, coneAng: 12, coneLen: 900,
     rim: "#B58CFF", rimA: 0.55, key: 1, ambient: null, ball: 0, spin: 0, sweat: 0, zzz: 0, t: 0,
     shadow: 1, sit: 0,
     // ator: alvo [x,y] px para olhar, camera 0..1 (olhar para a câmera), segura/seguraB (objeto na pata), bFrente (braço de trás na frente do corpo),
@@ -515,12 +515,16 @@
       });
       const L = p.coneLen * sc;
       g.save(); g.translate(x, y); g.rotate(deg(ang));
-      // 1) cunha quente em mistura normal: aparece sobre fundo claro (pedra cinza), não só no escuro
-      g.globalAlpha = Math.min(1, 0.8 * p.cone * k);
-      g.drawImage(spr, 0, -L * 0.5 * (p.coneAbre || 1), L * 256 / 236, L * (p.coneAbre || 1));
+      // 1) cunha quente em mistura normal (lê sobre pedra clara): 3 cunhas sobrepostas = borda macia
+      const ab = p.coneAbre || 1;
+      for (const [wf, a] of [[0.3, 0.22], [0.2, 0.28], [0.12, 0.34]]) {
+        g.globalAlpha = Math.min(1, a * p.cone * k);
+        g.beginPath(); g.moveTo(0, -7 * sc); g.lineTo(L, -L * wf * ab); g.lineTo(L, L * wf * ab); g.lineTo(0, 7 * sc); g.closePath();
+        g.fillStyle = ART.lg(g, 0, 0, L, 0, [[0, "rgba(255,236,170,1)"], [0.45, "rgba(255,214,120,.55)"], [1, "rgba(255,200,100,0)"]]); g.fill();
+      }
       // 2) núcleo aditivo
       g.globalCompositeOperation = "lighter"; g.globalAlpha = Math.min(1, 0.7 * p.cone * k);
-      g.drawImage(spr, 0, -L * 0.5 * (p.coneAbre || 1), L * 256 / 236, L * (p.coneAbre || 1));
+      g.drawImage(spr, 0, -L * 0.5 * ab, L * 256 / 236, L * ab);
       g.globalAlpha = Math.min(1, 0.6 * p.cone * k); g.drawImage(spr, 0, -L * 0.18 * (p.coneAbre || 1), L * 0.8 * 256 / 236, L * 0.36 * (p.coneAbre || 1));
       g.restore();
     }
