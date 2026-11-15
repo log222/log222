@@ -277,14 +277,6 @@ def fala_clips(falas, voice, speed, pron, rec_audio=None, rec_tempos=None, workd
             return AL.hybrid_times(a, words, spoken, asr=asr_cached(a), stats=stats)
         return T.estimate_word_times(a, words, spoken)
 
-    if voz_pasta:      # pasta pronta do CLI: clipes por fala, normalizados como gravação
-        ext = VX.ler_pasta(voz_pasta, com_texto)
-        for i, f in enumerate(falas):
-            if f["_words"]:
-                sp = T.apply_pronunciation(f["_words"], pron)
-                a = ext[f["id"]]
-                clips[i] = normalizar(i, a, [(w, x, y) for w, (x, y) in zip(f["_words"], tempos(a, f["_words"], sp))])
-        return clips
     # unidades de síntese = FRASES (pausa de fim de frase fica determinística)
     unid = []                                   # (i_fala, j_frase, i0, i1, falado)
     for i, f in enumerate(falas):
@@ -294,7 +286,27 @@ def fala_clips(falas, voice, speed, pron, rec_audio=None, rec_tempos=None, workd
         for j, (i0, i1) in enumerate(P.frases(f["_words"])):
             unid.append((i, j, i0, i1, " ".join(w for w in sp[i0:i1] if w)))
     audios = {}
-    if motor != "kokoro":
+    if voz_pasta:
+        # pasta pronta do CLI (tools/voz/falar.py). 1º tenta casar FRASE a FRASE (mesmo caminho do TTS,
+        # pausas determinísticas); se a pasta for por fala, casa por fala e normaliza como gravação.
+        por_frase = VX.ler_pasta_frases(voz_pasta)
+        textos = {(i, j): " ".join(falas[i]["_words"][i0:i1]) for i, j, i0, i1, _ in unid}
+        faltam = [t for t in textos.values() if VX.nk(t) not in por_frase]
+        if not faltam:
+            for (i, j), t in textos.items():
+                audios[f"{falas[i]['id']}#{j}"] = por_frase[VX.nk(t)]
+            print(f"  voz da pasta {voz_pasta}: {len(textos)} frases casadas pelo texto")
+        elif len(faltam) < len(textos):
+            die(f"a pasta {voz_pasta} não tem {len(faltam)} de {len(textos)} frases, ex.: {faltam[:5]}")
+    if voz_pasta and not audios:      # pasta por fala
+        ext = VX.ler_pasta(voz_pasta, com_texto)
+        for i, f in enumerate(falas):
+            if f["_words"]:
+                sp = T.apply_pronunciation(f["_words"], pron)
+                a = ext[f["id"]]
+                clips[i] = normalizar(i, a, [(w, x, y) for w, (x, y) in zip(f["_words"], tempos(a, f["_words"], sp))])
+        return clips
+    if motor != "kokoro" and not audios:
         grupos = {}
         for i, j, i0, i1, fal in unid:
             f = falas[i]

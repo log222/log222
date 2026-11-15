@@ -112,6 +112,21 @@ def gerar(itens, motor, voz, vel=1.0, atempo=1.0, regerar=(), log=print):
     return out
 
 
+def nk(s):
+    return "".join(ch for ch in s.lower() if ch.isalnum())
+
+
+def ler_pasta_frases(pasta):
+    """{texto normalizado: audio24k} de uma pasta do CLI (tempos.json + frases/NNN.wav)."""
+    pasta = Path(pasta)
+    d = json.loads((pasta / "tempos.json").read_text())
+    out = {}
+    for fr in d["frases"]:
+        a, sr = sf.read(pasta / fr["wav"], dtype="float32")
+        out[nk(fr["texto"])] = _to24(a, sr)
+    return out
+
+
 def ler_pasta(pasta, falas):
     """Usa uma pasta já gerada pelo CLI (tempos.json + frases/NNN.wav): casa cada fala pelo texto."""
     pasta = Path(pasta)

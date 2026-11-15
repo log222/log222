@@ -154,7 +154,10 @@ O kit `ART.*` (art/kit) tem paleta, Zeca com poses, câmera, glow, poeira etc. (
   `tools/voz/falar.py` no venv `.cache/venv-voz`, em lote só para o que falta, com cache próprio em `.cache/tts-ext/<motor>/`
   por (motor, voz, velocidade, atempo, take, texto falado). Geração serializada por motor (duas execuções não geram a
   mesma fala duas vezes). `--regerar f12` regera a fala ignorando o cache (mesmo take); para outra tomada use `"take"`.
-  `--voz-pasta DIR` usa uma pasta já gerada pelo CLI (casa as falas pelo texto). Depois disso tudo é igual: alinhamento
+  `--voz-pasta DIR` usa uma pasta já gerada pelo CLI (`tempos.json` + `frases/NNN.wav`): casa FRASE a FRASE pelo
+  texto (o roteiro completo do agente de voz, 1 frase por linha, bate 62/62 com as frases do story) e segue o mesmo
+  caminho do TTS (pausas determinísticas); se a pasta for por fala, casa por fala. Use `--motor/--voz` iguais aos da
+  pasta (pronúncia e rótulo). Ex.: `--voz-pasta build/voz/completo/qwen-narrador-jovem --motor qwen --voz narrador-jovem`. Depois disso tudo é igual: alinhamento
   por ASR, legenda, cortes.
 - `pm_alex` velocidade 1,0. `tts.py` gera WAV por frase + `tempos.json` (mesmo formato do alinhamento).
 - Tempo de palavra = **híbrido**: timestamps do Parakeet (ASR) como âncora onde a palavra reconhecida casa com o
