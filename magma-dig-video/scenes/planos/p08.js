@@ -11,12 +11,20 @@ MD.plano("p08", {
     const cena = ART.cenas.mina({ luz: 1 - esc, lanternas: true });
     ART.palco(g, t, cam, cena, gg => {
       const pose = ART.zeca.pose("parado", t, { x: 540, y: 1182, s: 1.62, turn: 0.15, camera: 0.8, lamp, cone: 0.5, eyes: "aberto", look: [Math.sin(Math.max(0, t - tp - 0.4) * 2.6) * 0.8 * esc, -0.4 * esc + 0.25 * Math.sin(t * 1.7) * esc], blinkSeed: 0.6, brows: esc > 0.3 ? "preocupado" : "nenhum", mouth: esc > 0.3 ? "o" : "neutro", rim: "#B58CFF" });
-      const A = esc > 0.01 ? ART.zeca.drawEscuro(gg, pose, esc) : ART.zeca.draw(gg, pose); ART._p08lamp = A.lanterna;
+      const A = esc > 0.01 ? ART.zeca.drawEscuro(gg, pose, esc) : ART.zeca.draw(gg, pose); ART._p08lamp = A.lanterna; ART._p08olhos = A.olhos; ART._p08pisca = pose.blink || 0;
     }, { frame: ctx.frame });
     g.save(); g.fillStyle = `rgba(4,3,8,${0.75 * esc})`; g.fillRect(0, 0, 1080, 1920); g.restore();
     // filamento esfriando (laranja que some devagar até o corte)
     const ember = esc * (1 - ART.prog(t, tp + 0.4, D)) * 0.8;
     if (ember > 0 && ART._p08lamp) ART.glow(g, ART._p08lamp.x, ART._p08lamp.y, 60, "#FF8A3C", ember);
+    // olhos acima do escurecimento: brilham, piscam e passeiam até o corte
+    if (esc > 0.3 && ART._p08olhos) for (const q of ART._p08olhos) {
+      const op = 1 - (ART._p08pisca || 0), lx = Math.sin(Math.max(0, t - tp - 0.4) * 2.6) * 8 * esc;
+      ART.glow(g, q.x, q.y, 70, "#CFE8FF", 0.55 * esc * op);
+      g.save(); g.globalAlpha = esc * op; g.fillStyle = "#FFFFFF";
+      g.beginPath(); g.ellipse(q.x + 6 + lx, q.y - 8, 9, 9 * Math.max(0.15, op), 0, 0, Math.PI * 2); g.fill();
+      ART.circ(g, q.x - 6 + lx, q.y + 8, 4); g.fill(); g.restore();
+    }
     GA.hud(g, t, { cron: 0 });
   },
 });

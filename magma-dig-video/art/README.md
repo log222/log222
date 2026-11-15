@@ -100,6 +100,11 @@ são mescladas e recortadas na faixa útil (`camadaEstatica(..., {y0, y1})`), gr
   cheia na faixa y≈300–1250, bordas esfumadas, cronômetro desenhado por cima, selo "IMAGEM REAL DO JOGO". O `visor` continua existindo; o selo padrão dele
   agora é "imagem real do jogo" (sem inglês).
 - **`ART.obj.bracoForte`**: redesenhado como braço de verdade (deltoide, bíceps, cotovelo, punho) e mais claro (`cor`, `rim`).
+- **v3 — lanterna corrigida de verdade**: a luz era desenhada nas âncoras (px de tela) ainda com a transformação da câmera ativa, e o feixe
+  era só aditivo (sumia sobre a pedra cinza). Agora halo, lente e feixe são desenhados em coordenadas de tela e o feixe tem uma cunha quente em
+  mistura normal + núcleo aditivo (lê sobre fundo claro). `coneAng` padrão 12° (para baixo/frente). **Reconferir:** qualquer plano com `lamp` dentro de
+  `ART.enquadrar`/zoom (o feixe agora aparece onde antes não aparecia).
+- **v3 — `ART.pata`**: o fim do braço esfuma para transparente (antes virava um retângulo escuro sobre fundo claro).
 - Tabela canônica do cronômetro e do contador: ver mensagem do orquestrador (vale para todos os grupos).
 
 ## Zonas
