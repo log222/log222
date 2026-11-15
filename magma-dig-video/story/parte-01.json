@@ -302,13 +302,14 @@
       },
       {
        "nome": "ronco",
-       "offset": 0.0,
+       "palavra": "dorme",
+       "offset": 0.05,
        "vol": -8
       },
       {
        "nome": "folha",
-       "offset": 0.3,
-       "vol": -6
+       "palavra": "aprende",
+       "offset": 0.0
       }
      ],
      "roteiro": {
@@ -830,11 +831,6 @@
        "nome": "passos",
        "offset": 0.0,
        "vol": -6
-      },
-      {
-       "nome": "porta",
-       "offset": 0.2,
-       "vol": -6
       }
      ],
      "roteiro": {
@@ -1010,7 +1006,8 @@
       },
       {
        "nome": "acorde",
-       "offset": 0.05,
+       "palavra": "sete",
+       "offset": 0.1,
        "vol": -6,
        "kw": {
         "tipo": "grave"
@@ -1199,6 +1196,12 @@
        "nome": "moeda",
        "offset": 0.25,
        "vol": -2
+      },
+      {
+       "nome": "ding",
+       "palavra": "Tempo",
+       "offset": 0.03,
+       "vol": -6
       }
      ],
      "roteiro": {
@@ -1664,12 +1667,18 @@
      "sfx": [
       {
        "nome": "tictac",
-       "offset": 0.0,
-       "vol": -4,
+       "offset": 0.1,
+       "vol": -6,
        "kw": {
-        "dur": 0.6,
-        "bpm": 200
+        "dur": 1.2,
+        "bpm": 350
        }
+      },
+      {
+       "nome": "pop",
+       "palavra": "amanhã",
+       "offset": 0.0,
+       "vol": -6
       }
      ],
      "roteiro": {
@@ -1695,7 +1704,8 @@
      "sfx": [
       {
        "nome": "moeda",
-       "offset": 0.25,
+       "palavra": "quarenta",
+       "offset": 0.12,
        "vol": -2
       }
      ],
@@ -1738,6 +1748,12 @@
        "kw": {
         "tipo": "grave"
        }
+      },
+      {
+       "nome": "giz",
+       "palavra": "Faltam",
+       "offset": 0.02,
+       "vol": -6
       }
      ],
      "roteiro": {

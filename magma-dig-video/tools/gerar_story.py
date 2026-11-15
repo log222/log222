@@ -21,11 +21,23 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 
-# Efeitos FIXADOS à mão (substituem o mapeamento automático daquele plano). Pedidos do animador:
-SFX_FIXO = {
-    3: [{"nome": "tictac", "offset": 0.0, "vol": -4, "kw": {"dur": 0.9, "bpm": 240}}],          # para seco no zero
-    30: [{"nome": "apagar", "offset": 0.1}, {"nome": "moeda", "palavra": "Seis", "offset": 0.0, "vol": -2}],
-    57: [{"nome": "clique", "palavra": "dois.", "offset": 0.45}, {"nome": "apagar", "palavra": "dois.", "offset": 0.5}],
+# Ajustes de efeito À MÃO por plano (pedidos dos animadores, casando som com a palavra em que a imagem reage).
+# "remover": nomes tirados do mapeamento automático ("*" = todos); "adicionar": eventos acrescentados.
+SFX_AJUSTE = {
+    3: {"remover": ["*"], "adicionar": [{"nome": "tictac", "offset": 0.0, "vol": -4, "kw": {"dur": 0.9, "bpm": 240}}]},
+    9: {"remover": ["ronco", "folha"], "adicionar": [{"nome": "ronco", "palavra": "dorme", "offset": 0.05, "vol": -8},
+                                                    {"nome": "folha", "palavra": "aprende", "offset": 0.0}]},
+    26: {"remover": ["porta"], "adicionar": []},
+    30: {"remover": ["*"], "adicionar": [{"nome": "apagar", "offset": 0.1},
+                                         {"nome": "moeda", "palavra": "Seis", "offset": 0.0, "vol": -2}]},
+    31: {"remover": ["acorde"], "adicionar": [{"nome": "acorde", "palavra": "sete", "offset": 0.1, "vol": -6, "kw": {"tipo": "grave"}}]},
+    36: {"remover": [], "adicionar": [{"nome": "ding", "palavra": "Tempo", "offset": 0.03, "vol": -6}]},
+    50: {"remover": ["tictac"], "adicionar": [{"nome": "tictac", "offset": 0.1, "vol": -6, "kw": {"dur": 1.2, "bpm": 350}},
+                                             {"nome": "pop", "palavra": "amanhã", "offset": 0.0, "vol": -6}]},
+    51: {"remover": ["moeda"], "adicionar": [{"nome": "moeda", "palavra": "quarenta", "offset": 0.12, "vol": -2}]},
+    52: {"remover": [], "adicionar": [{"nome": "giz", "palavra": "Faltam", "offset": 0.02, "vol": -6}]},
+    57: {"remover": ["*"], "adicionar": [{"nome": "clique", "palavra": "dois.", "offset": 0.45},
+                                         {"nome": "apagar", "palavra": "dois.", "offset": 0.5}]},
 }
 # Automação da trilha por deixa do roteiro (texto do campo sfx). Deixa persiste até a próxima deixa;
 # "baixa"/"corte seco" voltam ao normal no 1º plano de outro bloco; "some" dura até a próxima deixa
@@ -191,8 +203,10 @@ def main():
         idx = 0
         for p in ps:
             ev, sem = sfx_for(p)
-            if p["id"] in SFX_FIXO:
-                ev = json.loads(json.dumps(SFX_FIXO[p["id"]]))
+            if p["id"] in SFX_AJUSTE:
+                aj = SFX_AJUSTE[p["id"]]
+                ev = [] if "*" in aj["remover"] else [e for e in ev if e["nome"] not in aj["remover"]]
+                ev += json.loads(json.dumps(aj["adicionar"]))
             pl = {"id": f"p{p['id']:02d}", "inicio": idx, "cena": "auto",
                   "destaques": p.get("destaques", []), "sfx": ev,
                   "roteiro": {k: p[k] for k in ("id", "bloco", "cenario", "acao", "camera", "ui", "sfx", "usa_gameplay", "narracao")}}
