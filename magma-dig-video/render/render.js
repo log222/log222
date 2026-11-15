@@ -51,7 +51,8 @@ function args() {
     const ow = Math.round(W * scale), oh = Math.round(H * scale);
     const ff = spawn("ffmpeg", ["-v", "error", "-y", "-f", "image2pipe", "-framerate", String(fps), "-c:v", "mjpeg", "-i", "-",
       "-vf", `scale=${ow}:${oh}:flags=lanczos,format=yuv420p`, "-c:v", "libx264", "-preset", A.preset || "veryfast",
-      "-crf", A.crf || "17", "-threads", A.threads || "2", "-r", String(fps), A.out], { stdio: ["pipe", "inherit", "inherit"] });
+      ...(A.bitrate ? ["-b:v", A.bitrate, "-maxrate", A.maxrate || A.bitrate, "-bufsize", A.bufsize || "16M"] : ["-crf", A.crf || "17"]),
+      "-threads", A.threads || "2", "-r", String(fps), A.out], { stdio: ["pipe", "inherit", "inherit"] });
     const done = new Promise((res, rej) => ff.on("close", c => (c === 0 ? res() : rej(new Error("ffmpeg saiu com " + c)))));
     const t0 = Date.now();
     const tempos = [];

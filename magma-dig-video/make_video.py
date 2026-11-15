@@ -39,6 +39,7 @@ from lib import align as AL  # noqa: E402
 from lib import fsutil as FS  # noqa: E402
 from lib import mix as MX  # noqa: E402
 from lib import narration as N  # noqa: E402
+from lib import pausas as P  # noqa: E402
 from lib import sfx as X  # noqa: E402
 from lib import tts_engine as T  # noqa: E402
 from lib import voz_externa as VX  # noqa: E402
@@ -189,8 +190,21 @@ def asr_cached(audio):
 
 
 def fala_clips(falas, voice, speed, pron, rec_audio=None, rec_tempos=None, workdir=None, stats=None,
-               motor="kokoro", atempo=1.0, regerar=(), voz_pasta=None):
-    """Para cada fala: {audio(24k), palavras[(w, ini, fim)] relativos} ou None (fala muda)."""
+               motor="kokoro", atempo=1.0, regerar=(), voz_pasta=None, pausas=None, relat=None):
+    """Para cada fala: {audio(24k), palavras[(w, ini, fim)] relativos} ou None (fala muda).
+    Pausas por pontuação (lib/pausas.py): TTS sintetiza FRASE a FRASE, apara o silêncio do motor e junta com a
+    pausa configurada; vírgula/;/: dentro da frase são medidas e ajustadas. relat recebe o relatório por pontuação."""
+    relat = relat if relat is not None else []
+
+    def normalizar(i, a, ws):
+        """clipe de fala inteira (gravação ou pasta pronta): apara as pontas e ajusta TODAS as pausas internas."""
+        a2, head = P.trim2(a)
+        ws = [(w, x - head, y - head) for w, x, y in ws]
+        a3, tt, rel = P.ajustar(a2, [(x, y) for _, x, y in ws], [w for w, _, _ in ws], pausas)
+        for r in rel:
+            r["fala"] = falas[i]["id"]
+        relat.extend(rel)
+        return {"audio": a3, "palavras": [(w, x, y) for (w, _, _), (x, y) in zip(ws, tt)]}
     clips = [None] * len(falas)
     if rec_audio:
         full = N.load_any(rec_audio)
@@ -247,7 +261,7 @@ def fala_clips(falas, voice, speed, pron, rec_audio=None, rec_tempos=None, workd
         for i, (ini, fim, ws) in zip(idx, spans):
             a0, a1 = max(0, ini - 0.04), fim + 0.06
             seg = full[int(a0 * T.SR): int(a1 * T.SR)]
-            clips[i] = {"audio": seg, "palavras": [(w, x - a0, y - a0) for w, x, y in ws]}
+            clips[i] = normalizar(i, seg, [(w, x - a0, y - a0) for w, x, y in ws])
             al["frases"].append({"i": len(al["frases"]), "grupo": falas[i]["id"], "texto": falas[i]["texto"].replace("*", ""),
                                  "ini": round(ini, 3), "fim": round(fim, 3),
                                  "palavras": [{"w": w, "ini": round(x, 3), "fim": round(y, 3)} for w, x, y in ws]})
@@ -256,39 +270,72 @@ def fala_clips(falas, voice, speed, pron, rec_audio=None, rec_tempos=None, workd
         print(f"  alinhamento da gravação -> {workdir / 'alinhamento' / 'tempos.json'} (edite e use --narracao-tempos se precisar)")
         return clips
     use_asr = AL.available()
-    ext = {}
     com_texto = [f for f in falas if f["_words"]]
-    if voz_pasta:
+
+    def tempos(a, words, spoken):
+        if use_asr:
+            return AL.hybrid_times(a, words, spoken, asr=asr_cached(a), stats=stats)
+        return T.estimate_word_times(a, words, spoken)
+
+    if voz_pasta:      # pasta pronta do CLI: clipes por fala, normalizados como gravação
         ext = VX.ler_pasta(voz_pasta, com_texto)
-    elif motor != "kokoro":
-        # externo: gera em lote só o que falta no cache (por fala: velocidade/take podem variar)
+        for i, f in enumerate(falas):
+            if f["_words"]:
+                sp = T.apply_pronunciation(f["_words"], pron)
+                a = ext[f["id"]]
+                clips[i] = normalizar(i, a, [(w, x, y) for w, (x, y) in zip(f["_words"], tempos(a, f["_words"], sp))])
+        return clips
+    # unidades de síntese = FRASES (pausa de fim de frase fica determinística)
+    unid = []                                   # (i_fala, j_frase, i0, i1, falado)
+    for i, f in enumerate(falas):
+        if not f["_words"]:
+            continue
+        sp = T.apply_pronunciation(f["_words"], pron)
+        for j, (i0, i1) in enumerate(P.frases(f["_words"])):
+            unid.append((i, j, i0, i1, " ".join(w for w in sp[i0:i1] if w)))
+    audios = {}
+    if motor != "kokoro":
         grupos = {}
-        for f in com_texto:
-            falado = " ".join(w for w in T.apply_pronunciation(f["_words"], pron) if w)
+        for i, j, i0, i1, fal in unid:
+            f = falas[i]
             grupos.setdefault(float(f.get("velocidade", speed)), []).append(
-                {"id": f["id"], "falado": falado, "take": int(f.get("take", 0))})
+                {"id": f"{f['id']}#{j}", "falado": fal, "take": int(f.get("take", 0)), "fala": f["id"]})
         for vel, its in grupos.items():
-            ext.update(VX.gerar(its, motor, voice, vel, atempo, regerar=set(regerar)))
+            reg = {it["id"] for it in its if it["fala"] in regerar}
+            audios.update(VX.gerar(its, motor, voice, vel, atempo, regerar=reg))
+    for i, j, i0, i1, fal in unid:
+        f = falas[i]
+        key = f"{f['id']}#{j}"
+        if key not in audios:
+            v = float(f.get("velocidade", speed))
+            if f["id"] in regerar:
+                N.synth_cached(fal, voice, v, refresh=True)
+            audios[key] = N.synth_cached(fal, voice, v)
     for i, f in enumerate(falas):
         words = f["_words"]
         if not words:
             continue
-        spoken = T.apply_pronunciation(words, pron)
-        if f["id"] in ext:
-            a = ext[f["id"]]
-        else:
-            if f["id"] in regerar:
-                N.synth_cached(" ".join(w for w in spoken if w), voice, float(f.get("velocidade", speed)), refresh=True)
-            a = N.synth_cached(" ".join(w for w in spoken if w), voice, float(f.get("velocidade", speed)))
-        if use_asr:
-            wt = AL.hybrid_times(a, words, spoken, asr=asr_cached(a), stats=stats)
-        else:
-            wt = T.estimate_word_times(a, words, spoken)
-        clips[i] = {"audio": a, "palavras": [(w, x, y) for w, (x, y) in zip(words, wt)]}
+        sp = T.apply_pronunciation(words, pron)
+        parts, pal, t = [], [], 0.0
+        rng = P.frases(words)
+        for j, (i0, i1) in enumerate(rng):
+            a = P.trim(audios[f"{f['id']}#{j}"])
+            ws, sps = words[i0:i1], sp[i0:i1]
+            tt = tempos(a, ws, sps)
+            a, tt, rel = P.ajustar(a, tt, ws, pausas, forcar=())
+            for r in rel:
+                r["fala"] = f["id"]; r["k"] += i0
+            relat.extend(rel)
+            pal += [(w, t + x, t + y) for w, (x, y) in zip(ws, tt)]
+            parts.append(a); t += len(a) / T.SR
+            if j < len(rng) - 1:                # pausa entre frases da mesma fala: valor configurado
+                g = max(0.0, pausas[P.tipo(ws[-1]) or "fim_frase"] - 2 * P.KEEP)
+                parts.append(np.zeros(int(round(g * T.SR)), np.float32)); t += len(parts[-1]) / T.SR
+        clips[i] = {"audio": np.concatenate(parts), "palavras": pal}
     return clips
 
 
-def layout(falas, clips, tempo, meta, workdir):
+def layout(falas, clips, tempo, meta, workdir, pausas):
     sr = T.SR
     parts, t, frases, out = [], 0.0, [], []
 
@@ -314,7 +361,11 @@ def layout(falas, clips, tempo, meta, workdir):
                            "palavras": [{"w": w["w"], "ini": round(w["ini"], 3), "fim": round(w["fim"], 3)} for w in words]})
         else:
             silence(float(f["duracao"]))
-        silence(float(f["pausa_depois"]) if f.get("pausa_depois") is not None else tempo["pausa_fala"])
+        if f.get("pausa_depois") is not None:                       # pausa intencional por dado
+            silence(float(f["pausa_depois"]))
+        elif i < len(falas) - 1:
+            ult = f["_words"][-1] if f["_words"] else "."
+            silence(pausas[P.tipo(ult) or "fim_frase"] - (2 * P.KEEP if c else 0))
         if f.get("duracao_min"):
             silence(ini + float(f["duracao_min"]) - t)
         if i == len(falas) - 1:
@@ -506,7 +557,7 @@ def _print_warn(lines, seen):
             seen.add(line); print("  " + line)
 
 
-def run_render(tl_path, f0, f1, outdir, scale, workers, crf, preset, label):
+def run_render(tl_path, f0, f1, outdir, scale, workers, crf, preset, label, bitrate=None, maxrate=None):
     n = f1 - f0
     workers = max(1, min(workers, math.ceil(n / 15)))
     cuts = [f0 + round(n * k / workers) for k in range(workers + 1)]
@@ -516,7 +567,8 @@ def run_render(tl_path, f0, f1, outdir, scale, workers, crf, preset, label):
         seg = outdir / f"seg{k:02d}.mp4"
         cmd = ["node", str(ROOT / "render" / "render.js"), "--timeline", str(tl_path), "--from", str(cuts[k]),
                "--to", str(cuts[k + 1]), "--out", str(seg), "--scale", str(scale), "--crf", str(crf),
-               "--preset", preset, "--threads", "1", "--label", f"{label}{k}"]
+               "--preset", preset, "--threads", "1", "--label", f"{label}{k}"] + \
+              (["--bitrate", bitrate, "--maxrate", maxrate or bitrate] if bitrate else [])
         r = subprocess.run(cmd, capture_output=True, text=True)
         if r.returncode != 0:
             raise RuntimeError(f"render falhou ({k}):\n{r.stderr[-3000:]}")
@@ -595,6 +647,47 @@ def ffprobe(path):
     return json.loads(r.stdout)
 
 
+def tabela_pausas(falas, laid, narr, relat, pausas, work, verbose=True):
+    """Mede, na narração FINAL, a pausa depois de cada palavra pontuada (alvo × real) e salva pausas.json."""
+    allw, allt, dono = [], [], []
+    for f, lf in zip(falas, laid):
+        for w in lf["words"]:
+            allw.append(w["w"]); allt.append((w["ini"], w["fim"])); dono.append(f["id"])
+    med = P.medir(narr, allt, allw)
+    orig = {(r["fala"], r["k"]): r for r in relat}
+    # índice local da palavra dentro da fala
+    loc, cnt, prev = [], 0, None
+    for d in dono:
+        cnt = cnt + 1 if d == prev else 0; prev = d; loc.append(cnt)
+    linhas, sem = [], []
+    for k, tp, real in med:
+        r = orig.get((dono[k], loc[k]))
+        fronteira = dono[k] != dono[k + 1]
+        alvo = pausas[tp]
+        f = next(x for x in falas if x["id"] == dono[k])
+        if fronteira and f.get("pausa_depois") is not None:
+            alvo = float(f["pausa_depois"])
+        antes = r["antes"] if r else None
+        acao = r["acao"] if r else ("fala->fala" if fronteira else "frase->frase")
+        if acao == "sem pausa":
+            sem.append(f"{dono[k]}: \"{allw[k]} {allw[k + 1]}\"")
+        linhas.append({"fala": dono[k], "palavra": allw[k], "tipo": tp, "alvo": alvo, "motor": antes, "real": real, "acao": acao})
+    FS.write_text(work / "pausas.json", json.dumps(linhas, ensure_ascii=False, indent=1))
+    nw = len(allw)
+    total = laid[-1]["fim"]
+    por = {}
+    for l in linhas:
+        por.setdefault(l["tipo"], []).append(l["real"])
+    resumo = ", ".join(f"{tp}: n={len(v)} alvo {pausas[tp]:.2f} real méd {np.mean(v):.2f} min {np.min(v):.2f}" for tp, v in por.items())
+    print(f"[pausas] {nw} palavras em {total:.2f}s = {nw / total:.2f} pal/s; {resumo}")
+    print(f"   vírgulas/; sem pausa nenhuma no motor (não forçadas): {len(sem)}" + (f" -> {'; '.join(sem)}" if sem else ""))
+    if verbose:
+        print(f"   {'fala':5s} {'palavra':16s} {'tipo':13s} {'alvo':>5s} {'motor':>6s} {'real':>5s}  ação")
+        for l in linhas:
+            mo = f"{l['motor']:.2f}" if l["motor"] is not None else "  -"
+            print(f"   {l['fala']:5s} {l['palavra'][:16]:16s} {l['tipo']:13s} {l['alvo']:5.2f} {mo:>6s} {l['real']:5.2f}  {l['acao']}")
+
+
 def longest_silences(audio, sr, top=5):
     sil = T.silences(audio, sr, min_s=0.25, rel_db=-35)
     return sorted(((round(y - x, 2), round(x, 2)) for x, y in sil), reverse=True)[:top]
@@ -626,7 +719,9 @@ def main():
     ap.add_argument("--cs-max", type=int, default=0, help="divide o contact sheet em arquivos de até N quadros")
     ap.add_argument("--zona-segura", action="store_true")
     ap.add_argument("--workers", type=int, default=4)
-    ap.add_argument("--so-audio", action="store_true", help="para após gerar timeline e mix.wav")
+    ap.add_argument("--so-audio", action="store_true", help="para após gerar timeline e mix.wav (imprime a tabela de pausas)")
+    ap.add_argument("--pausas", action="store_true", help="imprime a tabela de pausas também fora do --so-audio")
+    ap.add_argument("--qualidade-max", action="store_true", help="codificação final sem teto de bitrate (crf 16)")
     a = ap.parse_args()
 
     t_start = time.time()
@@ -669,13 +764,15 @@ def main():
 
     # 1) narração
     os.environ.setdefault("OMP_NUM_THREADS", "4")
-    stats = {}
+    stats, relat = {}, []
+    pausas = st["tempo"]["pausas"]
     clips = fala_clips(falas, voice, speed, pron, a.narracao_audio, a.narracao_tempos, work, stats, motor=motor,
-                       atempo=atempo, regerar=(a.regerar or "").split(",") if a.regerar else (), voz_pasta=a.voz_pasta)
+                       atempo=atempo, regerar=(a.regerar or "").split(",") if a.regerar else (), voz_pasta=a.voz_pasta,
+                       pausas=pausas, relat=relat)
     meta = {"fonte": "gravado", "origem": a.narracao_audio} if a.narracao_audio else \
         {"fonte": "tts", "motor": motor, "voz": voice, "velocidade": speed, "atempo": atempo}
     print(f"[voz] motor={motor} voz={voice} velocidade={speed} atempo={atempo}" + (f" pasta={a.voz_pasta}" if a.voz_pasta else ""))
-    laid, narr = layout(falas, clips, st["tempo"], meta, work)
+    laid, narr = layout(falas, clips, st["tempo"], meta, work, pausas)
     nframes = int(round(laid[-1]["fim"] * fps))
     total = nframes / fps
     pstart, pend = plano_times(falas, planos, laid, total, st["tempo"])
@@ -714,6 +811,7 @@ def main():
     if stats.get("palavras"):
         print(f"   alinhamento: {stats['ancoras']}/{stats['palavras']} palavras ancoradas pelo ASR "
               f"({100 * stats['ancoras'] / stats['palavras']:.0f}%), resto interpolado por fonemas")
+    tabela_pausas(falas, laid, narr, relat, pausas, work, verbose=a.so_audio or a.pausas)
     n_arq = sum(1 for p in planos if p.get("params", {}).get("arquivo"))
     if any(p["cena"] == "auto" for p in planos):
         print(f"   planos com arquivo próprio (scenes/planos/): {n_arq}/{sum(p['cena'] == 'auto' for p in planos)}")
@@ -784,7 +882,9 @@ def main():
         p.unlink()
     t0 = time.time()
     segs, rstats = run_render(tl_path, f0, f1, segdir, scale, a.workers,
-                              crf=23 if a.rascunho else 17, preset="ultrafast" if a.rascunho else "veryfast", label="w")
+                              crf=23 if a.rascunho else 16, preset="ultrafast" if a.rascunho else "medium", label="w",
+                             bitrate=None if (a.rascunho or a.qualidade_max) else V.get("bitrate", "8M"),
+                             maxrate=V.get("bitrate_max", "10M"))
     dt = time.time() - t0
     nf = f1 - f0
     print(f"[render] {nf} quadros em {dt:.1f}s = {nf / dt:.1f} quadros/s ({len(segs)} workers; "

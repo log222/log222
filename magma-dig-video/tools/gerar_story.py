@@ -53,13 +53,13 @@ RESTAURA = {"db": 0, "rampa": 0.6, "modo": "normal"}
 # Pronúncia por motor (só o áudio). "padrao" vale para todos; a seção do motor sobrescreve.
 # Escolhas testadas com ASR de volta (Whisper + Parakeet), ver relatório da fase 3.
 PRONUNCIA = {
-    "padrao": {"MAGMA DIG": "Mágma Díg", "Zeca": "Zéca", "Crac": "Crák",
-               "Dia um. Mina A": "Dia um... Mina Á", "Cobre": "Cóbre"},
-    "kokoro": {"MAGMA DIG": "MAGMA /dˈiɡ/", "Zeca": "Zeca", "Crac": "/kɾˈak/",
-               "Dia um. Mina A": "Dia úm... Mína Á", "Cobre": "Cobre"},
+    # Só o nome do jogo (palavra inglesa); português comum fica na grafia normal (fase 4: grafias como
+    # "úm", "Mína", "cóbre", "Crák" foram removidas: o ASR não percebe tonicidade errada).
+    "padrao": {"MAGMA DIG": "Magma Díg"},
+    "kokoro": {"MAGMA DIG": "MAGMA /dˈiɡ/"},
 }
 
-PAUSAS = {47: 0.5}          # plano -> pausa depois da fala (s)
+PAUSAS = {47: 0.6}          # plano -> pausa depois da fala (s)
 SEPARAR_ANTES = {47, 57}     # planos que começam uma fala própria (isolar para a pausa / fechamento)
 
 

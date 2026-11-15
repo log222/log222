@@ -3,7 +3,9 @@
   "video": {
     "largura": 1080,
     "altura": 1920,
-    "fps": 30
+    "fps": 30,
+    "bitrate": "8M",
+    "bitrate_max": "10M"
   },
   "zona_segura": {
     "topo": 250,
@@ -65,11 +67,18 @@
     "sfx_vol": -10
   },
   "tempo": {
-    "_doc": "Ritmo medido da referência: ~2,95 palavras/s no total, nenhuma pausa > 0,55 s. pausa_fala = silêncio entre unidades de narração (além das pausas internas do TTS). Pausas intencionais: 'pausa_depois' na fala.",
-    "inicio": 0.12,
-    "pausa_fala": 0.12,
+    "_doc": "Pausas por pontuação (s de silêncio entre palavras), iguais para qualquer motor de voz. fim_frase/reticencias/dois_pontos: exatas; virgula/ponto_virgula: mínimo garantido (só alonga silêncio existente). Pausa intencional extra: 'pausa_depois' na fala.",
+    "pausas": {
+      "fim_frase": 0.4,
+      "reticencias": 0.3,
+      "dois_pontos": 0.3,
+      "virgula": 0.15,
+      "ponto_virgula": 0.15
+    },
+    "inicio": 0.15,
     "final": 0.9,
     "corte_antecipado": 0.04,
+    "pausa_fala": 0.4,
     "entrada_beat": 0.12,
     "pausa_frase": 0.28,
     "respiro": 0.35

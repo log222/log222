@@ -8,7 +8,9 @@
   $PY tools/voz/falar.py --lista-vozes
 
 Entrada: .txt (1 frase por linha), .json (lista de strings ou de {texto, grupo,
-pausa_depois}) ou -t repetido. Pronúncia: tools/voz/pronuncia.json (grafia ->
+pausa_depois, seed}) ou -t repetido. `seed` por frase
+fixa a tomada dos motores autorregressivos (Qwen, Chatterbox) independentemente da
+posição no lote; sem ela vale --seed (padrão 0). Pronúncia: tools/voz/pronuncia.json (grafia ->
 grafia falada, só no áudio; seções "padrao" e por motor). O texto original vai
 para o JSON ("texto"); o que o motor leu vai em "falado".
 
@@ -145,10 +147,12 @@ def main():
     ap.add_argument("--voz", default=None, help="voz pronta (ex.: M1, F2, pm_alex, Ryan) ou nome em vozes_qwen.json")
     ap.add_argument("--velocidade", type=float, default=1.0, help="velocidade nativa do motor (Supertonic/Kokoro)")
     ap.add_argument("--atempo", type=float, default=1.0, help="acelera depois (ffmpeg atempo, 0.9–1.15 sem mexer no timbre)")
-    ap.add_argument("--pausa", type=float, default=0.12, help="pausa entre frases em narracao.wav (s)")
+    ap.add_argument("--pausa", type=float, default=0.35, help="pausa entre frases em narracao.wav (s); ponto pede >= 0,3 s")
     ap.add_argument("--inicio", type=float, default=0.10)
     ap.add_argument("--pron", default=str(HERE / "pronuncia.json"))
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--virgula", default=None, help='reforço de vírgula só no texto falado, ex.: "..." ou ";" '
+                    "(o texto do JSON continua com a vírgula)")
     ap.add_argument("--sem-cache", action="store_true")
     ap.add_argument("--lista-vozes", action="store_true")
     a = ap.parse_args()
@@ -177,7 +181,10 @@ def main():
     for i, ph in enumerate(frases):
         texto = ph["texto"].strip()
         falado = aplicar_pron(texto, pron)
-        key = hashlib.sha1(f"{a.motor}|{voz}|{a.velocidade:.3f}|{a.seed}|{falado}|"
+        if a.virgula:
+            falado = re.sub(r",(?=\s)", a.virgula, falado)
+        seed = int(ph.get("seed", a.seed))  # semente por frase (JSON) — não depende da posição no lote
+        key = hashlib.sha1(f"{a.motor}|{voz}|{a.velocidade:.3f}|s{seed}|{falado}|"
                            f"{os.environ.get('VOZ_CB_EXAG','')}{os.environ.get('VOZ_CB_CFG','')}"
                            f"{os.environ.get('VOZ_ST3_PASSOS','')}".encode()).hexdigest()[:16]
         cp = CACHE / f"{a.motor}-{key}.npz"
@@ -186,7 +193,7 @@ def main():
             raw, sr, el = z["a"], int(z["sr"]), float(z["el"])
         else:
             ts = time.time()
-            raw, sr = fn(falado, voz, a.velocidade, a.seed + i)
+            raw, sr = fn(falado, voz, a.velocidade, seed)
             el = time.time() - ts
             np.savez(cp, a=raw, sr=sr, el=el)
         gen_s += el
@@ -196,7 +203,7 @@ def main():
         dur = len(b) / SR
         e = {"i": i, "grupo": ph.get("grupo"), "texto": texto, "falado": falado, "wav": wav,
              "duracao": round(dur, 3), "ini": round(t, 3), "fim": round(t + dur, 3),
-             "palavras": palavras_estimadas(texto, t, dur), "geracao_s": round(el, 2)}
+             "palavras": palavras_estimadas(texto, t, dur), "geracao_s": round(el, 2), "seed": seed}
         # duração fora do esperado (letras/s) = provável palavra engolida, repetição ou cauda alucinada
         cps = len(re.sub(r"[^\w]", "", falado)) / max(dur * a.atempo, 1e-3)
         if len(falado) > 8 and not (6.0 <= cps <= 22.0):
@@ -211,7 +218,7 @@ def main():
     nw = sum(len(WORD_RE.findall(e["texto"])) for e in entries)
     fala = sum(e["duracao"] for e in entries)
     data = {"versao": 1, "audio": "narracao.wav", "sr": SR, "fonte": "tts", "motor": a.motor, "voz": voz,
-            "velocidade": a.velocidade, "atempo": a.atempo, "licenca": M.LICENCAS.get(a.motor),
+            "velocidade": a.velocidade, "atempo": a.atempo, "virgula": a.virgula, "licenca": M.LICENCAS.get(a.motor),
             "duracao": round(len(audio) / SR, 3), "palavras_estimadas": True,
             "geracao_s": round(gen_s, 1), "frases": entries}
     (out / "tempos.json").write_text(json.dumps(data, ensure_ascii=False, indent=1))

@@ -7,18 +7,10 @@
  "trilha": true,
  "pronuncia": {
   "padrao": {
-   "MAGMA DIG": "Mágma Díg",
-   "Zeca": "Zéca",
-   "Crac": "Crák",
-   "Dia um. Mina A": "Dia um... Mina Á",
-   "Cobre": "Cóbre"
+   "MAGMA DIG": "Magma Díg"
   },
   "kokoro": {
-   "MAGMA DIG": "MAGMA /dˈiɡ/",
-   "Zeca": "Zeca",
-   "Crac": "/kɾˈak/",
-   "Dia um. Mina A": "Dia úm... Mína Á",
-   "Cobre": "Cobre"
+   "MAGMA DIG": "MAGMA /dˈiɡ/"
   }
  },
  "estilo": {
@@ -1583,7 +1575,7 @@
      }
     }
    ],
-   "pausa_depois": 0.5
+   "pausa_depois": 0.6
   },
   {
    "id": "f19",
