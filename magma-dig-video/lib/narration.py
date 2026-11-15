@@ -26,6 +26,7 @@ from pathlib import Path
 import numpy as np
 import soundfile as sf
 
+from . import fsutil as FS
 from . import tts_engine as T
 
 CACHE = T.ROOT / ".cache" / "tts"
@@ -39,7 +40,7 @@ def synth_cached(text: str, voice: str, speed: float) -> np.ndarray:
         a, _ = sf.read(p, dtype="float32")
         return a
     a = T.synth(text, voice, speed)
-    sf.write(p, a, T.SR)
+    FS.write_wav(p, a, T.SR)
     return a
 
 

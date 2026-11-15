@@ -169,4 +169,38 @@ window.GB_LOAD = window.GB_LOAD || (() => (window.__GB_P = window.__GB_P || MD.l
     ART.ell(g, 0, 0, r * 0.7, r * 0.38); g.lineWidth = r * 0.08; g.strokeStyle = "rgba(150,95,10,.55)"; g.stroke();
     g.restore();
   };
+
+  // ------------------------------------------------------------------ C5: fundo e coluna de ramos
+  let FUNDO = null;
+  /** Toca desfocada (kit) atrás dos painéis, com deriva de parallax própria: dx,dy em px, z = zoom */
+  GB.fundoC5 = (g, t, o = {}) => {
+    const ART = A();
+    if (!FUNDO) FUNDO = ART.cenas.tocaDesfocada({ riscados: o.riscados ?? 1 });
+    const z = o.z ?? 1.04;
+    g.save(); g.translate(540 + (o.dx || 0), 960 + (o.dy || 0)); g.scale(z, z); g.translate(-540, -960);
+    for (const L of FUNDO.fundo) L.draw(g, t);
+    g.restore();
+    if (o.escuro) { g.save(); g.fillStyle = `rgba(10,8,18,${o.escuro})`; g.fillRect(0, 0, W, H); g.restore(); }
+    if (o.tinta) { g.save(); g.fillStyle = o.tinta; g.fillRect(0, 0, W, H); g.restore(); }
+  };
+  /** transforma o "espaço do painel" (1080x1920) com zoom em torno de (cx,cy) e deslocamento: chama fn(g) */
+  GB.noPainel = (g, cam, fn) => {
+    g.save();
+    g.translate(540 + (cam.sx || 0), 960 + (cam.sy || 0)); g.scale(cam.z || 1, cam.z || 1); g.translate(-(cam.cx ?? 540), -(cam.cy ?? 960));
+    fn(g); g.restore();
+  };
+  /** posição Y (topo) do cartão de ramo i na coluna padrão */
+  GB.ramoY = (i, y0 = 520, gap = 112) => y0 + i * gap;
+  /** coluna de 7 ramos: est(i) -> {aceso, nivel, pulso, a, dx, esc} */
+  GB.colRamos = (g, est, o = {}) => {
+    const ART = A(), s = o.s ?? 0.82, w = 760 * s, x0 = 540 - w / 2, y0 = o.y0 ?? 520, gap = o.gap ?? 112;
+    ART.ui.RAMOS.forEach((R, i) => {
+      const e = est(i) || {}; if ((e.a ?? 1) <= 0) return;
+      const y = y0 + i * gap, sc = e.esc || 1;
+      g.save(); g.translate(540, y + 66 * s); g.scale(sc, sc); g.translate(-540, -(y + 66 * s));
+      ART.ui.ramo(g, x0 + (e.dx || 0), y, { ramo: i, nivel: e.nivel || 0, aceso: e.aceso ?? 0, s, a: e.a ?? 1, pulso: e.pulso || 0, sombra: false });
+      if (e.flash) ART.glow(g, 540, y + 66 * s, w * 0.7, R.cor, 0.5 * e.flash);
+      g.restore();
+    });
+  };
 })();

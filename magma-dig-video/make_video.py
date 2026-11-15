@@ -36,6 +36,7 @@ import soundfile as sf
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 from lib import align as AL  # noqa: E402
+from lib import fsutil as FS  # noqa: E402
 from lib import mix as MX  # noqa: E402
 from lib import narration as N  # noqa: E402
 from lib import sfx as X  # noqa: E402
@@ -164,7 +165,7 @@ def asr_cached(audio):
     if p.exists():
         return [tuple(x) for x in json.loads(p.read_text())]
     w = AL.asr_words(audio)
-    p.write_text(json.dumps(w))
+    FS.write_text(p, json.dumps(w))
     return w
 
 
@@ -231,7 +232,7 @@ def fala_clips(falas, voice, speed, pron, rec_audio=None, rec_tempos=None, workd
                                  "ini": round(ini, 3), "fim": round(fim, 3),
                                  "palavras": [{"w": w, "ini": round(x, 3), "fim": round(y, 3)} for w, x, y in ws]})
         (workdir / "alinhamento").mkdir(exist_ok=True, parents=True)
-        (workdir / "alinhamento" / "tempos.json").write_text(json.dumps(al, ensure_ascii=False, indent=1))
+        FS.write_text(workdir / "alinhamento" / "tempos.json", json.dumps(al, ensure_ascii=False, indent=1))
         print(f"  alinhamento da gravação -> {workdir / 'alinhamento' / 'tempos.json'} (edite e use --narracao-tempos se precisar)")
         return clips
     use_asr = AL.available()
@@ -282,9 +283,9 @@ def layout(falas, clips, tempo, meta, workdir):
             silence(float(f["final"]) if f.get("final") is not None else tempo["final"])
         out.append({"ini": ini, "fim": t, "words": words})
     audio = np.concatenate(parts)
-    sf.write(workdir / "narracao.wav", audio, sr)
+    FS.write_wav(workdir / "narracao.wav", audio, sr)
     data = dict(versao=1, audio="narracao.wav", sr=sr, duracao=round(len(audio) / sr, 3), frases=frases, **meta)
-    (workdir / "tempos.json").write_text(json.dumps(data, ensure_ascii=False, indent=1))
+    FS.write_text(workdir / "tempos.json", json.dumps(data, ensure_ascii=False, indent=1))
     return out, audio
 
 
@@ -552,9 +553,24 @@ def main():
     sp = Path(a.story)
     story = json.loads(sp.read_text())
     name = sp.stem
-    out = Path(a.out) if a.out else ROOT / "out" / f"{name}.mp4"
+    # pasta de trabalho POR INVOCAÇÃO: a execução "completa" padrão usa build/<nome>/; qualquer -o, --plano ou
+    # --trecho usa build/<nome>/runs/<tag>/ e saída própria. Se a pasta estiver travada por outra execução
+    # simultânea, usa <tag>-<pid>. Nada é apagado fora da própria pasta.
+    tag = ""
+    if a.out:
+        tag = Path(a.out).stem
+    if a.plano:
+        tag = (tag + "-" if tag else "") + "plano-" + "-".join(sorted(a.plano.split(",")))[:80]
+    if a.trecho:
+        tag = (tag + "-" if tag else "") + "trecho-" + a.trecho.replace(".", "_")
+    out = Path(a.out) if a.out else ROOT / "out" / (f"{name}-{tag}.mp4" if tag else f"{name}.mp4")
     out.parent.mkdir(parents=True, exist_ok=True)
-    work = ROOT / "build" / name
+    work = ROOT / "build" / name / "runs" / tag if tag else ROOT / "build" / name
+    lock = FS.lock_dir(work)
+    if lock is None:
+        work = work.with_name(work.name + f"-{os.getpid()}")
+        lock = FS.lock_dir(work)
+        print(f"  (pasta em uso por outra execução; usando {work})")
     work.mkdir(parents=True, exist_ok=True)
     st = deep_merge(json.loads((ROOT / "config" / "estilo.json").read_text()), story.get("estilo"))
     for sec in list(st.values()):
@@ -596,8 +612,8 @@ def main():
     tl = {"fps": fps, "largura": W, "altura": H, "duracao": total, "estilo": st, "captions": caps,
           "debug_zona_segura": bool(a.zona_segura), "fontes_extra": story.get("fontes", []), "beats": beats}
     tl_path = work / "timeline.json"
-    tl_path.write_text(json.dumps(tl, ensure_ascii=False, indent=1))
-    (work / "sfx.json").write_text(json.dumps(events, ensure_ascii=False, indent=1))
+    FS.write_text(tl_path, json.dumps(tl, ensure_ascii=False, indent=1))
+    FS.write_text(work / "sfx.json", json.dumps(events, ensure_ascii=False, indent=1))
 
     nw = sum(len(lf["words"]) for lf in laid)
     speech = sum(len(c["audio"]) for c in clips if c) / T.SR
@@ -621,7 +637,7 @@ def main():
     trilha = not a.sem_trilha and story.get("trilha", True) is not False
     tfile = a.trilha or (story["trilha"] if isinstance(story.get("trilha"), str) else None)
     mixed, info = MX.mixdown(narr, events, total, st["audio"], trilha=trilha, trilha_arquivo=tfile)
-    sf.write(work / "mix.wav", mixed, MX.SR)
+    FS.write_wav(work / "mix.wav", mixed, MX.SR)
     print(f"[áudio] {info['lufs']} LUFS, pico {info['pico_dbtp']} dBTP, trilha={'sim' if trilha else 'não'}")
     if a.so_audio:
         return
@@ -641,9 +657,18 @@ def main():
     scale = a.escala or (0.5 if a.rascunho else 1.0)
 
     # 5) quadros do contact sheet
+    sel_ids = set(a.plano.split(",")) if a.plano else None
     if a.cs_cortes:
         cs = [(min(f1 - 1, int((pstart[k] + pend[k]) / 2 * fps)), b["id"]) for k, b in enumerate(beats)
-              if pend[k] * fps > f0 and pstart[k] * fps < f1]
+              if (b["id"] in sel_ids or b["fala"] in sel_ids if sel_ids else
+                  pend[k] * fps > f0 + 0.5 and pstart[k] * fps < f1 - 0.5)]
+    elif sel_ids:   # só dentro dos planos pedidos (mesmo se não forem vizinhos)
+        ks = [k for k, b in enumerate(beats) if b["id"] in sel_ids or b["fala"] in sel_ids]
+        per = max(1, a.cs_quadros // len(ks))
+        cs = []
+        for k in ks:
+            g0, g1 = int(math.ceil(pstart[k] * fps)), int(pend[k] * fps) - 1
+            cs += [(g0 + round((g1 - g0) * (j + 0.5) / per), beats[k]["id"]) for j in range(per)]
     else:
         fr = sorted({min(f1 - 1, f0 + round((f1 - f0 - 1) * k / max(1, a.cs_quadros - 1))) for k in range(a.cs_quadros)})
         cs = [(f, next(b["id"] for k, b in enumerate(beats) if pstart[k] <= f / fps < pend[k] or k == len(beats) - 1)) for f in fr]
