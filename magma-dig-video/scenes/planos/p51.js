@@ -17,6 +17,8 @@ MD.plano("p51", {
     const z = ART.map(t, 0, dur, 1.0, 1.14, "inOutSine");
     GB.noPainel(g, { z, cx: 540, cy: 880, px: ART.map(t, 0, dur, 540, 620, "inOutSine"), py: 860 }, gg => {
       ART.painelMercado(gg, t, { preco, seta: 0, prog: 1, press: 0 });
+      // antes do "quarenta" o botão diz só VENDER (sem valor); depois, VENDER +40 moedas
+      if (t < trava) u.botao(gg, 540, 1130, 720, 150, { texto: "VENDER", icone: "moeda" });
       // ícone do cobre pulsa no "cobre"
       const pc = GB.hit(t, tCobre, 0.5); if (pc > 0) ART.glow(gg, 106 + 87 * 1.55, 390 + 87 * 1.55, 200, "#FF8A3C", 0.7 * pc);
       // estouro do preço

@@ -11,11 +11,12 @@ MD.plano("p30", {
     g.fillStyle = "#040308"; g.fillRect(0, 0, 1080, 1920);
     g.save(); GC.cam(g, z, 540, 900);
     // no escuro os olhos vivem: piscam, procuram (esquerda/direita) e sobem para o contador quando ele acende
-    let pisca = 0; for (let b = tOff + 0.35; b < D; b += 0.9) pisca = Math.max(pisca, ART.pulse(t, b, 0.16));
+    let pisca = 0; for (let b = tOff + 0.3; b < D; b += 0.65) pisca = Math.max(pisca, ART.pulse(t, b, 0.22));
     const procura = t < tSeis ? Math.sin((t - tOff) * 3.2) * 0.7 : 0;
     const sobe = ART.prog(t, tSeis - 0.1, tSeis + 0.25, "outCubic");
     const p = ART.zeca.pose("parado", t, { x: 540 + 6 * Math.sin(t * 1.3), y: 1700, s: 3.6, turn: 0.1, look: [procura, ART.lerp(0.1, -0.85, sobe)], eyes: "aberto", mouth: "o", lamp: lamp, headTilt: ART.lerp(4 * procura, -8, sobe), blink: pisca });
     if (lamp > 0.05) { ART.zeca.draw(g, p); g.fillStyle = "rgba(4,3,8,.45)"; g.fillRect(-200, -200, 1480, 2320); }
+    else if (pisca > 0.45) GC.zecaNoEscuro(g, p, { escuro: 1, apagado: 0.96 });   // piscada: os olhos somem por inteiro
     else ART.zeca.drawEscuro(g, p, 1);
     g.restore();
     // contador flutuando no escuro
@@ -23,7 +24,8 @@ MD.plano("p30", {
     // antes de "Seis": o contador já está lá, apagado (fantasma), respirando de leve
     if (t > tOff && ck < 0.5) {
       const ga = ART.prog(t, tOff, tOff + 0.3) * (1 - ART.clamp(ck * 2));
-      ART.ui.contador(g, 540, 600, { valor: "?", s: 3.0, cor: "#5E586E", a: (0.32 + 0.08 * Math.sin(t * 4)) * ga });
+      const pul = 0.5 + 0.5 * Math.sin((t - tOff) * 2 * Math.PI * 1.4);   // "?" pulsando até o "Seis"
+      ART.ui.contador(g, 540, 600, { valor: "?", s: 3.0 * (1 + 0.06 * pul), cor: ART.mix("#5E586E", "#B8AE90", pul), a: (0.3 + 0.35 * pul) * ga });
     }
     if (ck > 0.06) {
       const y = 600 + Math.sin(t * 3) * 8;

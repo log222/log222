@@ -17,7 +17,7 @@ MD.plano("p49", {
       // brilho passando pelo título
       { const sx = ART.lerp(200, 900, ART.prog(t, tM + 0.15, D, "inOutSine")); g.save(); g.globalCompositeOperation = "lighter"; g.globalAlpha = k * 0.55;
         g.fillStyle = ART.lg(g, sx - 90, 0, sx + 90, 0, [[0, "rgba(255,240,200,0)"], [0.5, "rgba(255,240,200,.9)"], [1, "rgba(255,240,200,0)"]]); g.fillRect(sx - 90, 360, 180, 120); g.restore(); }
-      [["pedra", "Pedra", "×7"], ["cobre", "Cobre", "×1"]].forEach(([ic, nome, q], i) => {
+      [["cobre", "Cobre", "×1"]].forEach(([ic, nome, q], i) => {
         const y = 560 + i * 160, d0 = tM + i * Math.max(0.08, (D - tM) * 0.3), sl = (1 - ART.ease.outCubic(ART.prog(t, d0, d0 + 0.4))) * 80, al = ART.prog(t, d0 - 0.05, d0 + 0.25);
         g.save(); g.globalAlpha *= al;
         ART.ui.cartao(g, 130 + sl, y, 820, 130, { r: 26, sombra: false });
