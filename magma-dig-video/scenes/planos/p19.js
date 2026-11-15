@@ -11,7 +11,7 @@ MD.plano("p19", {
     const beat = Math.max(ART.pulse(t, tb, 0.28), 0.7 * ART.pulse(t, tb + 0.22, 0.26), ART.pulse(t, tb + 0.85, 0.28), 0.7 * ART.pulse(t, tb + 1.07, 0.26));
     const z = ART.map(t, 0, D, 1.0, 1.07, "outSine") * (1 + 0.012 * beat);
     g.save(); GC.cam(g, z, 540, 820);
-    ART.coracaoMagma(g, 0, { x: 540, y: 800, s: 0.92, pulso: 0.45 + 1.1 * beat, revela: 0.15 + 0.35 * beat + 0.15 * ART.prog(t, tCor, D) });
+    ART.coracaoMagma(g, 0, { x: 540, y: 800, s: 0.92, pulso: 0.45 + 1.1 * beat, revela: 0.08 + 0.3 * beat + 0.1 * ART.prog(t, tCor, D) });
     ART.glow(g, 540, 800, 900, "#FF5A1A", 0.4 * beat); ART.glow(g, 540, 760, 380, "#FFB060", 0.3 * beat);
     // chão de rocha e o Zeca pequeno de costas, recortado pela luz laranja
     g.fillStyle = ART.lg(g, 0, 1180, 0, 1400, [[0, "#1A0806"], [1, "#050203"]]);
