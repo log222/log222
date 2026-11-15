@@ -1,0 +1,9 @@
+kokoro-onnx==0.6.1
+sherpa-onnx==2.0.1
+soundfile
+numpy
+scipy
+pyloudnorm
+num2words
+pillow
+fonttools

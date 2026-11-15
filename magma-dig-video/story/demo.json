@@ -1,0 +1,46 @@
+{
+  "titulo": "DEMO do pipeline (não é o roteiro real)",
+  "voz": "pm_alex",
+  "velocidade": 1.05,
+  "trilha": true,
+  "pronuncia": {},
+  "beats": [
+    {
+      "id": "gancho",
+      "narracao": "Em MAGMA DIG, o Zeca cavou até a camada 312.",
+      "enfase": ["MAGMA", "DIG", "312"],
+      "cena": "placeholder",
+      "params": {"rotulo": "PARTE 1", "fundo": ["#3a2214", "#140806"]},
+      "sfx": [
+        {"nome": "picareta", "palavra": "cavou", "offset": 0.05},
+        {"nome": "picareta", "palavra": "camada", "offset": 0.0, "seed": 2}
+      ]
+    },
+    {
+      "id": "recompensa",
+      "narracao": "A pedra rachou, e ele ganhou mil e quinhentas moedas!",
+      "legenda": "A pedra rachou, e ele ganhou *1.500* moedas!",
+      "cena": "placeholder",
+      "params": {"fundo": ["#2c1a10", "#0e0604"], "moeda_txt": "+1.500"},
+      "transicao": {"tipo": "fade", "dur": 0.3},
+      "sfx": [
+        {"nome": "quebrar", "palavra": "rachou", "offset": 0.1},
+        {"nome": "moeda", "palavra": "moedas", "offset": -0.1, "vol": 2}
+      ]
+    },
+    {
+      "id": "gancho_final",
+      "narracao": "Mas então, o chão começou a tremer.",
+      "enfase": ["tremer"],
+      "cena": "placeholder",
+      "params": {"bloco": false, "fundo": ["#4a1608", "#120402"]},
+      "transicao": {"tipo": "flash", "dur": 0.24, "sfx": "boom", "sfx_vol": -4},
+      "legenda_pos": "alto",
+      "sfx": [
+        {"nome": "ronco", "palavra": "chão", "offset": 0.0, "vol": 3},
+        {"nome": "sting", "palavra": "tremer", "offset": 0.2, "vol": -2}
+      ],
+      "final": 1.4
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><title>Kit de arte MAGMA DIG</title>
+<link rel="stylesheet" href="../../assets/fonts/fonts.css">
+<style>html,body{margin:0;background:#000;overflow:hidden}canvas{display:block}</style>
+<script src="../kit/art.js"></script>
+</head><body><canvas id="c" width="1080" height="1920"></canvas>
+<script>
+/* Harness de pré-visualização: index.html?board=mina  ->  window.renderFrame(t, frame)
+ * Cada prancha (art/boards/<nome>.js) registra ART.boards[nome] = {dur, setup?, render(g, t, frame)} */
+(async () => {
+  try {
+    await ART_LOAD("../kit/");
+    const q = new URLSearchParams(location.search), name = q.get("board") || "zeca";
+    ART.boards = ART.boards || {};
+    await new Promise((res, rej) => { const s = document.createElement("script"); s.src = "../boards/" + name + ".js"; s.onload = res; s.onerror = () => rej(new Error("board " + name)); document.head.appendChild(s); });
+    const B = ART.boards[name];
+    if (B.setup) await B.setup();
+    await ART.ready();
+    const g = document.getElementById("c").getContext("2d");
+    window.renderFrame = (t, frame = Math.round(t * 30)) => { g.setTransform(1,0,0,1,0,0); g.globalAlpha = 1; g.globalCompositeOperation = "source-over"; g.filter = "none"; g.clearRect(0,0,1080,1920); B.render(g, t, frame); return true; };
+    window.__BOARD__ = B; window.__READY__ = true;
+    if (!navigator.webdriver) { let t0 = performance.now(); const loop = () => { renderFrame(((performance.now() - t0) / 1000) % (B.dur || 6)); requestAnimationFrame(loop); }; loop(); }
+  } catch (e) { window.__ERR__ = String(e.stack || e); console.error(e); }
+})();
+</script></body></html>

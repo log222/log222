@@ -1,0 +1,6 @@
+.cache/
+build/
+out/*.mp4
+out/*-contact*.png
+__pycache__/
+*.pyc
