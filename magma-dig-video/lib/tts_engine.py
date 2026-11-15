@@ -51,12 +51,30 @@ def _piper(name: str):
 def synth(text: str, voice: str = "pm_alex", speed: float = 1.0) -> np.ndarray:
     """Sintetiza UMA frase. Retorna float32 24 kHz sem silêncio nas pontas."""
     if voice in KOKORO_VOICES:
-        audio, sr = _kokoro().create(text, voice=voice, speed=speed, lang="pt-br", trim=True)
+        k = _kokoro()
+        if "/" in text:  # trechos /IPA/ vindos do dicionário de pronúncia
+            parts = re.split(r"(/[^/]+/)", text)
+            ph = " ".join(p[1:-1] if p.startswith("/") and p.endswith("/") and len(p) > 2
+                          else k.tokenizer.phonemize(p, "pt-br") for p in parts if p.strip())
+            # pontuação logo após um trecho IPA (ex.: "/dˈiɡ/,") fica colada
+            ph = re.sub(r"\s+([,.!?;:])", r"\1", " ".join(ph.split()))
+            audio, sr = k.create(ph, voice=voice, speed=speed, is_phonemes=True, trim=True)
+        else:
+            audio, sr = k.create(text, voice=voice, speed=speed, lang="pt-br", trim=True)
         assert sr == SR
         return trim_silence(np.asarray(audio, dtype=np.float32))
     if voice in PIPER_VOICES:
+        # sherpa-onnx 2.x não traz mais o frontend espeak para Piper: fonemizamos
+        # aqui (mesmo espeak-ng do Kokoro) e passamos os codepoints.
+        import sherpa_onnx
         tts = _piper(voice)
-        out = tts.generate(text, sid=0, speed=speed)
+        ph = _espeak_raw(text)
+        g = sherpa_onnx.GenerationConfig()
+        g.phoneme_codepoints = [[ord(c) for c in ph]]
+        g.speed = speed
+        out = tts.generate(text, g)
+        if out.sample_rate <= 0 or len(out.samples) == 0:
+            raise RuntimeError(f"Piper falhou em {text!r}")
         a = np.asarray(out.samples, dtype=np.float32)
         if out.sample_rate != SR:
             from scipy.signal import resample_poly
@@ -65,6 +83,20 @@ def synth(text: str, voice: str = "pm_alex", speed: float = 1.0) -> np.ndarray:
             a = resample_poly(a, SR // g, out.sample_rate // g).astype(np.float32)
         return trim_silence(a)
     raise ValueError(f"voz desconhecida: {voice} (use {ALL_VOICES})")
+
+
+@functools.lru_cache(maxsize=1)
+def _espeak_backend():
+    import espeakng_loader
+    from phonemizer.backend import EspeakBackend
+    from phonemizer.backend.espeak.wrapper import EspeakWrapper
+    EspeakWrapper.set_library(espeakng_loader.get_library_path())
+    EspeakWrapper.set_data_path(espeakng_loader.get_data_path())
+    return EspeakBackend("pt-br", preserve_punctuation=True, with_stress=True)
+
+
+def _espeak_raw(text: str) -> str:
+    return " ".join(_espeak_backend().phonemize([text])[0].split())
 
 
 # ------------------------------------------------------------------ análise
@@ -150,16 +182,31 @@ def apply_pronunciation(words: list[str], pron: dict[str, str] | None) -> list[s
 @functools.lru_cache(maxsize=20000)
 def phoneme_weight(word: str) -> float:
     """Peso ~ número de fonemas (espeak pt-br). Pontuação adiciona um pouco."""
+    m = re.search(r"/([^/]+)/", word)
     core = re.sub(r"[^\w]", "", word, flags=re.UNICODE)
     if not core:
         return 0.0
     try:
-        ph = _kokoro().tokenizer.phonemize(core, "pt-br")
-        ph = re.sub(r"[ˈˌː\s]", "", ph)
-        w = float(len(ph))
+        ph = m.group(1) if m else _kokoro().tokenizer.phonemize(core, "pt-br")
+        ph = ph.replace(" ", "")
     except Exception:
-        w = float(len(core))
-    return max(1.0, w)
+        return max(1.0, float(len(core)))
+    # vogais pesam mais que consoantes; sílaba tônica alonga (ajustado contra
+    # timestamps do Parakeet nas amostras: mediana ~80 ms, p90 ~200 ms)
+    w = 0.0
+    for c in ph:
+        if c == "ˈ":
+            w += 0.4
+        elif c in "ˌː̃":
+            continue
+        elif c in _VOWELS:
+            w += 1.3
+        else:
+            w += 0.8
+    return max(0.6, w)
+
+
+_VOWELS = set("aeiouɐɛɔəɪʊæyɨ")
 
 
 # ------------------------------------------------------------ alinhamento

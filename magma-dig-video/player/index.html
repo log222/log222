@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>MAGMA DIG player</title>
+<link rel="stylesheet" href="../assets/fonts/fonts.css">
+<style>
+  html, body { margin: 0; padding: 0; background: #000; overflow: hidden; }
+  #frame { position: relative; width: 1080px; height: 1920px; overflow: hidden; background: #000; }
+  #stage, #captions, #overlay, #flash { position: absolute; inset: 0; }
+  #captions { z-index: 1000; pointer-events: none; }
+  #flash { z-index: 900; opacity: 0; pointer-events: none; }
+  #overlay { z-index: 2000; pointer-events: none; }
+  /* determinismo: nada de transição/animação CSS dependente de relógio */
+  *, *::before, *::after { transition: none !important; caret-color: transparent; }
+  * { animation-play-state: paused; }
+</style>
+<script src="helpers.js"></script>
+<script src="captions.js"></script>
+</head>
+<body>
+<div id="frame"><div id="stage"></div><div id="flash"></div><div id="captions"></div><div id="overlay"></div></div>
+<script src="player.js"></script>
+</body>
+</html>

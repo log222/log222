@@ -1,0 +1,54 @@
+{
+  "_doc": "ÚNICO lugar do estilo visual global. Um story pode sobrescrever qualquer chave em story.estilo (merge profundo). Coordenadas em px do quadro 1080x1920.",
+  "video": {"largura": 1080, "altura": 1920, "fps": 30},
+  "zona_segura": {"topo": 250, "base": 420, "direita": 120, "esquerda": 60},
+  "legenda": {
+    "fonte": "Lilita One",
+    "max_palavras": 4,
+    "max_caracteres": 18,
+    "quebrar_em_pontuacao": true,
+    "segurar_fim": 0.3,
+    "modo": "bloco",
+    "caixa_alta": true,
+    "tamanho": 104,
+    "altura_linha": 1.02,
+    "espaco_letras": "0.01em",
+    "espaco_palavras": "0.22em",
+    "cor": "#FFFFFF",
+    "cor_ativa": "#FFD21F",
+    "cor_enfase": "#FF7A1A",
+    "contorno": 16,
+    "cor_contorno": "#111111",
+    "sombra": "0 9px 0 rgba(0,0,0,0.9), 0 16px 30px rgba(0,0,0,0.55)",
+    "escala_ativa": 1.12,
+    "escala_enfase": 1.0,
+    "centro_x": 510,
+    "centro_y": 1300,
+    "largura_max": 860,
+    "entrada": "pop",
+    "dur_entrada": 0.14,
+    "saida": "nenhuma",
+    "fundo": null,
+    "posicoes": {
+      "baixo": {"centro_y": 1300},
+      "centro": {"centro_y": 960},
+      "alto": {"centro_y": 520}
+    }
+  },
+  "transicao_padrao": {"tipo": "fade", "dur": 0.3, "sfx": "whoosh", "sfx_vol": -10},
+  "tempo": {
+    "inicio": 0.25,
+    "entrada_beat": 0.12,
+    "pausa_frase": 0.28,
+    "respiro": 0.35,
+    "final": 0.9
+  },
+  "audio": {
+    "lufs": -14.0,
+    "pico_dbtp": -1.0,
+    "trilha_db": -20.0,
+    "ducking_db": 9.0,
+    "sfx_db": -6.0,
+    "voz_db": 0.0
+  }
+}
