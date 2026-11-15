@@ -8,7 +8,8 @@
   $PY tools/voz/falar.py --lista-vozes
 
 Entrada: .txt (1 frase por linha), .json (lista de strings ou de {texto, grupo,
-pausa_depois, seed}) ou -t repetido. `seed` por frase
+pausa_depois, seed, falado}) ou -t repetido. `falado` substitui o texto lido pelo motor
+(sem passar pelo dicionário) — ex.: reticências no lugar de uma vírgula que o motor engoliu. `seed` por frase
 fixa a tomada dos motores autorregressivos (Qwen, Chatterbox) independentemente da
 posição no lote; sem ela vale --seed (padrão 0). Pronúncia: tools/voz/pronuncia.json (grafia ->
 grafia falada, só no áudio; seções "padrao" e por motor). O texto original vai
@@ -147,7 +148,7 @@ def main():
     ap.add_argument("--voz", default=None, help="voz pronta (ex.: M1, F2, pm_alex, Ryan) ou nome em vozes_qwen.json")
     ap.add_argument("--velocidade", type=float, default=1.0, help="velocidade nativa do motor (Supertonic/Kokoro)")
     ap.add_argument("--atempo", type=float, default=1.0, help="acelera depois (ffmpeg atempo, 0.9–1.15 sem mexer no timbre)")
-    ap.add_argument("--pausa", type=float, default=0.28, help="pausa entre frases em narracao.wav (s); com as bordas dá ~0,34 s (ponto pede >= 0,3 s)")
+    ap.add_argument("--pausa", type=float, default=0.32, help="pausa entre frases em narracao.wav (s); ponto pede >= 0,3 s")
     ap.add_argument("--inicio", type=float, default=0.10)
     ap.add_argument("--pron", default=str(HERE / "pronuncia.json"))
     ap.add_argument("--seed", type=int, default=0)
@@ -181,7 +182,9 @@ def main():
     for i, ph in enumerate(frases):
         texto = ph["texto"].strip()
         falado = aplicar_pron(texto, pron)
-        if a.virgula:
+        if ph.get("falado"):  # override por frase do texto falado (ex.: "velha... um bloco")
+            falado = ph["falado"]
+        elif a.virgula:
             falado = re.sub(r",(?=\s)", a.virgula, falado)
         seed = int(ph.get("seed", a.seed))  # semente por frase (JSON) — não depende da posição no lote
         key = hashlib.sha1(f"{a.motor}|{voz}|{a.velocidade:.3f}|s{seed}|{falado}|"
