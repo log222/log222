@@ -46,3 +46,6 @@ $PY tools/voz/medir.py build/voz/saida/narracao.wav --texto-arquivo tools/voz/am
 ```
 WER ida e volta (Whisper-small e Parakeet, de `.cache/asr`), palavras/s, pausas, clipping, F0 (desvio em semitons),
 UTMOS22 (treinado em inglês) e DNSMOS.
+
+Atenção: o cache não sabe da descrição/referência. Se mudar uma descrição em `vozes_qwen.json`, apague a referência em
+`.cache/voz-ref/` e gere com `--sem-cache` (ou mude `--seed`).

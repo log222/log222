@@ -17,7 +17,7 @@ MD.plano("p37", {
     const pump = ART.clamp(ART.prog(t, tF - 0.08, tF + 0.12, "outBack") - ART.prog(t, tN, tN + 0.2) * 0.6);
     const pk = ART.prog(t, tN - 0.05, tN + 0.1);
     const giro = ART.kf(t, [[tN, 0], [tN + 0.22, -14, "outCubic"], [imp, 26, "inQuart"], [imp + 0.3, 22, "outCubic"]]);
-    const pulso = ART.kf(t, [[tN, 0], [tN + 0.22, -10, "outCubic"], [imp, 105, "inQuart"], [imp + 0.3, 98, "outCubic"]]);
+    const pulso = ART.kf(t, [[tN, 0], [tN + 0.22, -10, "outCubic"], [imp, 140, "inQuart"], [imp + 0.3, 134, "outCubic"]]);
     const cor = ART.mix("#07060C", "#1E1830", 0.15 + 0.85 * rim);
     let R = null;
     ART.withLayer(g, cam, 1, gg => { R = ART.obj.muque(gg, t, { x: 1110, y: 1010 + (1 - sobe) * 300, s: 1.0, rim, pump, giro, picareta: pk, pulso, cor }); });
@@ -32,7 +32,7 @@ MD.plano("p37", {
     }
     // Zeca: só os olhos no breu (aparece quando o golpe começa)
     const zk = ART.prog(t, tN, tN + 0.3);
-    if (zk > 0) ART.withLayer(g, cam, 1, gg => { gg.save(); gg.globalAlpha = zk; ART.zeca.drawEscuro(gg, ART.zeca.pose("parado", t, { x: 150, y: 1290, s: 0.95, turn: 0.4, alvo: [700, 800], eyes: t > imp ? "espanto" : "aberto" }), 0.97); gg.restore(); });
+    if (zk > 0) ART.withLayer(g, cam, 1, gg => { gg.save(); gg.globalAlpha = zk; ART.zeca.drawEscuro(gg, ART.zeca.pose("parado", t, { x: 770, y: 1320, s: 0.8, turn: -0.4, alvo: [300, 1100], eyes: t > imp ? "espanto" : "aberto" }), 0.97); gg.restore(); });
     ART.post(g, ctx.frame, { vinheta: 0.65 });
   },
 });
