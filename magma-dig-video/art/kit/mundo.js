@@ -180,11 +180,87 @@
       }
     });
     g.drawImage(spr, bx, by);
+    if (o.especial === "ampulheta") faceAmpulheta(g, front, top, o);
     if (o.escuro) { for (const q of [front, top, side]) { ART.poly(g, q); g.fillStyle = `rgba(12,8,20,${o.escuro})`; g.fill(); } }
     if (o.veios) veios(g, front, top, o.veios, o.seed || 1, o.t || 0);
     if (o.crack > 0) rachar(g, front, top, o.crack, o.seed || 1, o.crackGlow);
     return { front, top, side, centro: [(front[0][0] + front[2][0]) / 2, (front[0][1] + front[2][1]) / 2] };
   };
+  /** Parte 2: bloco especial de ampulheta (como o do jogo, shot_1): bloco mais claro com uma ampulheta gravada
+   *  (barras douradas/acobreadas, vidro prateado, areia dourada). o.brilho 0..1 (padrão 0.6), o.t (tempo, para o brilho pulsar) */
+  function faceAmpulheta(g, front, top, o) {
+    const [a, b, , d] = front, fw = b[0] - a[0], fh = d[1] - a[1], t = o.t || 0, br = clamp(o.brilho ?? 0.6);
+    const X = u => a[0] + fw * u, Y = v => a[1] + fh * v;
+    g.save();
+    // bloco mais claro (no jogo o bloco especial é uma pedra clara lisa) + chanfro
+    ART.poly(g, front); g.fillStyle = "rgba(226,220,204,.34)"; g.fill();
+    ART.poly(g, top); g.fillStyle = "rgba(226,220,204,.22)"; g.fill();
+    ART.rr(g, X(0.08), Y(0.08), fw * 0.84, fh * 0.84, fw * 0.05); g.fillStyle = "rgba(205,198,182,.32)"; g.fill();
+    g.lineWidth = fw * 0.012; g.strokeStyle = "rgba(255,248,230,.45)"; g.stroke();
+    ART.rr(g, X(0.08), Y(0.08) + fw * 0.012, fw * 0.84, fh * 0.84, fw * 0.05); g.strokeStyle = "rgba(40,30,40,.25)"; g.stroke();
+    const pul = 0.8 + 0.2 * Math.sin(t * 4.2);
+    if (br > 0) ART.glow(g, X(0.5), Y(0.5), fw * 0.95, "#FFC531", 0.38 * br * pul);
+    // vidro (dois triângulos) gravado
+    const cx = X(0.5), yT = Y(0.27), yB = Y(0.73), yM = Y(0.5), hw = fw * 0.27, nk = fw * 0.03;
+    const vidro = new Path2D(); vidro.moveTo(cx - hw, yT); vidro.lineTo(cx + hw, yT); vidro.quadraticCurveTo(cx + hw * 0.7, yM - fh * 0.08, cx + nk, yM); vidro.quadraticCurveTo(cx + hw * 0.7, yM + fh * 0.08, cx + hw, yB);
+    vidro.lineTo(cx - hw, yB); vidro.quadraticCurveTo(cx - hw * 0.7, yM + fh * 0.08, cx - nk, yM); vidro.quadraticCurveTo(cx - hw * 0.7, yM - fh * 0.08, cx - hw, yT); vidro.closePath();
+    g.lineJoin = "round"; g.lineWidth = fw * 0.03; g.strokeStyle = "rgba(30,22,30,.75)"; g.stroke(vidro);
+    g.fillStyle = ART.lg(g, cx - hw, 0, cx + hw, 0, [[0, "#B9C3CE"], [0.35, "#F4F8FC"], [1, "#9AA6B4"]]); g.fill(vidro);
+    g.save(); g.clip(vidro);
+    const sand = ART.lg(g, 0, yT, 0, yB, [[0, "#FFE38A"], [1, "#E8A21E"]]); g.fillStyle = sand;
+    g.fillRect(cx - hw, yM - fh * 0.1, hw * 2, fh * 0.1);                           // areia de cima (resto)
+    g.beginPath(); g.moveTo(cx - hw, yB); g.lineTo(cx + hw, yB); g.lineTo(cx + hw * 0.6, yB - fh * 0.08); g.lineTo(cx, yB - fh * 0.15); g.lineTo(cx - hw * 0.6, yB - fh * 0.08); g.closePath(); g.fill();
+    g.fillStyle = "#FFE9A6"; g.fillRect(cx - fw * 0.008, yM, fw * 0.016, yB - yM - fh * 0.12);   // filete caindo
+    g.fillStyle = "rgba(255,255,255,.55)"; g.beginPath(); g.moveTo(cx - hw * 0.75, yT + fh * 0.03); g.lineTo(cx - hw * 0.45, yT + fh * 0.03); g.lineTo(cx - nk * 2, yM - fh * 0.04); g.closePath(); g.fill();
+    g.restore();
+    // barras (douradas, como as barras acobreadas do jogo)
+    for (const yy of [yT, yB]) {
+      const bh = fh * 0.075, bw2 = hw * 1.32;
+      ART.rr(g, cx - bw2 - fw * 0.008, yy - bh / 2 + fw * 0.012, bw2 * 2 + fw * 0.016, bh, bh / 2); g.fillStyle = "rgba(30,20,20,.6)"; g.fill();
+      ART.rr(g, cx - bw2, yy - bh / 2, bw2 * 2, bh, bh / 2); g.fillStyle = ART.lg(g, 0, yy - bh / 2, 0, yy + bh / 2, [[0, "#FFE08A"], [0.45, "#F0A238"], [1, "#9A5414"]]); g.fill();
+      g.lineWidth = fw * 0.01; g.strokeStyle = "rgba(60,30,10,.8)"; g.stroke();
+    }
+    // brilhos de areia
+    if (br > 0) {
+      g.globalCompositeOperation = "lighter";
+      for (let i = 0; i < 3; i++) { const ph = (t * 0.8 + i / 3) % 1, al = Math.sin(ph * Math.PI) * br; const px = cx + Math.cos(i * 2.3) * hw * 0.9, py = yM + Math.sin(i * 2.3) * fh * 0.22, r = fw * 0.06 * al;
+        g.globalAlpha = al; g.fillStyle = "#FFF4CC"; g.save(); g.translate(px, py); g.rotate(0.4); g.fillRect(-r, -fw * 0.006, r * 2, fw * 0.012); g.fillRect(-fw * 0.006, -r, fw * 0.012, r * 2); g.restore(); }
+    }
+    g.restore();
+  }
+  ART.faceAmpulheta = faceAmpulheta;
+
+  /** Parte 2: estouro do bloco de ampulheta em AREIA DOURADA que sobe em espiral (planos 245–246).
+   *  o = {t0, front (do ART.cubo) ou centro:[x,y] + tam, alvo:[x,y] (opcional: a areia converge para lá, ex. o cronômetro),
+   *       tAlvo (0.75: quando começa a ir ao alvo), n (160), seed, lascas (true: lascas de pedra clara pelo ART.estouro)} -> fração que chegou ao alvo */
+  ART.estouroAreia = (g, t, o = {}) => {
+    const dt0 = t - (o.t0 ?? 0); if (dt0 < 0) return 0;
+    let cx, cy, sz;
+    if (o.front) { const [a, b, c2] = o.front; cx = (a[0] + c2[0]) / 2; cy = (a[1] + c2[1]) / 2; sz = b[0] - a[0]; } else { [cx, cy] = o.centro || [540, 900]; sz = o.tam || 300; }
+    if (o.lascas !== false && o.front) ART.estouro(g, t, { t0: o.t0 ?? 0, front: o.front, seed: o.seed || 5, cores: ["#C9C2B0", "#E2DCCB", "#9C9686", "#F0D890"] });
+    if (dt0 < 0.3) ART.glow(g, cx, cy, sz * 1.8, "#FFD86A", 1 - dt0 / 0.3);
+    const n = o.n ?? 220, r = ART.rng((o.seed || 5) + 77), alvo = o.alvo, ta = o.tAlvo ?? 0.75, life = alvo ? 1.6 : 1.9;
+    let chegou = 0;
+    g.save(); g.globalCompositeOperation = "lighter";
+    for (let i = 0; i < n; i++) {
+      const ph = r() * Math.PI * 2, rr = (0.12 + r() * 0.5) * sz, om = (4.5 + r() * 4) * (r() < 0.5 ? 1 : 1), vy = (0.7 + r() * 0.9) * sz, de = r() * 0.25, tam = 3 + r() * 6, cor = r();
+      const dt = dt0 - de; if (dt < 0) continue;
+      if (dt > life) { if (alvo) chegou++; continue; }
+      const e = ART.ease.outCubic(clamp(dt / 0.45)), ang = ph + om * dt;
+      const rad = rr * (0.25 + 0.75 * e) * (1 + 0.35 * dt);
+      let x = cx + Math.cos(ang) * rad, y = cy - vy * dt * (0.9 + 0.25 * dt) + Math.sin(ang) * rad * 0.28;
+      let s = 1, al = 1 - Math.pow(dt / life, 2);
+      if (alvo && dt > ta) { const q = ART.ease.inCubic(clamp((dt - ta) / (life - ta))); x = lerp(x, alvo[0], q); y = lerp(y, alvo[1], q); s = 1 - 0.6 * q; al = 1; if (q >= 1) { chegou++; continue; } }
+      const frente = Math.sin(ang) > 0 ? 1 : 0.55;
+      g.globalAlpha = clamp(al) * frente;
+      g.fillStyle = cor < 0.45 ? "#FFD23F" : cor < 0.8 ? "#FFE9A0" : "#F0A238";
+      const q = tam * s; g.fillRect(x - q / 2, y - q / 2, q, q);
+      if (i % 9 === 0) ART.glow(g, x, y, q * 5, "#FFC531", 0.5 * al * frente);
+    }
+    g.restore();
+    return alvo ? chegou / n : 0;
+  };
+
   /** veios de cobre incandescentes na face (plano 45–48: "a parede diferente"). k = 0..1 */
   function veios(g, front, top, k, seed, t) {
     const [a, b, , d] = front, map = (u, v) => [a[0] + (b[0] - a[0]) * u + (d[0] - a[0]) * v, a[1] + (b[1] - a[1]) * u + (d[1] - a[1]) * v];

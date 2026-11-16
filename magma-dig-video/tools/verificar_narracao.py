@@ -5,6 +5,9 @@ no mesmo trecho (provável pronúncia ruim, não erro do ASR).
 
   .cache/venv/bin/python tools/verificar_narracao.py build/parte-01
 """
+import os as _os, sys as _sys  # Windows: textos e JSON em UTF-8 (equivale a PYTHONUTF8=1); nada muda no Linux
+if _os.name == "nt" and not _sys.flags.utf8_mode:
+    _os.environ["PYTHONUTF8"] = "1"; _sys.exit(__import__("subprocess").call([_sys.executable] + _sys.argv))
 import difflib
 import json
 import sys

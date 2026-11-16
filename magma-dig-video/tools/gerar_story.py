@@ -12,6 +12,9 @@ Regras:
   o que não casa vai para "sfx_sem_mapa" no plano (e é listado no fim).
 O story gerado é o ponto de partida: pode ser editado à mão depois (não rode de novo por cima sem querer).
 """
+import os as _os, sys as _sys  # Windows: textos e JSON em UTF-8 (equivale a PYTHONUTF8=1); nada muda no Linux
+if _os.name == "nt" and not _sys.flags.utf8_mode:
+    _os.environ["PYTHONUTF8"] = "1"; _sys.exit(__import__("subprocess").call([_sys.executable] + _sys.argv))
 import argparse
 import json
 import re
@@ -43,6 +46,67 @@ SFX_AJUSTE = {
     52: {"remover": [], "adicionar": [{"nome": "giz", "palavra": "Faltam", "offset": 0.02, "vol": -6}]},
     57: {"remover": ["*"], "adicionar": [{"nome": "clique", "palavra": "dois.", "offset": 0.45},
                                          {"nome": "apagar", "palavra": "dois.", "offset": 0.5}]},
+    # ---- Parte 2 (ids 2xx): sons do roteiro que o mapa automático não cobre ou põe fora da palavra
+    202: {"remover": [], "adicionar": [{"nome": "boom", "palavra": "dia", "offset": 0.0, "vol": -12}]},
+    203: {"remover": [], "adicionar": [{"nome": "rachar", "palavra": "metade?", "offset": 0.0, "vol": -8}]},
+    210: {"remover": ["acorde"], "adicionar": [{"nome": "tictac", "palavra": "paga", "offset": 0.0, "vol": -8, "kw": {"dur": 0.5, "bpm": 480}},
+                                              {"nome": "acorde", "palavra": "vinte.", "offset": 0.0, "vol": -6, "kw": {"tipo": "grave"}}]},
+    213: {"remover": [], "adicionar": [{"nome": "boom", "palavra": "chão", "offset": 0.0, "vol": -16}]},
+    217: {"remover": ["*"], "adicionar": [{"nome": "ding", "palavra": "Sobe", "n": 0, "offset": 0.0, "vol": -8, "kw": {"pitch": 1.5}},
+                                         {"nome": "ding", "palavra": "desce", "offset": 0.0, "vol": -8, "kw": {"pitch": 0.9}},
+                                         {"nome": "ding", "palavra": "sobe", "n": 1, "offset": 0.0, "vol": -8, "kw": {"pitch": 1.5}}]},
+    219: {"remover": [], "adicionar": [{"nome": "folha", "offset": 0.2, "vol": -8}]},
+    220: {"remover": [], "adicionar": [{"nome": "giz", "palavra": "alta", "offset": 0.0, "vol": -10}]},
+    221: {"remover": [], "adicionar": [{"nome": "boom", "palavra": "Especulação.", "offset": 0.05, "vol": -10}]},
+    226: {"remover": [], "adicionar": [{"nome": "boom", "palavra": "noventa", "offset": 0.0, "vol": -8}]},
+    227: {"remover": [], "adicionar": [{"nome": "folha", "offset": 0.0, "vol": -8}]},
+    228: {"remover": [], "adicionar": [{"nome": "boom", "palavra": "dia", "offset": 0.0, "vol": -10}]},
+    232: {"remover": [], "adicionar": [{"nome": "pop", "palavra": "guardou", "offset": 0.1, "vol": -8, "kw": {"pitch": 0.7}}]},
+    242: {"remover": ["*"], "adicionar": [x for n in range(3) for x in (
+        {"nome": "picareta", "palavra": "pedra", "n": n, "offset": 0.0, "seed": n},
+        {"nome": "moeda", "palavra": "pedra", "n": n, "offset": 0.3, "vol": -2, "seed": n})]},
+    247: {"remover": [], "adicionar": [{"nome": "acorde", "palavra": "presente.", "offset": 0.0, "vol": -6, "kw": {"tipo": "claro"}}]},
+    249: {"remover": ["*"], "adicionar": [x for n in range(3) for x in (
+        {"nome": "picareta", "palavra": "Cobre.", "n": n, "offset": 0.0, "seed": n, "kw": {"pitch": 0.75}},
+        {"nome": "moeda", "palavra": "Cobre.", "n": n, "offset": 0.3, "vol": -2, "seed": n, "kw": {"pitch": 0.8}})] +
+        [{"nome": "tictac", "offset": 0.0, "vol": -4, "kw": {"dur": "plano", "bpm": 300}}]},
+    251: {"remover": [], "adicionar": [{"nome": "moeda", "offset": 0.1 + 0.18 * k, "vol": -4, "seed": k,
+                                        "kw": {"pitch": round(1.0 + 0.12 * k, 2)}} for k in range(4)]},
+    254: {"remover": ["moeda"], "adicionar": [{"nome": "tictac", "offset": 0.0, "vol": -8, "kw": {"dur": 0.5, "bpm": 480}},
+                                             {"nome": "moeda", "palavra": "moedas", "offset": 0.0, "vol": -2}]},
+    255: {"remover": [], "adicionar": [{"nome": "moeda", "palavra": "Quatro", "offset": 0.05 + 0.15 * k, "vol": -4, "seed": k,
+                                        "kw": {"pitch": round(1.0 + 0.12 * k, 2)}} for k in range(4)] +
+         [{"nome": "acorde", "palavra": "duzentos", "offset": 0.0, "vol": -6, "kw": {"tipo": "recompensa"}}]},
+    258: {"remover": [], "adicionar": [{"nome": "ding", "offset": 0.2, "vol": -10, "kw": {"pitch": 1.2}}]},
+    261: {"remover": [], "adicionar": [{"nome": "ding", "offset": 0.0, "vol": -10, "kw": {"pitch": 1.0}},
+                                       {"nome": "ding", "offset": 0.3, "vol": -10, "kw": {"pitch": 1.33}}]},
+    262: {"remover": [], "adicionar": [{"nome": "ding", "palavra": "amigo.", "offset": 0.0, "vol": -8, "kw": {"pitch": 2.0}}]},
+}
+# Automação da trilha à mão por plano (substitui a deixa automática; [] = nenhuma). Parte 2.
+TRILHA_AJUSTE = {
+    207: [{"offset": 0.0, "db": 0, "rampa": 0.6, "modo": "normal"}],      # sai da suspensa do "previamente"
+    211: [{"offset": 0.0, "db": -80, "rampa": 0.02}],                     # "Metade.": corte seco
+    212: [{"offset": 0.0, "db": -6, "rampa": 0.6, "modo": "normal"}],
+    218: [{"offset": 0.0, "db": -8, "rampa": 0.8, "modo": "normal"}],     # trilha calma
+    219: [{"offset": 0.0, "db": 0, "rampa": 0.6, "modo": "normal"}],
+    231: [{"offset": 0.0, "db": 0, "rampa": 1.0, "modo": "suspensa"}],
+    233: [{"offset": 0.0, "db": 0, "rampa": 0.6, "modo": "normal"}],
+    265: [{"offset": 0.0, "db": 0, "rampa": 1.0, "modo": "suspensa"}],    # dilema: suspensa até o fim
+}
+# Legenda em algarismos por plano (a fala continua por extenso) e destaques correspondentes. Parte 2.
+LEGENDA = {
+    209: ("Ontem, o cobre pagava 40.", ["40"]),
+    210: ("Hoje, paga 20.", ["20"]),
+    223: ("Em 1929,", ["1929"]),
+    224: ("Wall Street tinha subido 6×.", ["6×"]),
+    226: ("Em três anos, caiu quase 90%.", ["90%"]),
+    227: ("Em 87,", ["87"]),
+    229: ("22%.", ["22%"]),
+    230: ("Vender agora era perder 20.", ["PERDER"]),
+    254: ("60 moedas cada.", ["60"]),
+    255: ("Quatro pepitas, 240.", ["240"]),
+    260: ("Paga 160.", ["160"]),
+    264: ("Faltam 26 dias.", ["26"]),
 }
 # Automação da trilha por deixa do roteiro (texto do campo sfx). Deixa persiste até a próxima deixa;
 # "baixa"/"corte seco" voltam ao normal no 1º plano de outro bloco; "some" dura até a próxima deixa
@@ -64,8 +128,8 @@ PRONUNCIA = {
     "kokoro": {"MAGMA DIG": "MAGMA /dˈiɡ/"},
 }
 
-PAUSAS = {47: 0.6}          # plano -> pausa depois da fala (s)
-SEPARAR_ANTES = {47, 57}     # planos que começam uma fala própria (isolar para a pausa / fechamento)
+PAUSAS = {47: 0.6, 211: 0.6, 257: 0.6}          # plano -> pausa depois da fala (s)
+SEPARAR_ANTES = {47, 57, 211, 267}     # planos que começam uma fala própria (isolar para a pausa / fechamento)
 
 
 def nk(s):
@@ -226,11 +290,20 @@ def main():
                   or estado["trilha"] and estado["trilha"].get("rampa") == 0.02) and p["bloco"] != estado["bloco"]:
                 pl["trilha"] = [dict(RESTAURA)]
                 estado["trilha"] = None
+            if p["id"] in TRILHA_AJUSTE:
+                pl.pop("trilha", None)
+                if TRILHA_AJUSTE[p["id"]]:
+                    pl["trilha"] = [dict(c) for c in TRILHA_AJUSTE[p["id"]]]
+                    estado["trilha"] = dict(pl["trilha"][-1]); estado["bloco"] = p["bloco"]
+            if p["id"] in LEGENDA:
+                pl["destaques"] = list(LEGENDA[p["id"]][1])
             if sem:
                 pl["sfx_sem_mapa"] = sem
                 sem_mapa.append((p["id"], sem))
             f["planos"].append(pl)
             idx += len(words(p["narracao"]))
+        if any(p["id"] in LEGENDA for p in ps):   # legenda da fala = trechos dos planos (algarismos onde houver)
+            f["legenda"] = " ".join(LEGENDA[p["id"]][0] if p["id"] in LEGENDA else p["narracao"].strip() for p in ps)
         out_falas.append(f)
     story = {
         "titulo": d.get("titulo", ""),

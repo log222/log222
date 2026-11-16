@@ -91,7 +91,14 @@ def _qwen(kind):
     torch.set_num_threads(NTHREADS)
     # bf16 por padrão: o 1.7B em fp32 passa de 8 GB de RAM e foi morto por OOM nesta máquina
     dt = {"fp32": torch.float32, "bf16": torch.bfloat16}[os.environ.get("VOZ_QWEN_DTYPE", "bf16")]
-    return Qwen3TTSModel.from_pretrained(QWEN_REPOS[kind], device_map="cpu", dtype=dt)
+    return Qwen3TTSModel.from_pretrained(QWEN_REPOS[kind], device_map=dispositivo(), dtype=dt)
+
+
+def dispositivo():
+    """VOZ_DEVICE (cpu, cuda, cuda:0…) ou, sem ela, cuda:0 quando houver GPU CUDA; senão cpu (como antes)."""
+    import torch
+    d = os.environ.get("VOZ_DEVICE") or ("cuda:0" if torch.cuda.is_available() else "cpu")
+    return "cuda:0" if d == "cuda" else d
 
 
 def _seed(seed):

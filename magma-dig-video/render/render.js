@@ -32,7 +32,7 @@ function args() {
   page.on("pageerror", e => errors.push(String(e)));
   page.on("console", m => { if (m.type() === "error" || m.type() === "warning") errors.push(`[console.${m.type()}] ${m.text()}`); });
   await page.addInitScript(t => { window.__TIMELINE__ = t; window.__ROOT__ = "../"; }, tl);
-  await page.goto("file://" + path.join(root, "player", "index.html"));
+  await page.goto(require("url").pathToFileURL(path.join(root, "player", "index.html")).href);  // file:///C:/… no Windows
   await page.waitForFunction(() => window.__MD_READY__ || window.__MD_ERROR__, null, { timeout: 120000, polling: 100 }); // polling por tempo: rAF é proibido no player
   const err = await page.evaluate(() => window.__MD_ERROR__);
   if (err) { console.error("ERRO no player:\n" + err); await browser.close(); process.exit(2); }

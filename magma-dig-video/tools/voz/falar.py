@@ -19,6 +19,9 @@ Saída (mesmo formato de tempos.json do tts.py, com sr 48000 e campos extras):
   frases/NNN.wav, narracao.wav (frases + --pausa entre elas), tempos.json
 Palavras: tempos ESTIMADOS (proporcionais a letras); o pipeline pode refinar.
 """
+import os as _os, sys as _sys  # Windows: textos e JSON em UTF-8 (equivale a PYTHONUTF8=1); nada muda no Linux
+if _os.name == "nt" and not _sys.flags.utf8_mode:
+    _os.environ["PYTHONUTF8"] = "1"; _sys.exit(__import__("subprocess").call([_sys.executable] + _sys.argv))
 import argparse
 import hashlib
 import json
@@ -179,6 +182,11 @@ def main():
     (out / "frases").mkdir(parents=True, exist_ok=True)
     CACHE.mkdir(parents=True, exist_ok=True)
 
+    # GPU e CPU dão tomadas diferentes: o dispositivo/dtype entra na chave do cache (vazio no padrão antigo, cpu+bf16)
+    disp = ""
+    if a.motor.startswith("qwen"):
+        d = M.dispositivo()
+        disp = ("" if d == "cpu" else d) + os.environ.get("VOZ_QWEN_DTYPE", "")
     entries, faixa, t = [], [np.zeros(int(a.inicio * SR), np.float32)], a.inicio
     t0 = time.time()
     gen_s = 0.0
@@ -193,7 +201,7 @@ def main():
         key = hashlib.sha1(f"{a.motor}|{voz}|{a.velocidade:.3f}|s{seed}|{falado}|"
                            f"{os.environ.get('VOZ_CB_EXAG','')}{os.environ.get('VOZ_CB_CFG','')}"
                            f"{os.environ.get('VOZ_ST3_PASSOS','')}{os.environ.get('VOZ_REF_TEMPO','')}"
-                           f"{os.environ.get('VOZ_QWEN_TEMP','')}".encode()).hexdigest()[:16]
+                           f"{os.environ.get('VOZ_QWEN_TEMP','')}{disp}".encode()).hexdigest()[:16]
         cp = CACHE / f"{a.motor}-{key}.npz"
         if cp.exists() and not a.sem_cache:
             z = np.load(cp)

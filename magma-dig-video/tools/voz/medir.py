@@ -11,6 +11,9 @@ Todos os números são INDICADORES: não substituem ouvir.
 - UTMOS foi treinado em inglês (VoiceMOS 2022); DNSMOS mede limpeza/qualidade
   de sinal mais do que prosódia. Comparação relativa entre motores, nada mais.
 """
+import os as _os, sys as _sys  # Windows: textos e JSON em UTF-8 (equivale a PYTHONUTF8=1); nada muda no Linux
+if _os.name == "nt" and not _sys.flags.utf8_mode:
+    _os.environ["PYTHONUTF8"] = "1"; _sys.exit(__import__("subprocess").call([_sys.executable] + _sys.argv))
 import argparse
 import difflib
 import json

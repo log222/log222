@@ -121,6 +121,7 @@ def hybrid_times(audio: np.ndarray, words: list[str], spoken: list[str] | None =
     if stats is not None:
         stats["palavras"] = stats.get("palavras", 0) + n
         stats["ancoras"] = stats.get("ancoras", 0) + sum(a is not None for a in anchor)
+        stats.setdefault("sem_ancora", []).extend(w for w, a in zip(words, anchor) if a is None)
     # interpola os buracos com o estimador por fonemas dentro do intervalo livre
     est_full = T.estimate_word_times(audio, words, spoken, sr)
     times = [None] * n

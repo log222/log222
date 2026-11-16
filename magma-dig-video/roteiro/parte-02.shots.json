@@ -1,0 +1,1086 @@
+{
+  "titulo": "MAGMA DIG · Parte 2",
+  "palavras": 311,
+  "dur_estimada_total_s": 154.5,
+  "ritmo_palavras_s": 2.04,
+  "nota": "Durações estimadas pelo ritmo REAL da Parte 1 (2,04 palavras/s com as pausas de §4.4) + folga de pontuação; a duração real vem do áudio. Ids 201…; nunca usar 1–57.",
+  "cenarios": {
+    "VILA": "C1 Vila à noite / boca da mina",
+    "MINA": "C2 Mina A, pedra cinza (Zeca em cena)",
+    "GAME": "C3 Gameplay real do trailer (ponto de vista do Zeca)",
+    "TOCA": "C4 Toca (interior: parede da meta, cama, mesa)",
+    "PAINEL": "C5 Painéis da Toca (Habilidades, Mercado)",
+    "TERRA": "C6 Inserto de ciência: corte da Terra",
+    "CLOSE": "C7 Close de objeto sobre fundo escuro"
+  },
+  "planos": [
+    {
+      "id": 201,
+      "bloco": "Gancho",
+      "narracao": "E se esperar",
+      "destaques": [
+        "ESPERAR"
+      ],
+      "cenario": "C7 Close de objeto sobre fundo escuro",
+      "acao": "Breu total. Clique. A lanterna do capacete amarelo acende em close e o feixe corta a poeira (repete o p01).",
+      "camera": "Close frontal da lanterna; push-in rápido",
+      "ui": "nenhuma",
+      "sfx": "clique de interruptor + zumbido de lâmpada",
+      "usa_gameplay": false,
+      "dur_estimada_s": 1.5,
+      "inicio_estimado_s": 0.0
+    },
+    {
+      "id": 202,
+      "bloco": "Gancho",
+      "narracao": "só um dia",
+      "destaques": [
+        "DIA"
+      ],
+      "cenario": "C7 Close de objeto sobre fundo escuro",
+      "acao": "Calendário de 30 quadradinhos (ART.obj.calendario): o terceiro quadradinho se preenche com um baque; a folha balança.",
+      "camera": "Close frontal, push-in contínuo",
+      "ui": "grade de 30 dias, quadradinhos 1–2 cheios, o 3 preenche",
+      "sfx": "tique de relógio + baque",
+      "usa_gameplay": false,
+      "dur_estimada_s": 1.5,
+      "inicio_estimado_s": 1.5
+    },
+    {
+      "id": 203,
+      "bloco": "Gancho",
+      "narracao": "custasse a metade?",
+      "destaques": [
+        "METADE"
+      ],
+      "cenario": "C7 Close de objeto sobre fundo escuro",
+      "acao": "Pepita de cobre girando no holofote. A etiqueta de preço 40 racha ao meio e vira 20; o holofote cai para metade do brilho.",
+      "camera": "Close, giro lento da pepita, tremida curta no 20",
+      "ui": "etiqueta 40 → 20 (ART.ui.flutua), em vermelho no 20",
+      "sfx": "vidro rachando + nota grave",
+      "usa_gameplay": false,
+      "dur_estimada_s": 1.5,
+      "inicio_estimado_s": 3.0
+    },
+    {
+      "id": 204,
+      "bloco": "Previamente",
+      "narracao": "Vocês mandaram segurar.",
+      "destaques": [
+        "SEGURAR"
+      ],
+      "cenario": "C4 Toca (interior: parede da meta, cama, mesa)",
+      "acao": "Zeca na cama abraçado à pepita (mesmo enquadramento do p56). Palavras amarelas SEGURA sobem do pé da cama como balões, várias, em tamanhos diferentes, e somem no teto.",
+      "camera": "Plano médio, câmera parada com leve deriva lateral",
+      "ui": "balões de texto SEGURA (ART.ui.flutua), dentro de y 400–1200",
+      "sfx": "burburinho baixo + trilha suspensa da Parte 1",
+      "usa_gameplay": false,
+      "dur_estimada_s": 1.5,
+      "inicio_estimado_s": 4.5
+    },
+    {
+      "id": 205,
+      "bloco": "Previamente",
+      "narracao": "O Zeca segurou o cobre.",
+      "destaques": [
+        "SEGUROU"
+      ],
+      "cenario": "C4 Toca (interior: parede da meta, cama, mesa)",
+      "acao": "Close da pata do Zeca apertando a pepita contra o peito; ele dorme (pose dormindo, zzz), luz laranja da pepita pulsando no rosto.",
+      "camera": "Close, push-in lento",
+      "ui": "nenhuma",
+      "sfx": "ronco curto + brilho cintilante",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.5,
+      "inicio_estimado_s": 6.0
+    },
+    {
+      "id": 206,
+      "bloco": "Previamente",
+      "narracao": "E a seta errou.",
+      "destaques": [
+        "ERROU"
+      ],
+      "cenario": "C5 Painéis da Toca (Habilidades, Mercado)",
+      "acao": "Painel do Mercado da noite dois (estado do p53: Cobre 40, seta verde para cima). A seta verde treme, gira 180° e cai vermelha para baixo.",
+      "camera": "Close da seta, câmera parada com micro-tremor no giro",
+      "ui": "painelMercado preço 40 + ART.ui.seta cima → baixo",
+      "sfx": "nota dissonante descendo",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.0,
+      "inicio_estimado_s": 8.5
+    },
+    {
+      "id": 207,
+      "bloco": "Queda",
+      "narracao": "Noite três. Mercado.",
+      "destaques": [
+        "MERCADO"
+      ],
+      "cenario": "C3 Gameplay real do trailer (ponto de vista do Zeca)",
+      "acao": "Tela real do Mercado do jogo por um instante, depois dissolve para o painel redesenhado (como o p49).",
+      "camera": "Plano do trailer, push-in rápido, dissolve curto para o C5",
+      "ui": "título MERCADO; tapar o +91,1K",
+      "sfx": "whoosh de painel",
+      "usa_gameplay": "trailer 13,5–14,5 s (Mercado; esconder o +91,1K)",
+      "dur_estimada_s": 1.5,
+      "inicio_estimado_s": 10.5
+    },
+    {
+      "id": 208,
+      "bloco": "Queda",
+      "narracao": "Ele abriu o painel sorrindo.",
+      "destaques": [
+        "SORRINDO"
+      ],
+      "cenario": "C4 Toca (interior: parede da meta, cama, mesa)",
+      "acao": "Zeca de corpo inteiro na Toca, de pé diante do painel aceso, pepita na pata, sorriso largo, balança o corpo de expectativa (pose feliz).",
+      "camera": "Plano inteiro, câmera baixa, push-in leve; luz do painel azulada no rosto",
+      "ui": "cartão fixo SALDO 14 · META 1.000 · DIA 3 DE 30 · COBRE 4% · RESTAM 27",
+      "sfx": "passinhos + trilha leve",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.5,
+      "inicio_estimado_s": 12.0
+    },
+    {
+      "id": 209,
+      "bloco": "Queda",
+      "narracao": "Ontem, o cobre pagava quarenta.",
+      "destaques": [
+        "QUARENTA"
+      ],
+      "cenario": "C5 Painéis da Toca (Habilidades, Mercado)",
+      "acao": "Cartão do minério Cobre (painelMercado). Rótulo ONTEM em cinza sobre o preço 40; gráfico de 7 dias com a barra de ontem alta.",
+      "camera": "Plano frontal, push-in no 40",
+      "ui": "cartão Cobre: ONTEM 40",
+      "sfx": "tique de barra",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.5,
+      "inicio_estimado_s": 14.5
+    },
+    {
+      "id": 210,
+      "bloco": "Queda",
+      "narracao": "Hoje, paga vinte.",
+      "destaques": [
+        "VINTE"
+      ],
+      "cenario": "C5 Painéis da Toca (Habilidades, Mercado)",
+      "acao": "O 40 leva um risco; o número rola para baixo até 20; aparece −50% em vermelho e a barra de hoje do gráfico desce até a metade.",
+      "camera": "Mesmo enquadramento do anterior (sem salto), push-in continua",
+      "ui": "40 riscado → 20; −50% vermelho; seta vermelha para baixo",
+      "sfx": "contador rolando para baixo + nota grave",
+      "usa_gameplay": false,
+      "dur_estimada_s": 1.5,
+      "inicio_estimado_s": 17.0
+    },
+    {
+      "id": 211,
+      "bloco": "Queda",
+      "narracao": "Metade.",
+      "destaques": [
+        "METADE."
+      ],
+      "cenario": "C7 Close de objeto sobre fundo escuro",
+      "acao": "Pepita no holofote; uma linha de sombra corta a pepita ao meio e o lado de baixo escurece. Segurar ≈ 1 s (pausa intencional).",
+      "camera": "Close, giro lento continua até o último quadro",
+      "ui": "nenhuma",
+      "sfx": "corte seco da trilha + respiração",
+      "usa_gameplay": false,
+      "dur_estimada_s": 0.8,
+      "inicio_estimado_s": 18.5
+    },
+    {
+      "id": 212,
+      "bloco": "Queda",
+      "narracao": "O sorriso foi junto com o preço.",
+      "destaques": [
+        "SORRISO"
+      ],
+      "cenario": "C4 Toca (interior: parede da meta, cama, mesa)",
+      "acao": "Mesmo Zeca do p208, corpo inteiro: o sorriso desmancha, ombros e orelhas caem, dá um passo para trás (mix feliz → preocupado).",
+      "camera": "Plano inteiro, câmera recua devagar",
+      "ui": "cartão fixo: COBRE 4% → 2% · RESTAM 27",
+      "sfx": "nota descendo",
+      "usa_gameplay": false,
+      "dur_estimada_s": 3.4,
+      "inicio_estimado_s": 19.3
+    },
+    {
+      "id": 213,
+      "bloco": "Queda",
+      "narracao": "Sentou no chão da Toca.",
+      "destaques": [
+        "CHÃO"
+      ],
+      "cenario": "C4 Toca (interior: parede da meta, cama, mesa)",
+      "acao": "Zeca escorrega até sentar no chão encostado na cama (seq parado → sentado). Plano geral: Toca grande, ele pequeno no centro.",
+      "camera": "Plano geral, câmera desce junto com ele",
+      "ui": "nenhuma",
+      "sfx": "pano raspando + baque fofo",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.5,
+      "inicio_estimado_s": 22.7
+    },
+    {
+      "id": 214,
+      "bloco": "Queda",
+      "narracao": "A pepita no colo.",
+      "destaques": [
+        "PEPITA"
+      ],
+      "cenario": "C4 Toca (interior: parede da meta, cama, mesa)",
+      "acao": "Plano médio: Zeca sentado olhando a pepita no colo, entre as patas; brilho laranja fraco no rosto; pisca devagar.",
+      "camera": "Plano médio, push-in lento",
+      "ui": "nenhuma",
+      "sfx": "brilho cintilante fraco",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.0,
+      "inicio_estimado_s": 25.2
+    },
+    {
+      "id": 215,
+      "bloco": "Queda",
+      "narracao": "Ninguém tirou nada dele.",
+      "destaques": [
+        "NINGUÉM"
+      ],
+      "cenario": "C7 Close de objeto sobre fundo escuro",
+      "acao": "A pepita inteira gira no holofote, intacta, de novo com o brilho cheio.",
+      "camera": "Close, giro 360 lento",
+      "ui": "nenhuma",
+      "sfx": "acorde suave",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.0,
+      "inicio_estimado_s": 27.2
+    },
+    {
+      "id": 216,
+      "bloco": "Queda",
+      "narracao": "No Mercado, o preço anda todo dia.",
+      "destaques": [
+        "ANDA"
+      ],
+      "cenario": "C5 Painéis da Toca (Habilidades, Mercado)",
+      "acao": "Gráfico de 7 dias (grafico7) desliza para a esquerda: cada barra nova entra pela direita, uma por sílaba forte.",
+      "camera": "Close do gráfico, câmera desliza da esquerda para a direita",
+      "ui": "grafico7 animado",
+      "sfx": "tiques de barra",
+      "usa_gameplay": false,
+      "dur_estimada_s": 3.4,
+      "inicio_estimado_s": 29.2
+    },
+    {
+      "id": 217,
+      "bloco": "Queda",
+      "narracao": "Sobe, desce, sobe de novo.",
+      "destaques": [
+        "SOBE"
+      ],
+      "cenario": "C5 Painéis da Toca (Habilidades, Mercado)",
+      "acao": "Três barras grandes nascem no ritmo das palavras: verde alta, vermelha baixa, verde alta; a seta (ART.ui.seta) acompanha cima/baixo/cima.",
+      "camera": "Câmera parada com leve balanço no ritmo",
+      "ui": "grafico7 + seta cima/baixo/cima",
+      "sfx": "três notas: sobe, desce, sobe",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.5,
+      "inicio_estimado_s": 32.6
+    },
+    {
+      "id": 218,
+      "bloco": "Queda",
+      "narracao": "É a regra do mundo.",
+      "destaques": [
+        "REGRA"
+      ],
+      "cenario": "C4 Toca (interior: parede da meta, cama, mesa)",
+      "acao": "Plano geral da Toca: Zeca ainda sentado, olha para o painel e balança a cabeça devagar, aceitando; respira fundo.",
+      "camera": "Plano geral, push-in lento",
+      "ui": "nenhuma",
+      "sfx": "respiração + trilha calma",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.5,
+      "inicio_estimado_s": 35.1
+    },
+    {
+      "id": 219,
+      "bloco": "Mercado real",
+      "narracao": "E do nosso também.",
+      "destaques": [
+        "NOSSO"
+      ],
+      "cenario": "C6 Inserto de ciência: corte da Terra",
+      "acao": "A Toca dissolve em linhas ciano sobre azul-petróleo; uma linha de preço em ciano começa a se desenhar da esquerda.",
+      "camera": "Dissolve curto (troca de mundo), câmera desliza para a direita",
+      "ui": "linha de preço ciano (peça nova: grafLinha)",
+      "sfx": "whoosh + papel",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.0,
+      "inicio_estimado_s": 37.6
+    },
+    {
+      "id": 220,
+      "bloco": "Mercado real",
+      "narracao": "Segurar apostando na alta tem nome.",
+      "destaques": [
+        "ALTA"
+      ],
+      "cenario": "C6 Inserto de ciência: corte da Terra",
+      "acao": "Desenho em linhas ciano: uma pata segurando uma moeda; uma seta ciano para cima nasce ao lado.",
+      "camera": "Plano frontal, linhas se desenhando",
+      "ui": "seta ciano ↑",
+      "sfx": "risco de caneta",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.9,
+      "inicio_estimado_s": 39.6
+    },
+    {
+      "id": 221,
+      "bloco": "Mercado real",
+      "narracao": "Especulação.",
+      "destaques": [
+        "ESPECULAÇÃO."
+      ],
+      "cenario": "C6 Inserto de ciência: corte da Terra",
+      "acao": "A etiqueta ESPECULAÇÃO se carimba sobre o desenho; a seta pulsa.",
+      "camera": "Câmera parada, leve push-in",
+      "ui": "etiqueta ESPECULAÇÃO",
+      "sfx": "carimbo",
+      "usa_gameplay": false,
+      "dur_estimada_s": 0.8,
+      "inicio_estimado_s": 42.5
+    },
+    {
+      "id": 222,
+      "bloco": "Mercado real",
+      "narracao": "Foi a aposta do Zeca.",
+      "destaques": [
+        "ZECA"
+      ],
+      "cenario": "C6 Inserto de ciência: corte da Terra",
+      "acao": "A pata em linhas vira a silhueta do Zeca (ART.ciencia.tatu adaptado em linhas) segurando a pepita; a seta ciano de amanhã sobre ele.",
+      "camera": "Câmera parada, deriva lateral",
+      "ui": "seta ciano ↑ + pepita em linhas",
+      "sfx": "nota suspensa",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.5,
+      "inicio_estimado_s": 43.3
+    },
+    {
+      "id": 223,
+      "bloco": "Mercado real",
+      "narracao": "Em mil novecentos e vinte e nove,",
+      "destaques": [
+        "MIL NOVECENTOS E VINTE E NOVE"
+      ],
+      "cenario": "C6 Inserto de ciência: corte da Terra",
+      "acao": "Etiqueta WALL STREET · NOVA YORK; contador de anos corre 1921 → 1929 embaixo da linha de preço (como o contador do p22).",
+      "camera": "Zoom-out contínuo revelando o gráfico inteiro",
+      "ui": "1921 → 1929 + etiqueta WALL STREET",
+      "sfx": "tique de contador",
+      "usa_gameplay": false,
+      "dur_estimada_s": 3.4,
+      "inicio_estimado_s": 45.8
+    },
+    {
+      "id": 224,
+      "bloco": "Mercado real",
+      "narracao": "Wall Street tinha subido seis vezes.",
+      "destaques": [
+        "SEIS VEZES"
+      ],
+      "cenario": "C6 Inserto de ciência: corte da Terra",
+      "acao": "A linha ciano sobe forte da esquerda até o pico; régua vertical marca 63 embaixo e 381 no topo; etiqueta ×6.",
+      "camera": "Câmera sobe junto com a ponta da linha",
+      "ui": "régua 63 → 381; ×6",
+      "sfx": "acorde subindo",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.9,
+      "inicio_estimado_s": 49.2
+    },
+    {
+      "id": 225,
+      "bloco": "Mercado real",
+      "narracao": "Muita gente comprou com dinheiro emprestado.",
+      "destaques": [
+        "EMPRESTADO"
+      ],
+      "cenario": "C6 Inserto de ciência: corte da Terra",
+      "acao": "No pé do gráfico, pilhas de moedas em linhas: uma moeda cheia e nove tracejadas (emprestadas) ao lado; etiqueta EMPRESTADO.",
+      "camera": "Câmera desce até as pilhas, push-in",
+      "ui": "1 cheia + 9 tracejadas; etiqueta EMPRESTADO",
+      "sfx": "moedas tilintando",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.9,
+      "inicio_estimado_s": 52.1
+    },
+    {
+      "id": 226,
+      "bloco": "Mercado real",
+      "narracao": "Em três anos, caiu quase noventa por cento.",
+      "destaques": [
+        "NOVENTA POR CENTO"
+      ],
+      "cenario": "C6 Inserto de ciência: corte da Terra",
+      "acao": "A linha despenca do pico até perto do chão; contador de anos 1929 → 1932; etiqueta −89% em vermelho-coral (única cor quente do inserto).",
+      "camera": "Câmera segue a linha caindo, tremor curto no fundo",
+      "ui": "linha 381 → 41; 1929 → 1932; −89%",
+      "sfx": "whoosh longo descendo + baque grave",
+      "usa_gameplay": false,
+      "dur_estimada_s": 3.9,
+      "inicio_estimado_s": 55.0
+    },
+    {
+      "id": 227,
+      "bloco": "Mercado real",
+      "narracao": "Em oitenta e sete,",
+      "destaques": [
+        "OITENTA E SETE"
+      ],
+      "cenario": "C6 Inserto de ciência: corte da Terra",
+      "acao": "Um segundo gráfico ciano se desenha à direita do primeiro; etiqueta 1987.",
+      "camera": "Pan lateral para a direita",
+      "ui": "etiqueta 1987",
+      "sfx": "papel + tique",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.0,
+      "inicio_estimado_s": 58.9
+    },
+    {
+      "id": 228,
+      "bloco": "Mercado real",
+      "narracao": "a queda foi num dia só.",
+      "destaques": [
+        "DIA SÓ"
+      ],
+      "cenario": "C6 Inserto de ciência: corte da Terra",
+      "acao": "A linha de 1987 cai num degrau quase vertical; marcador de calendário 1 DIA sobre o degrau; etiqueta SEGUNDA-FEIRA NEGRA.",
+      "camera": "Câmera parada, tremor no degrau",
+      "ui": "etiqueta SEGUNDA-FEIRA NEGRA · 1 DIA",
+      "sfx": "baque seco",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.9,
+      "inicio_estimado_s": 60.9
+    },
+    {
+      "id": 229,
+      "bloco": "Mercado real",
+      "narracao": "Vinte e dois por cento.",
+      "destaques": [
+        "VINTE E DOIS POR CENTO"
+      ],
+      "cenario": "C6 Inserto de ciência: corte da Terra",
+      "acao": "Etiqueta −22,6% em vermelho-coral cresce sobre o degrau; as linhas ciano voltam a se apagar (fim do inserto).",
+      "camera": "Push-in no número, depois linhas se apagando",
+      "ui": "−22,6%",
+      "sfx": "nota grave",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.5,
+      "inicio_estimado_s": 63.8
+    },
+    {
+      "id": 230,
+      "bloco": "Escolha",
+      "narracao": "Vender agora era perder vinte.",
+      "destaques": [
+        "PERDER"
+      ],
+      "cenario": "C5 Painéis da Toca (Habilidades, Mercado)",
+      "acao": "Volta ao painel do Mercado (dissolve curto): botão VENDER com +20 moedas; atrás, um 40 fantasma riscado.",
+      "camera": "Plano frontal, push-in",
+      "ui": "botão VENDER · +20 moedas; 40 fantasma riscado",
+      "sfx": "whoosh de painel",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.5,
+      "inicio_estimado_s": 66.3
+    },
+    {
+      "id": 231,
+      "bloco": "Escolha",
+      "narracao": "Todo mundo vende pra esquecer.",
+      "destaques": [
+        "ESQUECER"
+      ],
+      "cenario": "C5 Painéis da Toca (Habilidades, Mercado)",
+      "acao": "A patinha do Zeca chega perto do botão VENDER (como o p55) e para; o botão pulsa, convidando.",
+      "camera": "Plano detalhe, push-in lento",
+      "ui": "botão VENDER pulsando",
+      "sfx": "trilha suspensa",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.5,
+      "inicio_estimado_s": 68.8
+    },
+    {
+      "id": 232,
+      "bloco": "Escolha",
+      "narracao": "O Zeca guardou a pepita de novo.",
+      "destaques": [
+        "GUARDOU"
+      ],
+      "cenario": "C4 Toca (interior: parede da meta, cama, mesa)",
+      "acao": "Zeca de corpo inteiro se levanta, recolhe a pata, põe a pepita no saquinho (ART.obj.saquinho) e amarra; olha para a câmera, decidido.",
+      "camera": "Plano inteiro, câmera acompanha a subida",
+      "ui": "nenhuma",
+      "sfx": "saquinho fechando",
+      "usa_gameplay": false,
+      "dur_estimada_s": 3.4,
+      "inicio_estimado_s": 71.3
+    },
+    {
+      "id": 233,
+      "bloco": "Escolha",
+      "narracao": "Porque quem tem pressa vende barato.",
+      "destaques": [
+        "PRESSA"
+      ],
+      "cenario": "C4 Toca (interior: parede da meta, cama, mesa)",
+      "acao": "Close do rosto do Zeca, olhos determinados (eyes determinado), meio sorriso; luz do painel recorta o perfil.",
+      "camera": "Close do rosto, push-in lento",
+      "ui": "nenhuma",
+      "sfx": "batida firme",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.9,
+      "inicio_estimado_s": 74.7
+    },
+    {
+      "id": 234,
+      "bloco": "Escolha",
+      "narracao": "Mas parou de olhar pra seta.",
+      "destaques": [
+        "SETA"
+      ],
+      "cenario": "C4 Toca (interior: parede da meta, cama, mesa)",
+      "acao": "Parede da meta: a seta desenhada em giz (a do p56) leva um X de giz; Zeca de costas riscando (pose riscando).",
+      "camera": "Plano por cima do ombro",
+      "ui": "seta de giz + X",
+      "sfx": "giz arranhando",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.9,
+      "inicio_estimado_s": 77.6
+    },
+    {
+      "id": 235,
+      "bloco": "Escolha",
+      "narracao": "Seta é palpite de amanhã.",
+      "destaques": [
+        "PALPITE"
+      ],
+      "cenario": "C5 Painéis da Toca (Habilidades, Mercado)",
+      "acao": "Painel: a seta verde de tendência fica fantasma, com o rótulo AMANHÃ e um ponto de interrogação piscando.",
+      "camera": "Close da seta, câmera parada com deriva",
+      "ui": "seta fantasma + AMANHÃ ?",
+      "sfx": "nota interrogativa",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.5,
+      "inicio_estimado_s": 80.5
+    },
+    {
+      "id": 236,
+      "bloco": "Escolha",
+      "narracao": "Todo dia, um minério fica em alta.",
+      "destaques": [
+        "ALTA"
+      ],
+      "cenario": "C5 Painéis da Toca (Habilidades, Mercado)",
+      "acao": "No topo do Mercado acende uma faixa dourada EM ALTA HOJE (como o jogo: 'Em alta hoje: … +50%'), ainda vazia; brilho percorre a faixa.",
+      "camera": "Plano frontal, push-in",
+      "ui": "faixa EM ALTA HOJE (peça nova do Mercado)",
+      "sfx": "brilho subindo",
+      "usa_gameplay": false,
+      "dur_estimada_s": 3.4,
+      "inicio_estimado_s": 83.0
+    },
+    {
+      "id": 237,
+      "bloco": "Escolha",
+      "narracao": "Hoje, era o ferro.",
+      "destaques": [
+        "FERRO"
+      ],
+      "cenario": "C5 Painéis da Toca (Habilidades, Mercado)",
+      "acao": "A faixa mostra FERRO +50%; abaixo, a linha FERRO (linhaMercado) com ×0; a linha COBRE ×1 embaixo, apagada.",
+      "camera": "Câmera desce da faixa até as linhas",
+      "ui": "faixa EM ALTA HOJE: FERRO +50%; linhas FERRO ×0, COBRE ×1 · 20",
+      "sfx": "plim",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.0,
+      "inicio_estimado_s": 86.4
+    },
+    {
+      "id": 238,
+      "bloco": "Escolha",
+      "narracao": "Um dia, vai ser o cobre.",
+      "destaques": [
+        "COBRE"
+      ],
+      "cenario": "C5 Painéis da Toca (Habilidades, Mercado)",
+      "acao": "A linha COBRE ×1 pisca; o ícone do cobre sobe até a faixa EM ALTA como um fantasma e volta.",
+      "camera": "Push-in na linha COBRE",
+      "ui": "linha COBRE ×1 · 20",
+      "sfx": "nota de esperança",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.9,
+      "inicio_estimado_s": 88.4
+    },
+    {
+      "id": 239,
+      "bloco": "Escolha",
+      "narracao": "Até lá, mais cobre na mochila.",
+      "destaques": [
+        "MOCHILA"
+      ],
+      "cenario": "C4 Toca (interior: parede da meta, cama, mesa)",
+      "acao": "Zeca de corpo inteiro pega a picareta velha, ajeita o capacete e anda até a porta da Toca (pose andando); para e olha para trás.",
+      "camera": "Plano inteiro, câmera acompanha da esquerda para a direita",
+      "ui": "nenhuma",
+      "sfx": "passos + porta de madeira",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.9,
+      "inicio_estimado_s": 91.3
+    },
+    {
+      "id": 240,
+      "bloco": "Dia 4",
+      "narracao": "Dia quatro.",
+      "destaques": [
+        "QUATRO"
+      ],
+      "cenario": "C1 Vila à noite / boca da mina",
+      "acao": "Placa de madeira A · TERRA RASA na entrada; Zeca passa por baixo dela e entra (como o p26).",
+      "camera": "Plano médio, câmera acompanha o Zeca",
+      "ui": "cartão fixo DIA 4 DE 30",
+      "sfx": "passos + vento",
+      "usa_gameplay": false,
+      "dur_estimada_s": 1.0,
+      "inicio_estimado_s": 94.2
+    },
+    {
+      "id": 241,
+      "bloco": "Dia 4",
+      "narracao": "Onze segundos de luz.",
+      "destaques": [
+        "ONZE"
+      ],
+      "cenario": "C2 Mina A, pedra cinza (Zeca em cena)",
+      "acao": "Abertura do preto com linha de luz (ART.aberturaOlho, como o p27); a parede de blocos cinza aparece; HUD entra.",
+      "camera": "Transição-assinatura, depois leve push-in",
+      "ui": "cronômetro 11,0 (max 11) + contador de moedas 0",
+      "sfx": "clique + zumbido",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.0,
+      "inicio_estimado_s": 95.2
+    },
+    {
+      "id": 242,
+      "bloco": "Dia 4",
+      "narracao": "Pedra, pedra, pedra.",
+      "destaques": [],
+      "cenario": "C2 Mina A, pedra cinza (Zeca em cena)",
+      "acao": "Zeca em 3ª pessoa dá três golpes nos marks de picareta; CRAC! amarelo e uma moeda voa ao contador a cada golpe.",
+      "camera": "Plano médio lateral, cortes internos no ritmo dos golpes",
+      "ui": "CRAC! + contador 0 → 3",
+      "sfx": "CRAC + plim, três vezes",
+      "usa_gameplay": false,
+      "dur_estimada_s": 1.5,
+      "inicio_estimado_s": 97.2
+    },
+    {
+      "id": 243,
+      "bloco": "Dia 4",
+      "narracao": "Seis segundos.",
+      "destaques": [
+        "SEIS"
+      ],
+      "cenario": "C3 Gameplay real do trailer (ponto de vista do Zeca)",
+      "acao": "Golpes rápidos em blocos cinza em 1ª pessoa.",
+      "camera": "Plano do trailer, cortes no ritmo",
+      "ui": "cronômetro desenhado 7,0 → 6,0 (em \"Seis\") + contador 3 → 4",
+      "sfx": "CRAC, CRAC",
+      "usa_gameplay": "trailer 0–3 s (mina de pedra; cobrir o 13,2)",
+      "dur_estimada_s": 1.0,
+      "inicio_estimado_s": 98.7
+    },
+    {
+      "id": 244,
+      "bloco": "Dia 4",
+      "narracao": "E um bloco diferente,",
+      "destaques": [
+        "DIFERENTE"
+      ],
+      "cenario": "C3 Gameplay real do trailer (ponto de vista do Zeca)",
+      "acao": "Screenshot real com o bloco de ampulheta: push-in até o bloco (recorte central, sem o céu e as árvores).",
+      "camera": "Push-in contínuo no bloco da ampulheta",
+      "ui": "cronômetro desenhado 6,0 → 5,6; tapar 137/12/6 e o 11,8; selo IMAGEM REAL DO JOGO",
+      "sfx": "nota curiosa",
+      "usa_gameplay": "screenshot shot_1 (bloco de ampulheta, centro-direita)",
+      "dur_estimada_s": 2.0,
+      "inicio_estimado_s": 99.7
+    },
+    {
+      "id": 245,
+      "bloco": "Dia 4",
+      "narracao": "com uma ampulheta.",
+      "destaques": [
+        "AMPULHETA"
+      ],
+      "cenario": "C2 Mina A, pedra cinza (Zeca em cena)",
+      "acao": "Zeca vira a cabeça; o feixe da lanterna acha um bloco cinza com uma ampulheta dourada gravada; olhos arregalam (espantado leve).",
+      "camera": "Plano médio, câmera gira junto com o feixe",
+      "ui": "bloco especial ampulheta (peça nova); cronômetro 5,6 → 5,2",
+      "sfx": "brilho de areia",
+      "usa_gameplay": false,
+      "dur_estimada_s": 1.5,
+      "inicio_estimado_s": 101.7
+    },
+    {
+      "id": 246,
+      "bloco": "Dia 4",
+      "narracao": "Crac.",
+      "destaques": [
+        "CRAC."
+      ],
+      "cenario": "C2 Mina A, pedra cinza (Zeca em cena)",
+      "acao": "Golpe; o bloco estoura em areia dourada que sobe em espiral.",
+      "camera": "Close do impacto, tremor de câmera",
+      "ui": "CRAC! dourado; cronômetro 5,2 → 5,0",
+      "sfx": "CRAC + areia + plim agudo",
+      "usa_gameplay": false,
+      "dur_estimada_s": 0.8,
+      "inicio_estimado_s": 103.2
+    },
+    {
+      "id": 247,
+      "bloco": "Dia 4",
+      "narracao": "Dois segundos de presente.",
+      "destaques": [
+        "DOIS"
+      ],
+      "cenario": "C7 Close de objeto sobre fundo escuro",
+      "acao": "Close do cronômetro: a areia dourada entra na barra amarela, que cresce; o número sobe 5,0 → 7,0; ampulheta pequena (ART.obj.ampulheta) brilha ao lado; +2 s flutua.",
+      "camera": "Close, leve push-in",
+      "ui": "cronômetro 5,0 → 7,0 (sobe DENTRO do plano: a ampulheta deu) + \"+2 s\"",
+      "sfx": "tique ao contrário + acorde",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.0,
+      "inicio_estimado_s": 104.0
+    },
+    {
+      "id": 248,
+      "bloco": "Dia 4",
+      "narracao": "Foi nesses dois que achou o veio.",
+      "destaques": [
+        "VEIO"
+      ],
+      "cenario": "C2 Mina A, pedra cinza (Zeca em cena)",
+      "acao": "Últimos segundos: Zeca golpeia; a parede racha e aparecem veios laranja (ART.cubo veios), como no p45.",
+      "camera": "Close do impacto, tremor",
+      "ui": "cronômetro 2,0 → 1,6; contador 6",
+      "sfx": "CRAC grave + faísca",
+      "usa_gameplay": false,
+      "dur_estimada_s": 3.4,
+      "inicio_estimado_s": 106.0
+    },
+    {
+      "id": 249,
+      "bloco": "Dia 4",
+      "narracao": "Cobre. Cobre. Cobre.",
+      "destaques": [
+        "COBRE"
+      ],
+      "cenario": "C2 Mina A, pedra cinza (Zeca em cena)",
+      "acao": "Três golpes rápidos; a cada um, uma pepita de cobre voa em arco até um segundo contador (ícone de cobre).",
+      "camera": "Plano médio, câmera na mão",
+      "ui": "cronômetro 1,6 → 0,4 (1,0 com alerta); contador de cobre 1 → 4",
+      "sfx": "CRAC + plim grave, três vezes; tique alto",
+      "usa_gameplay": false,
+      "dur_estimada_s": 1.5,
+      "inicio_estimado_s": 109.4
+    },
+    {
+      "id": 250,
+      "bloco": "Dia 4",
+      "narracao": "Apagou.",
+      "destaques": [],
+      "cenario": "C2 Mina A, pedra cinza (Zeca em cena)",
+      "acao": "A lanterna pisca duas vezes e apaga; só os olhos do Zeca brilham, e um reflexo laranja das pepitas na mochila.",
+      "camera": "Close do rosto, câmera respira",
+      "ui": "cronômetro 0,4 → 0,0",
+      "sfx": "estalo de lâmpada apagando",
+      "usa_gameplay": false,
+      "dur_estimada_s": 0.8,
+      "inicio_estimado_s": 110.9
+    },
+    {
+      "id": 251,
+      "bloco": "Dia 4",
+      "narracao": "Quatro pepitas na mochila.",
+      "destaques": [
+        "QUATRO"
+      ],
+      "cenario": "C7 Close de objeto sobre fundo escuro",
+      "acao": "No escuro, quatro pepitas de cobre acendem uma a uma num holofote, em fila.",
+      "camera": "Close, travelling lateral pela fila",
+      "ui": "contador de cobre 4",
+      "sfx": "quatro plins em escada",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.0,
+      "inicio_estimado_s": 111.7
+    },
+    {
+      "id": 252,
+      "bloco": "Recompensa",
+      "narracao": "Noite quatro. Mercado.",
+      "destaques": [
+        "MERCADO"
+      ],
+      "cenario": "C5 Painéis da Toca (Habilidades, Mercado)",
+      "acao": "Painel do Mercado sobe da base (como o p33); cartão fixo atualiza.",
+      "camera": "Plano frontal, painel desliza de baixo",
+      "ui": "cartão fixo SALDO 20 · DIA 4 DE 30",
+      "sfx": "whoosh de painel",
+      "usa_gameplay": false,
+      "dur_estimada_s": 1.5,
+      "inicio_estimado_s": 113.7
+    },
+    {
+      "id": 253,
+      "bloco": "Recompensa",
+      "narracao": "Em alta hoje: cobre.",
+      "destaques": [
+        "ALTA"
+      ],
+      "cenario": "C5 Painéis da Toca (Habilidades, Mercado)",
+      "acao": "A faixa EM ALTA HOJE acende em dourado com o ícone do cobre e +50%; brilho varre a faixa.",
+      "camera": "Push-in na faixa",
+      "ui": "faixa EM ALTA HOJE: COBRE +50%",
+      "sfx": "acorde claro",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.0,
+      "inicio_estimado_s": 115.2
+    },
+    {
+      "id": 254,
+      "bloco": "Recompensa",
+      "narracao": "Sessenta moedas cada.",
+      "destaques": [
+        "SESSENTA"
+      ],
+      "cenario": "C5 Painéis da Toca (Habilidades, Mercado)",
+      "acao": "Cartão do Cobre: o preço rola 20 → 60; a barra de hoje do gráfico sobe acima de todas.",
+      "camera": "Plano frontal, push-in no 60",
+      "ui": "cartão Cobre 60 (sem % no cartão; o +50% fica só na faixa)",
+      "sfx": "contador rolando para cima + plim",
+      "usa_gameplay": false,
+      "dur_estimada_s": 1.5,
+      "inicio_estimado_s": 117.2
+    },
+    {
+      "id": 255,
+      "bloco": "Recompensa",
+      "narracao": "Quatro pepitas, duzentos e quarenta.",
+      "destaques": [
+        "DUZENTOS E QUARENTA"
+      ],
+      "cenario": "C5 Painéis da Toca (Habilidades, Mercado)",
+      "acao": "Quatro pepitas deslizam e se alinham sobre o botão VENDER, que vira +240 moedas.",
+      "camera": "Câmera acompanha as pepitas",
+      "ui": "linha COBRE ×4; botão VENDER +240",
+      "sfx": "quatro plins + acorde",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.5,
+      "inicio_estimado_s": 118.7
+    },
+    {
+      "id": 256,
+      "bloco": "Recompensa",
+      "narracao": "Quase um quarto da meta.",
+      "destaques": [
+        "UM QUARTO"
+      ],
+      "cenario": "C4 Toca (interior: parede da meta, cama, mesa)",
+      "acao": "Parede da meta: a barrinha enche 2% de cinza (saldo) e mais 24% de laranja (cobre); quatro tracinhos riscados de trinta.",
+      "camera": "Close da parede, push-in lento",
+      "ui": "cartão fixo SALDO 20 · DIA 4 · COBRE 24% · RESTAM 26",
+      "sfx": "giz + nota grave",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.5,
+      "inicio_estimado_s": 121.2
+    },
+    {
+      "id": 257,
+      "bloco": "Recompensa",
+      "narracao": "Ele esperou a alta, não a seta.",
+      "destaques": [
+        "ALTA"
+      ],
+      "cenario": "C4 Toca (interior: parede da meta, cama, mesa)",
+      "acao": "Zeca de corpo inteiro com as quatro pepitas no colo, dá um pulinho contido de alegria (comemorando curto), luz laranja no rosto. Segurar o acorde ≈ 1 s.",
+      "camera": "Plano inteiro, push-in lento",
+      "ui": "nenhuma",
+      "sfx": "acorde de recompensa",
+      "usa_gameplay": false,
+      "dur_estimada_s": 3.4,
+      "inicio_estimado_s": 123.7
+    },
+    {
+      "id": 258,
+      "bloco": "Dilema",
+      "narracao": "Mas na aba Clientes, tinha um pedido.",
+      "destaques": [
+        "PEDIDO"
+      ],
+      "cenario": "C3 Gameplay real do trailer (ponto de vista do Zeca)",
+      "acao": "Tela real dos Clientes: push-in até a aba amarela CLIENTES e o cartão da Dona Coruja.",
+      "camera": "Push-in contínuo; dissolve curto para o C5",
+      "ui": "tapar 'amizade 4', '+8% → 10%', '960/6,8K Prata → +634K' e os outros valores; tirar a caixa de marketing; selo IMAGEM REAL DO JOGO",
+      "sfx": "notificação suave",
+      "usa_gameplay": "screenshot shot_5 (aba CLIENTES, cartão da Dona Coruja)",
+      "dur_estimada_s": 3.4,
+      "inicio_estimado_s": 127.1
+    },
+    {
+      "id": 259,
+      "bloco": "Dilema",
+      "narracao": "A Dona Coruja quer quatro cobres.",
+      "destaques": [
+        "CORUJA"
+      ],
+      "cenario": "C5 Painéis da Toca (Habilidades, Mercado)",
+      "acao": "Cartão de cliente redesenhado (peça nova): retrato da Dona Coruja de óculos, simpática, pisca; pedido 0/4 COBRE; botão ENTREGAR.",
+      "camera": "Plano frontal, push-in no retrato",
+      "ui": "cartão cliente: Dona Coruja · amizade 0 · pedido 0/4 cobre",
+      "sfx": "pio de coruja curto e amigável",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.9,
+      "inicio_estimado_s": 130.5
+    },
+    {
+      "id": 260,
+      "bloco": "Dilema",
+      "narracao": "Paga cento e sessenta.",
+      "destaques": [
+        "CENTO E SESSENTA"
+      ],
+      "cenario": "C5 Painéis da Toca (Habilidades, Mercado)",
+      "acao": "No cartão, a recompensa +160 moedas acende.",
+      "camera": "Push-in na recompensa",
+      "ui": "+160 moedas",
+      "sfx": "plim",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.0,
+      "inicio_estimado_s": 133.4
+    },
+    {
+      "id": 261,
+      "bloco": "Dilema",
+      "narracao": "Menos que o Mercado.",
+      "destaques": [
+        "MENOS"
+      ],
+      "cenario": "C5 Painéis da Toca (Habilidades, Mercado)",
+      "acao": "Lado a lado: barra ENTREGAR 160 e barra VENDER 240; a de 160 é menor.",
+      "camera": "Câmera parada, as barras crescem",
+      "ui": "ENTREGAR 160 × VENDER 240",
+      "sfx": "duas notas, a segunda mais alta",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.0,
+      "inicio_estimado_s": 135.4
+    },
+    {
+      "id": 262,
+      "bloco": "Dilema",
+      "narracao": "Só que cliente atendido vira amigo.",
+      "destaques": [
+        "AMIGO"
+      ],
+      "cenario": "C5 Painéis da Toca (Habilidades, Mercado)",
+      "acao": "No cartão da Dona Coruja, a amizade 0 → 1 enche com um coraçãozinho; ela sorri.",
+      "camera": "Push-in no retrato",
+      "ui": "amizade 0 → 1",
+      "sfx": "sininho",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.9,
+      "inicio_estimado_s": 137.4
+    },
+    {
+      "id": 263,
+      "bloco": "Dilema",
+      "narracao": "E amizade rende bônus nas vendas.",
+      "destaques": [
+        "BÔNUS"
+      ],
+      "cenario": "C5 Painéis da Toca (Habilidades, Mercado)",
+      "acao": "Abaixo do nome aparece a linha de bônus (como no jogo: 'no preço de venda'), sem número; brilho verde.",
+      "camera": "Câmera parada, deriva lateral",
+      "ui": "linha BÔNUS NO PREÇO DE VENDA (sem %)",
+      "sfx": "brilho",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.9,
+      "inicio_estimado_s": 140.3
+    },
+    {
+      "id": 264,
+      "bloco": "Dilema",
+      "narracao": "Faltam vinte e seis dias.",
+      "destaques": [
+        "VINTE E SEIS"
+      ],
+      "cenario": "C4 Toca (interior: parede da meta, cama, mesa)",
+      "acao": "Close dos trinta tracinhos: quatro riscados.",
+      "camera": "Close, câmera parada com deriva",
+      "ui": "cartão fixo: RESTAM 26",
+      "sfx": "risco de giz",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.5,
+      "inicio_estimado_s": 143.2
+    },
+    {
+      "id": 265,
+      "bloco": "Dilema",
+      "narracao": "Entrega pra Dona Coruja e ganha uma amiga,",
+      "destaques": [
+        "ENTREGA"
+      ],
+      "cenario": "C5 Painéis da Toca (Habilidades, Mercado)",
+      "acao": "A patinha do Zeca paira sobre ENTREGAR no cartão da Dona Coruja, sem apertar.",
+      "camera": "Plano detalhe, push-in lento",
+      "ui": "botão ENTREGAR · +160",
+      "sfx": "trilha suspensa",
+      "usa_gameplay": false,
+      "dur_estimada_s": 3.9,
+      "inicio_estimado_s": 145.7
+    },
+    {
+      "id": 266,
+      "bloco": "Dilema",
+      "narracao": "ou vende tudo hoje na alta?",
+      "destaques": [
+        "VENDE"
+      ],
+      "cenario": "C4 Toca (interior: parede da meta, cama, mesa)",
+      "acao": "Zeca sentado na cama com as quatro pepitas, olha para a porta (vila) e depois para o painel do Mercado; não decide.",
+      "camera": "Plano médio, câmera parada com deriva; luz laranja das pepitas",
+      "ui": "nenhuma",
+      "sfx": "trilha suspensa, sem resolver",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.9,
+      "inicio_estimado_s": 149.6
+    },
+    {
+      "id": 267,
+      "bloco": "Chamada",
+      "narracao": "Curte pra parte três.",
+      "destaques": [
+        "PARTE"
+      ],
+      "cenario": "C7 Close de objeto sobre fundo escuro",
+      "acao": "Mesma lanterna do p201, em close; ela apaga.",
+      "camera": "Repete o enquadramento do p201",
+      "ui": "nenhuma",
+      "sfx": "clique de lanterna apagando",
+      "usa_gameplay": false,
+      "dur_estimada_s": 2.0,
+      "inicio_estimado_s": 152.5
+    }
+  ]
+}

@@ -24,6 +24,8 @@ if [ "${1:-}" != "--sem-asr" ]; then
   done
   rm -f $C/asr/sherpa-onnx-whisper-small/small-{encoder,decoder}.onnx   # só usamos as versões int8
 fi
+# quadros do gameplay real (ART.gameplay; p02, p07, p17, p28, p39, p41, p49): build/ não é versionado
+[ -s build/art/gameplay/f_0001.jpg ] || { mkdir -p build/art/gameplay; ffmpeg -v error -i assets/game/preview.mp4 -vf fps=30 -q:v 3 build/art/gameplay/f_%04d.jpg; }
 node -e "require('playwright')" || { echo "ERRO: node não acha 'playwright' (npm i -g playwright ou instale no projeto)"; exit 1; }
 ffmpeg -version >/dev/null
 echo "ok. Teste: $C/venv/bin/python make_video.py story/demo.json -o out/demo.mp4 --contact-sheet"

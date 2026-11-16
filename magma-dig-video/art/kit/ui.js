@@ -165,8 +165,10 @@
   };
 
   // ================================================================= gráfico de 7 dias (Mercado)
-  /** x,y = canto sup. esq. o = {barras: [7 valores 0..1], amanha (0..1), prog (0..1 animação), cor, corHoje} */
+  /** x,y = canto sup. esq. o = {barras: [7 valores 0..1], amanha (0..1 | false = sem barra de amanhã), prog (0..1 animação), cor, corHoje,
+   *  cores: [cor por barra] (Parte 2), desliza (Parte 2: nº de barras já deslizadas para a esquerda, fracionário), janela (7)} */
   UI.grafico7 = (g, x, y, w, h, o = {}) => {
+    if (o.desliza != null || o.amanha === false || o.cores) return grafico7b(g, x, y, w, h, o);
     const b = o.barras || [0.4, 0.55, 0.35, 0.5, 0.45, 0.6, 0.7], n = b.length + 1, gap = w * 0.035, bw = (w - gap * (n - 1)) / n, pr = o.prog ?? 1;
     g.save();
     for (let i = 0; i < n; i++) {
@@ -186,8 +188,31 @@
     g.fillStyle = "rgba(255,255,255,.15)"; g.fillRect(x - 6, y + h + 6, w + 12, 3);
     g.restore();
   };
-  /** seta de tendência (dir 'cima'|'baixo'). x,y = centro, o = {s, cor, a} */
+  /** variante do gráfico (Parte 2): sem barra de amanhã, cor por barra e/ou deslizando (barras novas entram pela direita) */
+  function grafico7b(g, x, y, w, h, o) {
+    const b = o.barras || [0.4, 0.55, 0.35, 0.5, 0.45, 0.6, 0.7], temA = o.amanha !== false && o.desliza == null;
+    const jan = o.desliza != null ? o.janela ?? 7 : b.length, n = jan + (temA ? 1 : 0), gap = w * 0.035, bw = (w - gap * (n - 1)) / n, pr = o.prog ?? 1;
+    const d = o.desliza ?? 0, ult = Math.min(b.length - 1, Math.ceil(d + jan - 1e-6) - 1); // índice da barra "hoje"
+    g.save(); g.beginPath(); g.rect(x - 4, y - h * 0.4, w + 8, h * 1.4 + 4); g.clip();
+    for (let i = 0; i < b.length; i++) {
+      const pos = i - d; if (pos < -1 || pos > jan) continue;
+      const ki = o.desliza != null ? clamp((d + jan - i) * 1.5) : clamp(pr * n - i);   // barra nova cresce ao entrar
+      if (ki <= 0) continue;
+      const hh = h * b[i] * ART.ease.outBack(ki), bx = x + pos * (bw + gap), by = y + h - hh;
+      const cor = (o.cores && o.cores[i]) || (i === (o.desliza != null ? ult : b.length - 1) ? o.corHoje || "#FFD23F" : "#7A739A");
+      ART.rr(g, bx, by, bw, hh, 6); g.fillStyle = cor; g.fill();
+    }
+    if (temA) {
+      const ki = clamp(pr * n - b.length), v = o.amanha ?? 0.85, hh = h * v * ART.ease.outBack(ki), bx = x + b.length * (bw + gap), by = y + h - hh, ca = o.corAmanha || "#5FD35F";
+      if (ki > 0) { ART.rr(g, bx + 2, by, bw - 4, hh, 6); g.setLineDash([10, 7]); g.lineWidth = 5; g.strokeStyle = ca; g.stroke(); g.setLineDash([]); ART.rr(g, bx + 2, by, bw - 4, hh, 6); g.fillStyle = ART.rgba(ca, 0.12 + 0.12 * (o.brilhoAmanha || 0)); g.fill(); }
+    }
+    g.restore();
+    g.save(); g.fillStyle = "rgba(255,255,255,.15)"; g.fillRect(x - 6, y + h + 6, w + 12, 3); g.restore();
+  }
+  /** seta de tendência (dir 'cima'|'baixo'). x,y = centro, o = {s, cor, a}
+   *  Parte 2: giro (0..1: gira 180° de cima para baixo e passa de verde a vermelho), contorno (0..1: vira seta fantasma tracejada) */
   UI.seta = (g, x, y, o = {}) => {
+    if (o.giro != null || o.contorno) return seta2(g, x, y, o);
     const s = o.s || 1, up = (o.dir || "cima") === "cima", cor = o.cor || (up ? "#5FD35F" : "#E63748");
     g.save(); g.translate(x, y); g.scale(s, up ? s : -s); g.globalAlpha *= o.a ?? 1;
     g.shadowColor = ART.rgba(cor, 0.6); g.shadowBlur = 30;
@@ -195,6 +220,33 @@
     g.fillStyle = ART.lg(g, 0, -70, 0, 66, [[0, ART.shade(cor, 0.3)], [1, ART.shade(cor, -0.2)]]); g.fill();
     g.shadowColor = "transparent"; g.lineWidth = 6; g.strokeStyle = ART.shade(cor, -0.45); g.lineJoin = "round"; g.stroke();
     g.restore();
+  };
+  function seta2(g, x, y, o) {
+    const s = o.s || 1, gk = clamp(o.giro ?? 0), up0 = (o.dir || "cima") === "cima", ck = clamp(o.contorno || 0);
+    const cor = o.cor || ART.mix("#5FD35F", "#E63748", up0 ? ART.smooth(gk) : 1 - ART.smooth(gk));
+    g.save(); g.translate(x, y); g.rotate(Math.PI * ART.ease.inOutBack(gk)); g.scale(s, up0 ? s : -s); g.globalAlpha *= o.a ?? 1;
+    const forma = () => ART.poly(g, [[0, -70], [56, -6], [22, -6], [22, 66], [-22, 66], [-22, -6], [-56, -6]]);
+    if (ck < 1) {
+      g.save(); g.globalAlpha *= 1 - ck; g.shadowColor = ART.rgba(cor, 0.6); g.shadowBlur = 30; forma();
+      g.fillStyle = ART.lg(g, 0, -70, 0, 66, [[0, ART.shade(cor, 0.3)], [1, ART.shade(cor, -0.2)]]); g.fill();
+      g.shadowColor = "transparent"; g.lineWidth = 6; g.strokeStyle = ART.shade(cor, -0.45); g.lineJoin = "round"; g.stroke(); g.restore();
+    }
+    if (ck > 0) { g.save(); g.globalAlpha *= ck; forma(); g.fillStyle = ART.rgba(cor, 0.1); g.fill(); g.setLineDash([12, 9]); g.lineWidth = 6; g.strokeStyle = ART.rgba(cor, 0.85); g.lineJoin = "round"; g.stroke(); g.restore(); }
+    g.restore();
+  }
+  /** número de preço que rola (odômetro) de `de` para `para`. Alinhado à direita em xr, linha de base yb. k 0..1. -> largura */
+  UI.precoRolando = (g, xr, yb, de, para, k, px, cor) => {
+    const v = lerp(de, para, clamp(k)), desce = para < de;
+    const a = desce ? Math.ceil(v - 1e-9) : Math.floor(v + 1e-9), f = Math.abs(v - a), nx = desce ? a - 1 : a + 1, H = px * 0.95;
+    g.save(); g.font = F(px, 1000); g.textAlign = "right"; g.fillStyle = cor;
+    const wTxt = Math.max(g.measureText(String(a)).width, g.measureText(String(para)).width);
+    g.beginPath(); g.rect(xr - wTxt - 20, yb - px * 0.8, wTxt + 40, px * 0.86); g.clip();
+    const dir = desce ? 1 : -1;   // desce: números escorregam para baixo
+    g.fillText(String(a), xr, yb + dir * f * H);
+    if (f > 0.001) g.fillText(String(nx), xr, yb + dir * (f - 1) * H);
+    g.restore();
+    g.save(); g.font = F(px, 1000); const w = g.measureText(String(Math.round(v))).width; g.restore();
+    return w;
   };
 
   // ================================================================= cartão de minério (preço + tendência)
@@ -208,19 +260,58 @@
     UI.pix(g, o.tipo || "cobre", x0 + 87 * s, y0 + 87 * s, 72 * s);
     g.fillStyle = "#F4EEDC"; g.font = F(58 * s, 1000); g.textAlign = "left"; g.textBaseline = "alphabetic";
     g.fillText(o.nome || "Cobre", x0 + 168 * s, y0 + 92 * s);
-    if (o.varPct != null) { g.font = F(38 * s, 900); g.fillStyle = o.varPct >= 0 ? "#5FD35F" : "#FF5A66"; g.fillText((o.varPct >= 0 ? "+" : "") + o.varPct + "%", x0 + 170 * s, y0 + 136 * s); }
-    UI.grafico7(g, x0 + 36 * s, y0 + 180 * s, 250 * s, 160 * s, { barras: o.barras, amanha: o.amanha, prog: o.prog ?? 1, brilhoAmanha: o.brilhoAmanha || 0 });
+    const antes = o.precoAntes, rk = clamp(o.rola ?? 0);
+    if (o.varPct != null) { g.save(); if (antes != null) g.globalAlpha *= o.varK ?? ART.prog(rk, 0.55, 0.9); g.font = F(38 * s, 900); g.fillStyle = o.varPct >= 0 ? "#5FD35F" : "#FF5A66"; g.fillText((o.varPct >= 0 ? "+" : "") + o.varPct + "%", x0 + 170 * s, y0 + 136 * s); g.restore(); }
+    const go = { barras: o.barras, amanha: o.amanha, prog: o.prog ?? 1, brilhoAmanha: o.brilhoAmanha || 0 };
+    if (o.corHoje) go.corHoje = o.corHoje; if (o.cores) go.cores = o.cores;
+    UI.grafico7(g, x0 + 36 * s, y0 + 180 * s, 250 * s, 160 * s, go);
     // preço
-    g.textAlign = "right"; g.font = F(30 * s, 800); g.fillStyle = "#A3A0AE"; g.fillText("HOJE PAGA", x0 + w - 36 * s, y0 + 216 * s);
-    g.font = F(104 * s, 1000); g.fillStyle = "#FFD23F"; g.fillText(String(o.preco ?? 40), x0 + w - 36 * s, y0 + 316 * s);
-    UI.pix(g, "moeda", x0 + w - 36 * s - measure(g, String(o.preco ?? 40), 104 * s) - 40 * s, y0 + 282 * s, 46 * s);
-    g.font = F(26 * s, 800); g.fillStyle = "#A3A0AE"; g.fillText("moedas", x0 + w - 36 * s, y0 + 352 * s);
+    if (antes == null) {
+      g.textAlign = "right"; g.font = F(30 * s, 800); g.fillStyle = "#A3A0AE"; g.fillText(o.rotuloPreco || "HOJE PAGA", x0 + w - 36 * s, y0 + 216 * s);
+      g.font = F(104 * s, 1000); g.fillStyle = o.corPreco || "#FFD23F"; g.fillText(String(o.preco ?? 40), x0 + w - 36 * s, y0 + 316 * s);
+      UI.pix(g, "moeda", x0 + w - 36 * s - measure(g, String(o.preco ?? 40), 104 * s) - 40 * s, y0 + 282 * s, 46 * s);
+    } else precoComAntes(g, x0, y0, w, s, o, antes, rk);
+    g.textAlign = "right"; g.font = F(26 * s, 800); g.fillStyle = "#A3A0AE"; g.fillText("moedas", x0 + w - 36 * s, y0 + 352 * s);
     g.restore();
     return { x0, y0, w, h };
   };
+  /** Parte 2: preço de ontem riscado -> preço novo rolando; o de ontem fica pequeno e riscado no canto (fantasma) */
+  function precoComAntes(g, x0, y0, w, s, o, antes, rk) {
+    const novo = o.preco ?? 40, xr = x0 + w - 36 * s, desce = novo < antes;
+    const corN = o.corPreco || (desce ? "#FF5A66" : "#FFD23F");
+    const risco = ART.prog(rk, 0, 0.3, "outCubic"), rola = ART.prog(rk, 0.3, 0.85, "inOutCubic"), troca = ART.prog(rk, 0.3, 0.6);
+    // rótulo: ONTEM -> HOJE PAGA
+    g.save(); g.textAlign = "right"; g.font = F(30 * s, 800); g.fillStyle = "#A3A0AE";
+    g.globalAlpha *= 1 - troca; g.fillText(o.rotuloAntes || "ONTEM", xr, y0 + 216 * s); g.restore();
+    g.save(); g.textAlign = "right"; g.font = F(30 * s, 800); g.fillStyle = "#A3A0AE";
+    g.globalAlpha *= troca; g.fillText(o.rotuloPreco || "HOJE PAGA", xr, y0 + 216 * s); g.restore();
+    // número grande
+    const px = 104 * s, cor = rola > 0 ? ART.mix("#FFD23F", corN, ART.prog(rola, 0, 0.3)) : "#FFD23F";
+    const pw = UI.precoRolando(g, xr, y0 + 316 * s, antes, novo, rola, px, cor);
+    UI.pix(g, "moeda", xr - pw - 40 * s, y0 + 282 * s, 46 * s);
+    const some = 1 - ART.prog(rk, 0.3, 0.42);   // risco sobre o número antigo (some quando ele rola)
+    if (risco > 0 && some > 0) { const ww = measure(g, String(antes), px) + 24 * s; g.save(); g.globalAlpha *= some; g.lineCap = "round"; g.strokeStyle = "#E63748"; g.lineWidth = 11 * s; g.beginPath(); g.moveTo(xr - ww, y0 + 290 * s); g.lineTo(xr - ww + (ww + 12 * s) * risco, y0 + 268 * s); g.stroke(); g.restore(); }
+    // fantasma do preço antigo no canto superior direito
+    const fk = ART.prog(rk, 0.6, 1) * (o.antesFantasma ?? 1);
+    if (fk > 0) {
+      g.save(); g.globalAlpha *= fk; g.textAlign = "right";
+      g.font = F(24 * s, 900); g.fillStyle = "#8E8A9A"; g.letterSpacing = 2 * s + "px"; g.fillText(o.rotuloAntes || "ONTEM", xr, y0 + 64 * s); g.letterSpacing = "0px";
+      g.font = F(64 * s, 1000); g.fillStyle = "#8E8A9A"; g.fillText(String(antes), xr, y0 + 128 * s);
+      const aw = measure(g, String(antes), 64 * s);
+      g.strokeStyle = "#E63748"; g.lineWidth = 7 * s; g.lineCap = "round"; g.beginPath(); g.moveTo(xr - aw - 8 * s, y0 + 116 * s); g.lineTo(xr + 8 * s, y0 + 96 * s); g.stroke();
+      g.restore();
+    }
+  }
 
-  /** linha do Mercado (como no jogo): x,y = canto sup. esq. o = {tipo, nome, qtd, barras, amanha, varPct, valor, w, s} */
+  /** linha do Mercado (como no jogo): x,y = canto sup. esq. o = {tipo, nome, qtd, barras, amanha, varPct, valor, w, s}
+   *  Parte 2: a (opacidade; "apagada" ≈ 0.4), pulso (0..1: borda dourada piscando, chama atenção) */
   UI.linhaMercado = (g, x, y, o = {}) => {
+    if (o.a != null || o.pulso) {
+      const s = o.s || 1, w = (o.w || 900) * s, h = 120 * s, p = clamp(o.pulso || 0);
+      g.save(); g.globalAlpha *= o.a ?? 1; UI.linhaMercado(g, x, y, { ...o, a: undefined, pulso: 0 });
+      if (p > 0) { ART.rr(g, x - 4 * s, y - 4 * s, w + 8 * s, h + 8 * s, 28 * s); g.lineWidth = 7 * s; g.strokeStyle = ART.rgba("#FFD23F", 0.85 * p); g.stroke(); ART.glow(g, x + w / 2, y + h / 2, w * 0.55, "#FFD23F", 0.3 * p); }
+      g.restore(); return;
+    }
     const s = o.s || 1, w = (o.w || 900) * s, h = 120 * s;
     UI.cartao(g, x, y, w, h, { r: 24 * s, cor: o.destaque ? "#2A2540" : P.uiCard, borda: o.destaque ? "#FFD23F" : P.uiBorda, bw: o.destaque ? 4 : 2.5, sombra: false });
     ART.rr(g, x + 18 * s, y + 18 * s, 84 * s, 84 * s, 18 * s); g.fillStyle = "#2A2640"; g.fill();

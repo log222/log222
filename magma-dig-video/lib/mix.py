@@ -100,6 +100,8 @@ def mixdown(voice24, events, dur, cfg, trilha=True, trilha_arquivo=None, seed=0,
         # automação por dados (ganho/modo com rampa): "trilha some", "suspensa", "corte seco"...
         g = M.automation(trilha_eventos or [], n)
         mus = sum(stems[m][:n] * g[m][:len(stems[m][:n]), None] for m in stems)
+        if len(mus) < n:   # a trilha sintetizada pode sair 1 amostra curta (arredondamento de dur * SR)
+            mus = np.pad(mus, ((0, n - len(mus)), (0, 0)))
         act = voice_activity(voice)
         gdb = cfg.get("trilha_db", -20) - cfg.get("ducking_db", 9) * act
         bus += mus * db(gdb)[:, None]

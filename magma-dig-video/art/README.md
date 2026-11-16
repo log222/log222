@@ -109,3 +109,64 @@ são mescladas e recortadas na faixa útil (`camadaEstatica(..., {y0, y1})`), gr
 
 ## Zonas
 Legenda: faixa y≈1300–1500 (centro 1400) mantida escura e sem detalhe (`ART.LEGENDA`, `ART.faixaLegenda`). Nada essencial em y<250, y>1500, x>960.
+
+## Parte 2 ("A seta") — peças novas (tudo opcional; sem os parâmetros novos o desenho da Parte 1 é idêntico, conferido byte a byte)
+Módulo novo `art/kit/parte2.js` (carregado pelo `ART_LOAD`). Pranchas: `art/boards/p2_mercado.js`, `p2_wallstreet.js`, `p2_ampulheta.js`, `p2_clientes.js`
+(cada segundo da prancha = um momento do roteiro). Provas: `art/frames/p2-*-contato.png`.
+
+**1. Mercado com queda e alta** (`ART.painelMercado`, `ART.ui.cartaoMinerio/grafico7/seta/linhaMercado`, `ART.ui.faixaAlta`)
+```js
+ART.painelMercado(g, t, { precoAntes: 40, preco: 20, rola: k, varPct: -50, barras: [.42,.5,.38,.55,.47,.66, hoje], corHoje: "#E63748", seta: 0 }); // p209–210 (rola 0 = "ONTEM 40")
+ART.painelMercado(g, t, { preco: 40, setaGiro: k });                       // p206: seta verde gira 180° e cai vermelha
+ART.painelMercado(g, t, { precoAntes: 40, preco: 20, rola: 1, varPct: -50, seta: 0, botaoPulso: 1 }); // p230–231: VENDER +20, "ONTEM 40" riscado no canto
+ART.painelMercado(g, t, { ..., seta: 1, setaFantasma: k, antesFantasma: 0 });  // p235: seta tracejada + "?" piscando
+ART.painelMercado(g, t, { faixa: { minerio: null, k, brilho }, linhas: [...], botao: false });             // p236 faixa vazia
+ART.painelMercado(g, t, { faixa: { minerio: "ferro", nome: "Ferro", mk }, botao: false,
+  linhas: [{ tipo: "ferro", nome: "Ferro", qtd: 0, valor: 0 }, { tipo: "cobre", nome: "Cobre", qtd: 1, valor: 20, a: .45, pulso }] }); // p237–238
+ART.painelMercado(g, t, { faixa: { minerio: "cobre", nome: "Cobre" }, precoAntes: 20, preco: 60, rola: k, varPct: false, amanha: false }); // p253–254
+ART.painelMercado(g, t, { faixa: { minerio: "cobre", nome: "Cobre" }, linhas: [{ tipo: "cobre", nome: "Cobre", qtd: 4, valor: 240, destaque: true }], botaoSub: "+240 moedas" }); // p255
+```
+- `rola` 0..1: 0–0,3 risco vermelho no preço antigo · 0,3–0,85 número rola (odômetro) até `preco` · 0,6–1 o antigo fica pequeno e riscado no canto ("ONTEM 40", some com `antesFantasma: 0`). Rótulo ONTEM → HOJE PAGA (`rotuloAntes`, `rotuloPreco`). Cor do novo: vermelho se cai, amarelo se sobe (`corPreco`). `varPct` aparece em 0,55–0,9 (`varK` força); `varPct: false` esconde.
+- `barras` (7 valores 0..1; o último é HOJE), `amanha` (número ou `false`), `corHoje`, `cores` (cor por barra). `seta` padrão 0 quando há `faixa`/`linhas`.
+- Layout com `faixa` ou `linhas`: título y 300, faixa y 412, cartão y 780 (escala 1,4), linhas a partir de y 520 (passo 150), botão y 1160. Sem eles: layout da Parte 1 (título 330, cartão 700, botão 1130). Devolve `{x0,y0,w,h,pos}`.
+- `ART.ui.faixaAlta(g, x, y, {minerio, nome, pct: 50, k (acende), mk (entrada do minério), brilho (0..1 varredura), w: 900, s})` — sozinha também.
+- `ART.ui.grafico7(..., {desliza: n, janela: 7})` barras entram pela direita (p216: `desliza` = 0 → nº de barras novas ao longo do plano); `{cores: ['#5FD35F','#E63748','#5FD35F'], amanha: false}` para sobe/desce/sobe (p217).
+- `ART.ui.seta(g, x, y, {giro: 0..1, contorno: 0..1})`; `ART.ui.linhaMercado(..., {a, pulso})`; `ART.ui.precoRolando(g, xDireita, yBase, de, para, k, px, cor)`.
+- `ART.ui.etiquetaPreco(g, x, y, {de: 40, para: 20, k, s, rot})` — p203: etiqueta racha (k 0–0,35), metades caem (0,35–0,75), a nova com 20 vermelho entra (0,5–0,85).
+
+**2. Gráfico de linha blueprint** (`ART.ciencia.grafLinha`, `ART.ciencia.especulacao`) — paleta `ART.BP`; a queda é a única cor quente (coral `#FF6B5B`).
+```js
+const GL = ART.ciencia.grafLinha;
+GL(g, t, { prog: k * GL.anoProg(1929), wallStreet: 1, regua: 1 });   // p223: ano na ponta corre 1921 → 1929
+GL(g, t, { prog: lerp(GL.anoProg(1929), GL.PICO, k), x6: k2, wallStreet: 1 }); // p224: sobe até 381, ×6
+GL(g, t, { prog: GL.PICO, x6: 1, emprestado: k, zoom: 1.15, foco: [540, 1180] }); // p225: 1 moeda cheia + 9 tracejadas
+GL(g, t, { prog: lerp(GL.PICO, 1, k), queda: k2 });                     // p226: despenca até 41, −89%
+GL(g, t, { prog: 1, queda: 1, pan: k, rotulo87: k2, prog87: k3 * 0.55 }); // p227: pan para o 2º gráfico
+GL(g, t, { prog: 1, pan: 1, rotulo87: 1, prog87: k, segunda: k2 });      // p228: degrau (GL.DEGRAU87 ≈ 0,73), 1 DIA, SEGUNDA-FEIRA NEGRA
+GL(g, t, { prog: 1, pan: 1, rotulo87: 1, prog87: 1, segunda: 1, queda87: k, apaga: k2 }); // p229: −22,6% e as linhas somem
+ART.ciencia.especulacao(g, t, { pata: k, seta: k2 });   // p220 pata + moeda, seta AMANHÃ? · {carimbo: k} p221 · {zeca: k} p222 (vira o Zeca com a pepita)
+```
+Parâmetros de `grafLinha`: `prog, regua, wallStreet, x6, queda, contador (true), emprestado, prog87, rotulo87, segunda, queda87, pan, zoom, foco:[x,y], apaga, a, fundo`.
+Devolve `{ponta, ponta87, ano}` (px de tela). Área útil y 340–1260 (eixo y 960, contador de anos y 1030–1110, moedas y 1172, EMPRESTADO y 1252); nada na faixa da legenda.
+Para o dissolve da Toca (p219), desenhe a Toca e por cima `GL(g, t, {a: k, prog: ...})`.
+
+**3. Bloco especial de ampulheta** (`ART.cubo`, `ART.estouroAreia`)
+```js
+ART.cubo(gg, GA.B.X, GA.B.Z, { especial: "ampulheta", t, brilho: 0.8, escuro: 0.6 * (1 - k) });  // p245 (o feixe acha o bloco: escuro -> 0)
+ART.estouroAreia(gg, t, { t0: golpe, front: GA.frente(), seed: 9 });       // p246: lascas claras + areia dourada em espiral
+ART.estouroAreia(g, t, { t0, centro: [x, y], tam, alvo: [790, 330], tAlvo: 0.7 }); // areia converge para o cronômetro (px de tela); -> fração que chegou
+```
+Bloco claro com ampulheta gravada (barras douradas, vidro prateado, areia dourada), como o do `shot_1`. Combina com `crack`. A areia dura ~1,9 s (1,6 s com `alvo`).
+Imagem real (p244): `ART.gameplay.cheio(g, t, Object.assign({}, ART.gameplay.PRESET.ampulheta, { dur, cronometro: {valor, max: 11, escala: 11} }))` (setup: `await ART.gameplay.preloadShot('shot_1')`).
+
+**4. Cliente Dona Coruja** (`ART.ui.cartaoCliente`, `ART.ui.coruja`, `ART.ui.coracao`, `ART.ui.barrasComparar`)
+```js
+const c = ART.ui.cartaoCliente(g, 540, 720, { t, amizade: 0, pedido: { tem: 0, precisa: 4, tipo: "cobre", nome: "Cobre" }, recompensa: 160 }); // p259
+// p260 {recompensaK: k} · p262 {amizade: k (0 -> 1; coração enche), amizadePulso, sorriso: k} · p263 {bonus: k, brilhoBonus} · p265 {botaoK: 1} + ART.pata perto de c.botao
+ART.ui.barrasComparar(g, { k, itens: [{ rotulo: "ENTREGAR", valor: 160, cor: "#8E7BE0" }, { rotulo: "VENDER", valor: 240, cor: "#FFD23F" }], base: 1130 }); // p261
+ART.ui.coruja(g, 540, 800, 620, { t, sorriso: 1 });   // retrato sozinho (pisca sozinha com t; `pisca` força)
+```
+Cartão 940×500 (s=1) centrado em x,y; devolve `{retrato, botao, recompensa, amizade}` em px. ENTREGAR cinza como no jogo (`botaoK` 0) → amarelo (1).
+Imagem real (p258): `ART.gameplay.cheio(g, t, Object.assign({}, ART.gameplay.PRESET.clientes, { dur }))` (setup: `preloadShot('shot_5')`): aba CLIENTES + cartões
+com "amizade N", bônus "+X% → Y%" e pedidos/recompensas apagados por remendos na cor do cartão (e a caixa de marketing). Recortes `RECORTES.clientes`/`.ampulheta`
+para o `visor`; `remendos: 'clientes' | [[x,y,w,h,cor]...]` vale em `cheio` e `visor`.

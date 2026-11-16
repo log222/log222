@@ -8,6 +8,9 @@ Exemplos:
   # alinhar uma gravação própria (1 arquivo) às mesmas frases:
   .cache/venv/bin/python tts.py frases.txt -o build/gravado --alinhar minha_voz.m4a
 """
+import os as _os, sys as _sys  # Windows: textos e JSON em UTF-8 (equivale a PYTHONUTF8=1); nada muda no Linux
+if _os.name == "nt" and not _sys.flags.utf8_mode:
+    _os.environ["PYTHONUTF8"] = "1"; _sys.exit(__import__("subprocess").call([_sys.executable] + _sys.argv))
 import argparse
 import json
 import os

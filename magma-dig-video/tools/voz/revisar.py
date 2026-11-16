@@ -13,6 +13,9 @@ Problemas contados por frase (quanto menos, melhor):
 Frase com 0 problemas não é regerada. Empate fica com a tomada original.
 Indicadores de ASR/F0: não garantem que a palavra soa inteira ao ouvido.
 """
+import os as _os, sys as _sys  # Windows: textos e JSON em UTF-8 (equivale a PYTHONUTF8=1); nada muda no Linux
+if _os.name == "nt" and not _sys.flags.utf8_mode:
+    _os.environ["PYTHONUTF8"] = "1"; _sys.exit(__import__("subprocess").call([_sys.executable] + _sys.argv))
 import argparse
 import json
 import subprocess

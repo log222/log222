@@ -6,6 +6,9 @@ e o fim real da última palavra de A é o ponto da emenda (- a margem). Compara 
   .cache/venv/bin/python tools/medir_alinhamento.py story/parte-01.json [--pares 30]
 Limite: só mede palavras nas emendas (início/fim de frase); o meio da frase não tem verdade conhecida.
 """
+import os as _os, sys as _sys  # Windows: textos e JSON em UTF-8 (equivale a PYTHONUTF8=1); nada muda no Linux
+if _os.name == "nt" and not _sys.flags.utf8_mode:
+    _os.environ["PYTHONUTF8"] = "1"; _sys.exit(__import__("subprocess").call([_sys.executable] + _sys.argv))
 import argparse
 import json
 import sys

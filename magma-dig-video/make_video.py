@@ -15,6 +15,9 @@
 """
 from __future__ import annotations
 
+import os as _os, sys as _sys  # Windows: textos e JSON em UTF-8 (equivale a PYTHONUTF8=1); nada muda no Linux
+if _os.name == "nt" and not _sys.flags.utf8_mode:
+    _os.environ["PYTHONUTF8"] = "1"; _sys.exit(__import__("subprocess").call([_sys.executable] + _sys.argv))
 import argparse
 import copy
 import difflib
@@ -625,6 +628,18 @@ def _print_warn(lines, seen):
             seen.add(line); print("  " + line)
 
 
+def node_env():
+    """Ambiente do node: usa o playwright/Chromium de .cache/node e .cache/ms-playwright se existirem (instalação
+    local, Windows); sem essas pastas, o do sistema, como antes."""
+    env = dict(os.environ)
+    nm, br = ROOT / ".cache" / "node" / "node_modules", ROOT / ".cache" / "ms-playwright"
+    if nm.is_dir():
+        env["NODE_PATH"] = os.pathsep.join(x for x in (str(nm), env.get("NODE_PATH")) if x)
+    if br.is_dir():
+        env.setdefault("PLAYWRIGHT_BROWSERS_PATH", str(br))
+    return env
+
+
 def run_render(tl_path, f0, f1, outdir, scale, workers, crf, preset, label, bitrate=None, maxrate=None):
     n = f1 - f0
     workers = max(1, min(workers, math.ceil(n / 15)))
@@ -637,7 +652,7 @@ def run_render(tl_path, f0, f1, outdir, scale, workers, crf, preset, label, bitr
                "--to", str(cuts[k + 1]), "--out", str(seg), "--scale", str(scale), "--crf", str(crf),
                "--preset", preset, "--threads", "1", "--label", f"{label}{k}"] + \
               (["--bitrate", bitrate, "--maxrate", maxrate or bitrate] if bitrate else [])
-        r = subprocess.run(cmd, capture_output=True, text=True)
+        r = subprocess.run(cmd, capture_output=True, text=True, env=node_env())
         if r.returncode != 0:
             raise RuntimeError(f"render falhou ({k}):\n{r.stderr[-3000:]}")
         _print_warn(r.stderr.splitlines(), seen)
@@ -661,7 +676,7 @@ def render_stills(tl_path, frames, outdir, scale):
             return
         r = subprocess.run(["node", str(ROOT / "render" / "render.js"), "--timeline", str(tl_path), "--stills",
                             ",".join(map(str, ch)), "--outdir", str(outdir), "--scale", str(scale)],
-                           capture_output=True, text=True)
+                           capture_output=True, text=True, env=node_env())
         if r.returncode != 0:
             raise RuntimeError(r.stderr[-3000:])
         _print_warn(r.stderr.splitlines(), seen)
@@ -881,7 +896,8 @@ def main():
     print(f"   maiores silêncios na narração (s, em): {longest_silences(narr, T.SR)}")
     if stats.get("palavras"):
         print(f"   alinhamento: {stats['ancoras']}/{stats['palavras']} palavras ancoradas pelo ASR "
-              f"({100 * stats['ancoras'] / stats['palavras']:.0f}%), resto interpolado por fonemas")
+              f"({100 * stats['ancoras'] / stats['palavras']:.0f}%), resto interpolado por fonemas"
+              + (f"; sem âncora: {' '.join(stats['sem_ancora'])}" if stats.get("sem_ancora") else ""))
     tabela_pausas(falas, laid, narr, relat, pausas, work, verbose=a.so_audio or a.pausas)
     n_arq = sum(1 for p in planos if p.get("params", {}).get("arquivo"))
     if any(p["cena"] == "auto" for p in planos):
@@ -971,7 +987,7 @@ def main():
     FS.write_text(work / "render_tempos.json", json.dumps({pid: {"ms_total": round(float(tt), 1), "ms_render": round(float(tr), 1)}
                                                           for tt, tr, pid in lent}, indent=1))
     lst = segdir / "lista.txt"
-    lst.write_text("".join(f"file '{p.resolve()}'\n" for p in segs))
+    lst.write_text("".join(f"file '{p.resolve().as_posix()}'\n" for p in segs))
     a_ss, a_t = f0 / fps, nf / fps
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "concat", "-safe", "0", "-i", str(lst),
                     "-ss", f"{a_ss:.4f}", "-t", f"{a_t:.4f}", "-i", str(work / "mix.wav"),

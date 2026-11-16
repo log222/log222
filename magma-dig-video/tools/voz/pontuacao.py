@@ -13,6 +13,9 @@ Por frase:
   Pergunta deve subir (> +1,5 st); afirmação não deveria subir (> +1,5 st = "soa como pergunta").
 Indicadores: não substituem ouvir.
 """
+import os as _os, sys as _sys  # Windows: textos e JSON em UTF-8 (equivale a PYTHONUTF8=1); nada muda no Linux
+if _os.name == "nt" and not _sys.flags.utf8_mode:
+    _os.environ["PYTHONUTF8"] = "1"; _sys.exit(__import__("subprocess").call([_sys.executable] + _sys.argv))
 import argparse
 import difflib
 import json

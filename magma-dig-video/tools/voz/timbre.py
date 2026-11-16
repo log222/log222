@@ -8,6 +8,9 @@ Por pasta: palavras/s e sílabas/s dentro da fala (soma das frases), similaridad
 clonar), F0 mediano (Hz) e centróide espectral mediano (Hz). Similaridade ~0,9+ = mesmo locutor
 para esse encoder; isso NÃO garante que soa igual ao ouvido.
 """
+import os as _os, sys as _sys  # Windows: textos e JSON em UTF-8 (equivale a PYTHONUTF8=1); nada muda no Linux
+if _os.name == "nt" and not _sys.flags.utf8_mode:
+    _os.environ["PYTHONUTF8"] = "1"; _sys.exit(__import__("subprocess").call([_sys.executable] + _sys.argv))
 import argparse
 import json
 import re
@@ -29,8 +32,13 @@ def ve():
     if _VE is None:
         import torch
         from huggingface_hub import snapshot_download
-        sys.path.insert(0, str(ROOT / ".cache" / "voz-modelos" / "cb-space"))
-        from chatterbox.src.chatterbox.models.voice_encoder import VoiceEncoder
+        cb = ROOT / ".cache" / "voz-modelos" / "cb-space"
+        sys.path.insert(0, str(cb))
+        try:
+            from chatterbox.src.chatterbox.models.voice_encoder import VoiceEncoder
+        except ImportError:  # sem as dependências do Chatterbox inteiro: só o subpacote do encoder (mesmo código)
+            sys.path.insert(0, str(cb / "chatterbox" / "src" / "chatterbox" / "models"))
+            from voice_encoder import VoiceEncoder
         d = Path(snapshot_download("ResembleAI/chatterbox", allow_patterns=["ve.pt"]))
         _VE = VoiceEncoder()
         _VE.load_state_dict(torch.load(d / "ve.pt", map_location="cpu", weights_only=True))

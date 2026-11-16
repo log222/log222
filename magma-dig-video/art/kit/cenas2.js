@@ -41,6 +41,8 @@
   };
   /** painel MERCADO: linhas Pedra/Cobre e botão VENDER. o = {preco, varPct, saldo, prog, press, seta, setaSombra} */
   ART.painelMercado = (g, t, o = {}) => {
+    const P2 = ["faixa", "linhas", "precoAntes", "setaGiro", "setaFantasma", "barras", "amanha", "corHoje", "cores", "botao", "botaoSub", "botaoPulso", "rotuloPreco", "rola"];
+    if (P2.some(k => o[k] !== undefined) || o.varPct === false) return painelMercado2(g, t, o);
     const u = UI();
     u.titulo(g, 540, o.y0 ?? 330, "MERCADO", { s: 0.9 });
     const c = u.cartaoMinerio(g, 540, 700, { tipo: "cobre", nome: "Cobre", preco: o.preco ?? 40, varPct: o.varPct ?? 12, barras: [0.42, 0.5, 0.38, 0.55, 0.47, 0.6, 0.66], amanha: 0.82, prog: o.prog ?? 1, s: 1.55, brilhoAmanha: o.brilhoAmanha || 0 });
@@ -54,6 +56,50 @@
     u.botao(g, 540, 1130, 720, 150, { texto: "VENDER", sub: `+${o.preco ?? 40} moedas`, icone: "moeda", press: o.press || 0 });
     return c;
   };
+  /** Mercado da Parte 2 (queda e alta). Mesmo desenho da Parte 1 quando só os parâmetros antigos são passados.
+   *  Novos: precoAntes + rola (0..1: risca o de ontem e rola até `preco`), rotuloPreco, antesFantasma, varPct:false (esconde),
+   *  barras / amanha (false = sem barra de amanhã) / corHoje / cores, setaGiro (0..1), setaFantasma (0..1, com "?"),
+   *  faixa {minerio, pct, k, brilho} (faixa EM ALTA HOJE; muda o layout: título 300, faixa 412, cartão 780, botão 1160),
+   *  linhas [{tipo, nome, qtd, valor, a, pulso, ...linhaMercado}] (no lugar do cartão grande), botao (false esconde),
+   *  botaoSub ('+240 moedas'), botaoPulso (0..1). Devolve o retângulo do cartão (ou das linhas) e as posições úteis. */
+  function painelMercado2(g, t, o) {
+    const u = UI(), fx = o.faixa, novo = !!(fx || o.linhas);
+    const pos = { titulo: o.y0 ?? (novo ? 300 : 330), faixa: (fx && fx.y) ?? 412, cartao: novo ? 780 : 700, botao: novo ? 1160 : 1130, linhas: [] };
+    u.titulo(g, 540, pos.titulo, "MERCADO", { s: 0.9 });
+    if (fx) u.faixaAlta(g, 540, pos.faixa, fx);
+    let c = null;
+    if (o.linhas) {
+      const y0 = o.linhasY ?? 520;
+      o.linhas.forEach((L, i) => { const y = y0 + i * 150; pos.linhas.push(y); u.linhaMercado(g, 90, y, Object.assign({ w: 900, barras: [0.42, 0.5, 0.38, 0.55, 0.47, 0.6, 0.66], amanha: 0.82 }, L)); });
+      c = { x0: 90, y0, w: 900, h: o.linhas.length * 150 - 30 };
+    } else {
+      const vp = o.varPct === false ? null : o.varPct ?? 12;
+      c = u.cartaoMinerio(g, 540, pos.cartao, { tipo: o.tipo || "cobre", nome: o.nome || "Cobre", preco: o.preco ?? 40, varPct: vp, barras: o.barras || [0.42, 0.5, 0.38, 0.55, 0.47, 0.6, 0.66], amanha: o.amanha ?? 0.82, corHoje: o.corHoje, cores: o.cores,
+        prog: o.prog ?? 1, s: novo ? 1.4 : 1.55, brilhoAmanha: o.brilhoAmanha || 0, precoAntes: o.precoAntes, rola: o.rola, rotuloPreco: o.rotuloPreco, rotuloAntes: o.rotuloAntes, antesFantasma: o.antesFantasma, corPreco: o.corPreco, varK: o.varK });
+      const sv = o.seta ?? (novo ? 0 : 1);
+      if (sv > 0) {
+        const k = ART.ease.outBack(clamp(sv)), sx = c.x0 + c.w - 30, sy = c.y0 - 20, gk = clamp(o.setaGiro || 0), fk = clamp(o.setaFantasma || 0);
+        if (o.setaSombra) u.seta(g, sx + 26, sy + 40, { s: 0.85, dir: "baixo", cor: "#E63748", a: 0.55 * o.setaSombra });
+        const tr = o.tremor ? Math.sin(t * 40) * 4 * o.tremor : 0;
+        u.seta(g, sx + tr, sy - 30 * k + 30 + 30 * ART.smooth(gk), { s: 0.85 * k, dir: "cima", giro: gk, contorno: fk });
+        const corR = ART.mix("#5FD35F", "#FF5A66", ART.smooth(gk));
+        g.save(); g.font = '900 30px "Nunito"'; g.fillStyle = corR; g.textAlign = "center"; g.globalAlpha = clamp(sv) * (1 - 0.35 * fk); g.fillText("AMANHÃ", sx, sy + 90 + 26 * ART.smooth(gk)); g.restore();
+        if (fk > 0) { // "?" piscando ao lado da seta fantasma
+          const pis = 0.55 + 0.45 * Math.sin(t * 7);
+          g.save(); g.globalAlpha = fk * pis; ART.textFx(g, "?", sx - 92, sy - 6, { size: 96, fam: "Lilita One", fill: "#F4EEDC", stroke: "#1A1020", sw: 10, sdy: 4 }); g.restore();
+        }
+      }
+    }
+    if (o.botao !== false) {
+      const pu = clamp(o.botaoPulso || 0), bs = 1 + 0.04 * pu * (0.5 + 0.5 * Math.sin(t * 6));
+      if (pu > 0) ART.glow(g, 540, pos.botao, 520, "#FFD23F", 0.35 * pu * (0.6 + 0.4 * Math.sin(t * 6)));
+      g.save(); g.translate(540, pos.botao); g.scale(bs, bs); g.translate(-540, -pos.botao);
+      u.botao(g, 540, pos.botao, 720, 150, { texto: "VENDER", sub: o.botaoSub || `+${o.preco ?? 40} moedas`, icone: "moeda", press: o.press || 0 });
+      g.restore();
+    }
+    c.pos = pos;
+    return c;
+  }
 
   // ================================================================= pata do Zeca em close
   /** braço+pata em close vindo de uma borda. (x,y) = ponta da pata; ang = direção do braço (graus, 0 = vem da direita);

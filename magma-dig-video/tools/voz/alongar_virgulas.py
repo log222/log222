@@ -8,6 +8,9 @@ frases/NNN.wav, tempos.json (ini/fim/duração/palavras) e narracao.wav.
 Vírgula com menos de --existente (padrão 40 ms) de silêncio não é mexida (inserir ali cortaria
 uma palavra ao meio): ela é listada para regerar com outra seed / "falado".
 """
+import os as _os, sys as _sys  # Windows: textos e JSON em UTF-8 (equivale a PYTHONUTF8=1); nada muda no Linux
+if _os.name == "nt" and not _sys.flags.utf8_mode:
+    _os.environ["PYTHONUTF8"] = "1"; _sys.exit(__import__("subprocess").call([_sys.executable] + _sys.argv))
 import argparse
 import json
 import sys

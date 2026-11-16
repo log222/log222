@@ -11,7 +11,6 @@ já gerada por ele, com cache próprio e robusto por (motor, voz, velocidade, at
 """
 from __future__ import annotations
 
-import fcntl
 import hashlib
 import json
 import os
@@ -28,7 +27,7 @@ from . import tts_engine as T
 
 ROOT = T.ROOT
 CLI = ROOT / "tools" / "voz" / "falar.py"
-PY = ROOT / ".cache" / "venv-voz" / "bin" / "python"
+PY = ROOT / ".cache" / "venv-voz" / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
 CACHE = ROOT / ".cache" / "tts-ext"
 INTERNOS = set(T.ALL_VOICES)       # motor "kokoro" interno usa lib.tts_engine
 
@@ -74,8 +73,8 @@ def gerar(itens, motor, voz, vel=1.0, atempo=1.0, regerar=(), log=print):
     vazio = CACHE / "sem_pron.json"
     if not vazio.exists():
         FS.write_text(vazio, "{}")
-    with open(CACHE / f"{motor}.lock", "w") as lk:
-        fcntl.flock(lk, fcntl.LOCK_EX)           # serializa geração por motor (espera a outra execução)
+    with FS.open_lock(CACHE / f"{motor}.lock") as lk:
+        FS.flock(lk)           # serializa geração por motor (espera a outra execução)
         # outra execução pode ter gerado enquanto esperávamos
         resto = []
         for it, k in falta:

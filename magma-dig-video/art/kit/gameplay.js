@@ -36,7 +36,28 @@
     mapa: [60, 110, 860, 460],        // 19,5–22 s: Mapa da Jornada (trilha A→B)
     mercado: [90, 110, 820, 470],     // 13,5–14,5 s: lista do Mercado (use tapar para o VENDER TUDO)
     botaoRank: [765, 190, 420, 95],   // img: 'shot_4' — só o botão SUBIR DE RANK (esconde 10,4BI e o rank E)
+    // Parte 2
+    clientes: [105, 84, 645, 461],    // img: 'shot_5' — painel esquerdo da aba CLIENTES (use remendos: 'clientes')
+    ampulheta: [560, 170, 400, 260],  // img: 'shot_1' — chão de pedra com o bloco de ampulheta (centro-direita), sem céu, árvores nem HUD
   };
+  /** Parte 2: remendos de cor sólida (px da imagem) que apagam valores que contradizem a história. [x, y, w, h, cor] */
+  GP.REMENDOS = {
+    // shot_5: caixa de marketing, "Encom...", e em cada cartão: "· amizade N", bônus "+X% → Y%" e o pedido/recompensa
+    clientes: [
+      [334, 84, 402, 62, "#1E1B2E"], [396, 146, 333, 2, "#38344D"], [396, 148, 332, 12, "#211E33"], [727, 146, 3, 14, "#38344D"],
+      [364, 156, 150, 29, "#211E33"], [216, 183, 262, 19, "#211E33"], [216, 202, 345, 50, "#211E33"],
+      [350, 273, 150, 29, "#211E33"], [216, 300, 330, 19, "#211E33"], [216, 319, 350, 51, "#211E33"],
+      [403, 391, 147, 29, "#211E33"], [216, 418, 275, 19, "#211E33"], [216, 437, 350, 51, "#211E33"],
+    ],
+  };
+  /** Parte 2: pontos de partida prontos para GP.cheio: Object.assign({}, ART.gameplay.PRESET.x, {dur, cronometro, ...}) */
+  GP.PRESET = {
+    // p244: push-in no bloco de ampulheta do shot_1 (o 137/12/6 e o 11,8 originais ficam fora do quadro)
+    ampulheta: { img: "shot_1", topo: 168, base: 588, foco: [745, 282], zoom: [1, 1.45] },
+    // p258: aba CLIENTES + cartão da Dona Coruja, valores tapados
+    clientes: { img: "shot_5", topo: 84, base: 545, foco: [372, 290], zoom: [1, 1.1], remendos: "clientes" },
+  };
+  const remendos = o => (typeof o.remendos === "string" ? GP.REMENDOS[o.remendos] : o.remendos) || null;
 
   /** retrato pixel art do Zeca (assets/game/zeca.png, 4 quadros: 0 normal, 1 feliz, 2 espantado, 3 dormindo) */
   ART.zecaPix = (g, i, x, y, size) => {
@@ -75,6 +96,7 @@
     const L = GP._full || (GP._full = ART.canvas(W, 1100)), lg = L.getContext("2d");
     lg.setTransform(1, 0, 0, 1, 0, 0); lg.globalCompositeOperation = "source-over"; lg.clearRect(0, 0, W, 1100); lg.filter = o.borrar ? `blur(${o.borrar}px)` : "none";
     if (img) lg.drawImage(img, sx, sy, sw, sh, 0, 0, W, Hh); lg.filter = "none";
+    const RM = remendos(o); if (RM) for (const [qx, qy, qw, qh, qc] of RM) { lg.fillStyle = qc || "#1E1B2E"; lg.fillRect((qx - sx) * sc, (qy - sy) * sc, qw * sc, qh * sc); }
     for (const [tx, ty, tw, th] of o.tapar || []) { const a = [(tx - sx) * sc, (ty - sy) * sc]; lg.save(); lg.beginPath(); lg.rect(a[0], a[1], tw * sc, th * sc); lg.clip(); lg.filter = "blur(22px)"; if (img) lg.drawImage(img, sx, sy, sw, sh, 0, 0, W, Hh); lg.filter = "none"; lg.fillStyle = "rgba(20,14,30,.55)"; lg.fillRect(a[0], a[1], tw * sc, th * sc); lg.restore(); }
     if (o.escurecer) { lg.fillStyle = `rgba(10,6,18,${o.escurecer})`; lg.fillRect(0, 0, W, Hh); }
     lg.fillStyle = ART.rg(lg, W / 2, Hh * 0.5, Hh * 0.3, W * 0.85, [[0, "rgba(255,200,120,0)"], [1, "rgba(14,8,24,.5)"]]); lg.fillRect(0, 0, W, Hh);
@@ -118,6 +140,7 @@
     const sc = (w / rw) * z, ox = x0 + w / 2 - (fx - rx - rw / 2) * (z - 1) * (w / rw) - (rw * sc) / 2 + 0, oy = y0 + h / 2 - (fy - ry - rh / 2) * (z - 1) * (w / rw) - (rh * sc) / 2;
     const map = (X, Y) => [ox + (X - rx) * sc, oy + (Y - ry) * sc];
     if (img) g.drawImage(img, rx, ry, rw, rh, ox, oy, rw * sc, rh * sc);
+    const RM = remendos(o); if (RM) for (const [qx, qy, qw, qh, qc] of RM) { const [a, b] = map(qx, qy); g.fillStyle = qc || "#1E1B2E"; g.fillRect(a, b, qw * sc, qh * sc); }
     for (const [tx, ty, tw, th] of o.tapar || []) {
       const [a, b] = map(tx, ty), cw = tw * sc, ch = th * sc;
       g.save(); ART.rr(g, a, b, cw, ch, 14); g.clip(); g.filter = "blur(18px)"; if (img) g.drawImage(img, tx - 30, ty, tw + 60, th, a - 30 * sc, b, cw + 60 * sc, ch); g.filter = "none";
