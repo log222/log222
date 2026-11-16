@@ -49,7 +49,10 @@
     // checagem de zona segura (mede sem a animação de entrada)
     const scale = window.__SCALE__ || 1;
     const box = { l: r.left / scale, r: r.right / scale, t: r.top / scale, b: r.bottom / scale };
-    const bad = box.l < Z.esquerda - 1 || box.r > MD.W - Z.direita + 1 || box.t < Z.topo - 1 || box.b > MD.H - Z.base + 1;
+    const [dy0, dy1] = Z.direita_y || [0, MD.H];
+    const naFaixaDireita = box.b > dy0 && box.t < dy1;   // botões do Instagram só entre direita_y
+    const bad = box.l < Z.esquerda - 1 || (naFaixaDireita && box.r > MD.W - Z.direita + 1) ||
+      box.t < Z.topo - 1 || box.b > MD.H - Z.base + 1;
     if (bad && !warned.has(i)) {
       warned.add(i);
       (window.__WARNINGS__ = window.__WARNINGS__ || []).push(

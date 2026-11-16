@@ -20,7 +20,10 @@ Para quem vai orquestrar a Parte N. Escrito ao fim da Parte 1 (15/11/2026). Onde
 - **Como trabalhar:** a sessão principal só orquestra; o trabalho vai para subagentes Opus. Retome o MESMO agente
   com SendMessage (contexto preservado) em vez de abrir um novo: sai muito mais barato.
 - **Ids da Parte N:** use `N01…N99` no `shots.json` (Parte 2: 201, 202…). O gerador cria `p201` e o plano carrega
-  `scenes/planos/p201.js`. **Nunca reutilize `p01…p57`**: são os arquivos da Parte 1 (a pasta de planos é uma só).
+  `scenes/planos/p201.js` (conferido: `gerar_story.py` gera `p201…` e o carregador `auto` busca o arquivo pelo id).
+  **Nunca reutilize `p01…p57`**: são os arquivos da Parte 1 (a pasta de planos é uma só). Atenção: as tabelas feitas à
+  mão no `tools/gerar_story.py` (`SFX_AJUSTE`, `PAUSAS`, `SEPARAR_ANTES`) são da Parte 1 e indexadas pelo id numérico;
+  para a Parte 2 acrescente entradas com os ids 2xx (não colidem com as da Parte 1).
 - **Máquina:** 4 núcleos, 15 GB de RAM. **Um processo pesado por vez** (voz OU render completo). Disco enche: apague
   `build/parte-0N/runs/*` antigos.
 - **Gancho do repositório:** exige commit e push a cada parada; faça checkpoints frequentes no branch.
@@ -61,7 +64,7 @@ $PY make_video.py story/demo.json -o out/demo.mp4 --contact-sheet     # teste r�
 cenario, acao, camera, ui, sfx, usa_gameplay, dur_estimada_s, inicio_estimado_s}]}`). `narracao` de cada plano é o
 trecho falado a partir do corte; os trechos concatenados formam o texto completo. `id` numérico `N01…`.
 
-**3. Voz** (método da Parte 1; parâmetros finais da voz ajustada: ver §5 "Voz definitiva", **A CONFIRMAR**)
+**3. Voz** (método da Parte 1; receita da voz definitiva A2: §5 "Voz definitiva" e `tools/voz/README.md` §"Voz definitiva da série")
 ```
 # 1 frase por linha, idêntica às frases do story (o --voz-pasta casa frase a frase pelo texto)
 # JSON aceita {texto, falado, seed}: "falado" muda só o que o motor lê (ex.: "Mágma Díg...")
@@ -98,7 +101,7 @@ Com 2–3 animadores testando ao mesmo tempo, use `--workers 1` ou `2` (recomend
 **8 e 11. Render**
 ```
 $PY make_video.py story/parte-0N.json --voz-pasta <pasta> --motor qwen --voz narrador-jovem -o out/parte-0N.mp4 --contact-sheet --cs-por-plano 3 --cs-max 21
-# saída final: x264 ~8 Mbps, +faststart. --qualidade-max = crf 16 sem teto.
+# saída final: x264 ABR 5,6 Mbps (teto 7), +faststart (~115 MB para 2 min 37 s). --qualidade-max = crf 16 sem teto.
 ```
 Depois de cada render completo: `rm -rf build/parte-0N/runs/<execuções antigas>` (cada uma tem 250–370 MB).
 
@@ -233,8 +236,8 @@ permitidos; para cima, nunca.
 - A coluna de botões da direita só ocupa x > 960 entre y ≈ 1000 e 1500 (fora dessa faixa, x > 960 pode ter conteúdo).
 - Legenda centrada em y = 1400 (bloco ocupa ~1369–1431 + sombra). Posições: `baixo` 1400, `meio` 1250, `alto` 390,
   `centro` 960 (`legenda_pos` no plano). Sobre a barriga do Zeca em close: aprovado. Sobre o rosto: não.
-- Os arquivos ainda dizem a regra antiga (x > 960 na altura toda): `config/estilo.json` `zona_segura`, `art/README.md`,
-  `docs/PIPELINE.md`. A regra acima é a validada; a antiga é só mais conservadora.
+- `config/estilo.json` `zona_segura` (`direita_y: [1000, 1500]`), o guia `--zona-segura` e `docs/PIPELINE.md` já usam
+  esta regra. `art/README.md` (do diretor de arte) ainda cita a antiga (x > 960 na altura toda), que só é mais conservadora.
 
 ### 4.3 Legenda (já em `config/estilo.json`, não mexer)
 Anton caixa-alta branca 72 px, contorno 4 px #161408 + sombra, sem karaokê, amarelo #EBBA40 só nos `destaques` por
@@ -252,7 +255,8 @@ recoloca o da pontuação):
 | dois-pontos | 0,45 s |
 | reticências | 0,45 s |
 | vírgula / ponto e vírgula | mínimo 0,28 s (só alonga silêncio que existe) |
-| entre falas (`pausa_fala`) | 0,40 s |
+
+Entre falas vale a mesma regra (a pausa depende da pontuação da última frase da fala); `pausa_fala` não é mais usado.
 
 Velocidade natural (1,0, sem `atempo`), nunca acelerar para bater ritmo. Pausa intencional extra: `pausa_depois`
 na fala ("Cobre." = 0,6 s). Vírgula "sem pausa" no relatório do `--so-audio` = o motor engoliu: regerar a frase.
@@ -303,14 +307,23 @@ Já nos arquivos:
   `.cache/voz-ref/qwen-design-narrador-jovem-s0-tempo0.85.wav`. `VOZ_QWEN_TEMP` muda a temperatura.
   `tools/voz/timbre.py` compara ritmo e similaridade de locutor contra a referência.
 
-**A CONFIRMAR (o orquestrador da Parte 1 preenche):**
-- Método final (ex.: `VOZ_REF_TEMPO=…`, `--atempo`, `alongar_virgulas.py --min …`, outro): ____
-- Parâmetros exatos (seed, ref_tempo, temperatura, pausa, `falado` com reticências): ____
-- Pasta da narração final da Parte 1 e comando de render final: ____
-- Palavras/s e duração final: ____
-- **Guardar a referência fora do `.cache`** (o container é efêmero): copiar
-  `.cache/voz-ref/qwen-design-narrador-jovem-s0.{wav,txt}` para um lugar versionado (ex.: `tools/voz/ref/`) e
-  restaurar antes de gerar. Regerar a referência do zero pode dar outro timbre. Caminho combinado: ____
+**Confirmado no render final da Parte 1 (voz A2):**
+- Método final: Qwen3-TTS Base 0.6B clonando a referência sintética da voz A, uma frase por chamada, `--atempo 0.87`
+  depois da síntese, `"falado"` com reticências onde o motor engolia a vírgula, `alongar_virgulas.py --min 0.22` e
+  depois `--min 0.24`. Sem `VOZ_REF_TEMPO` (esticar a referência mudou o timbre). Receita e comandos:
+  `tools/voz/README.md` §"Voz definitiva da série".
+- Parâmetros exatos por frase (20 sementes próprias, 6 `falado`): `tools/voz/roteiro_parte01_qwen_jovem_v2.json`.
+- Pasta da narração final: `build/voz/completo/qwen-narrador-jovem-v2/` (62 WAVs 48 kHz + `tempos.json`, `atempo` 0,87).
+- Comando do render final (o pipeline não aplica `atempo` nenhum; pausas de §4.4):
+  ```
+  .cache/venv/bin/python make_video.py story/parte-01.json --voz-pasta build/voz/completo/qwen-narrador-jovem-v2 \
+      --motor qwen --voz narrador-jovem -o out/parte-01-final.mp4 --contact-sheet --cs-cortes --cs-max 20 --workers 4 --pausas
+  ```
+  Execução em `build/parte-01/runs/parte-01-final/` (`pausas.json`, `timeline.json`, `render_tempos.json`).
+- Resultado: **157,07 s**, 4712 quadros, **2,04 palavras/s no total** (2,21 só fala), 0 vírgulas sem pausa,
+  -14 LUFS, 5,9 Mbps, 115 MB. Prévia leve `out/parte-01-final-previa.mp4` (3,5 Mbps, 69 MB).
+- Referência guardada fora do `.cache`: `tools/voz/ref/qwen-design-narrador-jovem-s0.{wav,txt}` (sha256 em
+  `tools/voz/ref/LEIAME.md`); `motores.referencia_sintetica()` restaura de lá. Não regerar.
 
 ---
 
@@ -508,11 +521,10 @@ Render: ~160–180 ms por quadro por worker nos planos mais pesados (`render_tem
 
 ## 11. Onde os arquivos estão atrás deste manual
 
-- `docs/PIPELINE.md` §"Ritmo e pausas" ainda descreve a tabela antiga (0,40/0,30/0,30/0,15 e `pausa_fala` padrão
-  0,12 s). Valem os valores de `config/estilo.json` (§4.4).
-- `docs/PIPELINE.md` (diagrama) e `story/parte-01.json` ainda dizem `motor: kokoro`, `voz: pm_alex`. A voz escolhida
-  é a Qwen `narrador-jovem`, entrando por `--voz-pasta` (ou `--motor qwen --voz narrador-jovem`).
-- `config/estilo.json` `zona_segura` e `art/README.md` ainda usam x > 960 na altura toda (§4.2).
-- `tools/voz/vozes_qwen.json` descreve o `narrador-jovem` com "fast speaking rate, short pauses"; o usuário pediu o
-  contrário depois. Ver "Voz definitiva" (A CONFIRMAR).
+- `story/parte-01.json` ainda diz `motor: kokoro`, `voz: pm_alex` (gerado antes da escolha): o render final passa
+  `--voz-pasta … --motor qwen --voz narrador-jovem` na linha de comando. Para a Parte 2, gere o story com
+  `--motor qwen --voz narrador-jovem`. (`docs/PIPELINE.md` e `config/estilo.json` já estão atualizados.)
+- `art/README.md` ainda usa x > 960 na altura toda (§4.2).
+- `tools/voz/vozes_qwen.json` descreve o `narrador-jovem` com "fast speaking rate, short pauses": isso só criou a
+  referência e NÃO deve ser mudado; o ritmo vem do `--atempo 0.87` (ver "Voz definitiva").
 - `tools/voz/README.md` não documenta `VOZ_REF_TEMPO` nem `VOZ_QWEN_TEMP` (estão em `tools/voz/motores.py`).

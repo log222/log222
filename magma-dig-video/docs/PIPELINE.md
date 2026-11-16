@@ -2,7 +2,9 @@
 
 ```
 roteiro/parte-XX.shots.json ──► tools/gerar_story.py ──► story/parte-XX.json  (falas + planos por palavra)
-story/parte-XX.json ──► make_video.py ─► TTS Kokoro por FALA ─► tempo de palavra (ASR Parakeet + fonemas)
+tools/voz/falar.py (Qwen narrador-jovem, venv-voz) ──► build/voz/completo/<voz>/ (1 WAV por FRASE + tempos.json)
+story/parte-XX.json + --voz-pasta ──► make_video.py ─► frases casadas pelo texto ─► pausas por pontuação (lib/pausas.py)
+                                     ├─► tempo de palavra (ASR Parakeet + fonemas)
                                      ├─► planos cortados em fronteira de palavra ─┐
                                      ├─► legenda em blocos (dados)                 ├─► build/<nome>/timeline.json
                                      ├─► sfx por dados (19 efeitos sintetizados)   ┘
@@ -20,7 +22,9 @@ Precisa de python3 ≥3.11, ffmpeg, node com `require('playwright')` + Chromium.
 ## Rodar
 ```
 $PY tools/gerar_story.py roteiro/parte-01.shots.json -o story/parte-01.json     # (re)gera o story do roteiro
-$PY make_video.py story/parte-01.json -o out/parte-01.mp4 --contact-sheet --cs-cortes   # vídeo + 1 quadro por plano
+$PY make_video.py story/parte-01.json --voz-pasta build/voz/completo/qwen-narrador-jovem-v2 --motor qwen \
+    --voz narrador-jovem -o out/parte-01-final.mp4 --contact-sheet --cs-cortes --cs-max 20 --workers 4 --pausas  # FINAL
+$PY make_video.py story/parte-01.json -o out/parte-01.mp4 --contact-sheet --cs-cortes   # (sem --voz-pasta: Kokoro, só teste)
 $PY make_video.py story/parte-01.json --so-contact-sheet --cs-cortes --zona-segura      # só stills (s), sem vídeo
 $PY make_video.py story/parte-01.json --plano p12,p13 --rascunho                        # só esses planos, 540x960
 $PY make_video.py story/parte-01.json --trecho 40-55 --rascunho                         # intervalo (s)
@@ -28,7 +32,8 @@ $PY make_video.py story/parte-01.json --so-audio          # só narração/timel
 $PY tools/verificar_narracao.py build/parte-01             # ASR de volta: palavras mal pronunciadas
 $PY tools/medir_alinhamento.py story/parte-01.json          # erro do tempo de palavra onde há verdade conhecida
 ```
-Codificação final: x264 ≈ 8 Mbps (`video.bitrate`, teto `bitrate_max`), `+faststart`; `--qualidade-max` = crf 16 sem teto.
+Codificação final: x264 ABR 5,6 Mbps (`video.bitrate`, teto `bitrate_max` 7 Mbps; ~115 MB para 2 min 37 s), `+faststart`;
+`--qualidade-max` = crf 16 sem teto. Prévia leve: `ffmpeg -i final.mp4 -b:v 3.3M -maxrate 4.2M -bufsize 7M -c:a copy -movflags +faststart`.
 Flags: `--sem-trilha`, `--trilha musica.mp3`, `--motor`, `--voz`, `--velocidade`, `--regerar f12`, `--voz-pasta DIR`,
 `--narracao-audio/--narracao-tempos`, `--workers`.
 
@@ -97,15 +102,22 @@ que começa numa palavra da fala. Planos são contíguos: cada um vai do seu cor
 - Formato antigo (`"beats": [...]`, 1 beat = 1 fala = 1 plano) continua aceito (`story/demo.json`).
 
 ### Ritmo e pausas por pontuação (config/estilo.json → tempo.pausas)
-Velocidade natural (1,0, sem `atempo`); a duração sai da fala. A voz é sintetizada FRASE a FRASE (qualquer motor), o
-silêncio do motor nas pontas é aparado (`lib/pausas.py`) e substituído pelo valor da pontuação:
-`fim_frase` (. ? !) 0,40 s e `reticencias` 0,30 s exatos; `dois_pontos` 0,30 s (ajusta o silêncio que o motor fez);
-`virgula`/`ponto_virgula` mínimo 0,15 s: só alonga o silêncio existente (com fade, no meio do trecho não vozeado);
-se o motor não fez pausa nenhuma ali, não força e a vírgula aparece como "sem pausa" no relatório.
+O pipeline nunca acelera a voz (o ritmo vem da pasta de voz; a voz definitiva já vem com `atempo` 0,87 do CLI de voz).
+A voz é tratada FRASE a FRASE (qualquer motor): o silêncio nas pontas é aparado (`lib/pausas.py`) e substituído pelo
+valor da pontuação (tabela atual, a da Parte 1 final):
+
+| pontuação | alvo | modo |
+|---|---|---|
+| fim de frase (. ? !) | 0,55 s | exato |
+| fim de frase depois de fragmento de até 2 palavras ("Crac.", "Dia um.") | 0,38 s | exato (`fim_frase_fragmento`, `fragmento_max_palavras`) |
+| dois-pontos, reticências | 0,45 s | exato (ajusta o silêncio que o motor fez) |
+| vírgula, ponto e vírgula | mínimo 0,28 s | só alonga silêncio existente (fade, no meio do trecho não vozeado) |
+
+Se o motor não fez pausa nenhuma numa vírgula, não força e ela aparece como "sem pausa" no relatório (critério de voz).
 O mesmo vale para narração gravada (`--narracao-audio`), onde os fins de frase também são normalizados.
 Pausa intencional extra: `"pausa_depois"` na fala (o "Cobre." usa 0,6 s).
 `--so-audio` (ou `--pausas`) imprime a tabela alvo × motor × real de cada vírgula/ponto e as palavras/s; salva
-`build/<…>/pausas.json`. Parte 1: Kokoro pm_alex 136,1 s (2,35 pal/s); Supertonic M1 120,5 s (2,66 pal/s).
+`build/<…>/pausas.json`. Parte 1 final (voz A2 `qwen-narrador-jovem-v2`): 157,07 s, 2,04 pal/s no total, 0 vírgulas sem pausa.
 
 ### Legenda (config/estilo.json → legenda, estilo medido da referência)
 Anton caixa-alta branca, 72 px (maiúsculas ≈ 62 px), contorno 4 px #161408 + sombra suave, sem karaokê
@@ -114,7 +126,9 @@ centro y = 1400 (`legenda_pos`: `baixo` 1400 | `meio` 1250 | `alto` 390 | `centr
 Blocos: até 3 unidades e 22 caracteres; duração mínima de exibição `dur_min_bloco` 0,35 s (bloco mais curto se
 junta ao vizinho, de preferência no mesmo plano e dentro do limite de caracteres; nunca dois blocos ao mesmo tempo); quebra em pontuação, em pausa > 0,35 s, no corte de plano, e após ~0,85 s
 com ≥ 2 palavras; não termina bloco em artigo/preposição. Pontuação é mantida.
-Zona segura: nada importante em y < 250, y > 1500, x > 960. Bloco em 1400 ocupa ~1369–1431 (+ sombra) → folga de ~65 px.
+Zona do Instagram (medida): nada essencial em y < 250 nem y > 1500; os botões da direita cobrem x > 960 **só entre
+y ≈ 1000 e 1500** (acima disso a borda direita é livre). Bloco em 1400 ocupa ~1369–1431 (+ sombra) → folga de ~65 px.
+`--zona-segura` desenha essa zona; o aviso de legenda fora da zona usa a mesma regra.
 
 ## Um arquivo por plano: `scenes/planos/pNN.js`
 O plano com `cena: "auto"` carrega `scenes/planos/<id>.js` se existir; se não, mostra o **placeholder de animatic**
@@ -159,7 +173,10 @@ O kit `ART.*` (art/kit) tem paleta, Zeca com poses, câmera, glow, poeira etc. (
   caminho do TTS (pausas determinísticas); se a pasta for por fala, casa por fala. Use `--motor/--voz` iguais aos da
   pasta (pronúncia e rótulo). Ex.: `--voz-pasta build/voz/completo/qwen-narrador-jovem --motor qwen --voz narrador-jovem`. Depois disso tudo é igual: alinhamento
   por ASR, legenda, cortes.
-- `pm_alex` velocidade 1,0. `tts.py` gera WAV por frase + `tempos.json` (mesmo formato do alinhamento).
+- **Voz definitiva da série:** Qwen3-TTS `narrador-jovem` (A2), gerada pelo agente de voz com a receita de
+  `tools/voz/README.md` §"Voz definitiva da série" e consumida por `--voz-pasta` (Parte 1:
+  `build/voz/completo/qwen-narrador-jovem-v2`). Kokoro (`pm_alex`) é só para teste rápido. `tts.py` gera WAV por frase
+  + `tempos.json` (mesmo formato).
 - Tempo de palavra = **híbrido**: timestamps do Parakeet (ASR) como âncora onde a palavra reconhecida casa com o
   texto (94–95 % das palavras na Parte 1), interpolação por fonemas entre âncoras, inícios caídos em silêncio são
   empurrados para o começo da voz. Erro medido em emendas de frases (verdade conhecida): mediana 35–40 ms, p90 80–92 ms

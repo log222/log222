@@ -64,9 +64,14 @@
   }
 
   function drawSafeZone(z) {
-    const o = MD.el("div", {}, document.getElementById("overlay"));
-    o.style.cssText = `position:absolute;left:${z.esquerda}px;top:${z.topo}px;right:${z.direita}px;bottom:${z.base}px;` +
-      `outline:4px dashed rgba(0,255,255,.8);outline-offset:0;box-shadow:0 0 0 2000px rgba(255,0,80,.18)`;
+    // guia visual: faixas proibidas em rosa (topo, base e botões da direita só entre direita_y)
+    const ov = document.getElementById("overlay");
+    const [y0, y1] = z.direita_y || [0, MD.H];
+    const faixa = (l, t, w, h) => { const e = MD.el("div", {}, ov);
+      e.style.cssText = `position:absolute;left:${l}px;top:${t}px;width:${w}px;height:${h}px;background:rgba(255,0,80,.25);outline:3px dashed rgba(0,255,255,.8)`; };
+    faixa(0, 0, MD.W, z.topo);
+    faixa(0, MD.H - z.base, MD.W, z.base);
+    faixa(MD.W - z.direita, y0, z.direita, y1 - y0);
   }
 
   const TR = {
