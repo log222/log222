@@ -2,6 +2,8 @@
 
 Para quem vai orquestrar a Parte N. Escrito ao fim da Parte 1 (15/11/2026). Onde este manual e um arquivo divergirem,
 **o arquivo manda** (o código e `config/estilo.json` são a verdade; os `.md` às vezes ficam para trás, ver §11).
+**Parte 2 pronta (16/11/2026):** ambiente Windows, voz, mecanismos novos, tabela canônica e lições em §12. Os
+caminhos `bin/python` abaixo são do container Linux; no PC do dono use `Scripts/python.exe` (§12.1).
 
 ---
 
@@ -415,8 +417,19 @@ Repetir na primeira conversa da próxima sessão (ainda SEM resposta):
 4. Qual **Zeca é o oficial** para corpo inteiro: o ícone 3D (`icon.png`) ou a pixel art (`zeca.png`)? (o do vídeo é
    desenhado pelo kit, inspirado nos dois)
 5. Pode mandar uma **gravação de tela vertical** do jogo (material novo de gameplay)?
-6. Qual lado ganhou o dilema da Parte 1 nos comentários (VENDE ou SEGURA)? A Parte 2 começa por ele.
+6. ~~Qual lado ganhou o dilema da Parte 1 nos comentários (VENDE ou SEGURA)?~~ **Resolvida: ganhou SEGURA** (a Parte 2
+   começa por ela).
 7. Preço na App Store no dia de postar (o post da Parte 1 cita R$ 19,90, conferido pelo orquestrador).
+
+Novas da Parte 2 (detalhe e fonte em `roteiro/fatos-02.md`):
+8. O **bloco de ampulheta** dá segundos extras ao dia? Quantos (o vídeo diz +2 s)? Aparece na mina A?
+9. O cobre pode **cair à metade** de um dia para o outro (40 → 20)? Qual a variação máxima?
+10. Toda **alta do dia** é **+50%**? Pode ser o cobre na Terra Rasa? O ferro aparece lá?
+11. **Dona Coruja**: quando aparece o primeiro cliente, pode pedir cobre no começo, e a encomenda paga mais ou menos que
+    o Mercado (o vídeo diz 160 × 240)?
+12. O **bônus de amizade** ("no preço de venda") vale para todas as vendas do Mercado ou só para as encomendas dela?
+13. **Placar do dilema da Parte 2** nos comentários: **ENTREGA** (Dona Coruja, 160 + amiga) × **VENDE** (Mercado em
+    alta, 240). A Parte 3 começa por ele.
 
 ---
 
@@ -467,6 +480,26 @@ revelado. O trailer tem guardião (9–13,5 s), poderes (5–9 s), clientes (16,
 **Como reaproveitar:** copie o arquivo-modelo para `scenes/planos/pN##.js`, troque o id em `MD.plano("pN##", …)`,
 troque as palavras âncora (`GA.w(ctx, "palavra")`, `MD.wordTime`) e os valores da tabela canônica. Não edite o
 modelo da Parte 1. Os helpers são carregados no `setup` (`MD.loadScript("../scenes/planos/_grupoA.js")`).
+
+### 9.2b Peças e helpers novos da Parte 2
+Kit (`art/kit/parte2.js`, API em `art/README.md` "Parte 2"; sem os parâmetros novos o desenho da Parte 1 é idêntico):
+- Mercado com queda e alta: `ART.painelMercado` com `precoAntes`/`rola`/`varPct`/`seta` para baixo/`setaGiro`/
+  `setaFantasma`, `rotuloAntes` ("NORMAL"), faixa **EM ALTA HOJE** (`ART.ui.faixaAlta`), `ART.ui.precoRolando`,
+  `ART.ui.etiquetaPreco` (etiqueta 40 que racha e vira 20).
+- Inserto blueprint de Wall Street: `ART.ciencia.grafLinha` (linha, eixo de anos, régua, queda em coral) e
+  `ART.ciencia.especulacao` (pata, seta AMANHÃ?, carimbo).
+- Bloco especial de ampulheta: `ART.cubo({especial: "ampulheta"})` + `ART.estouroAreia`.
+- Cliente: `ART.ui.cartaoCliente` (Dona Coruja, amizade, pedido tem/precisa, recompensa, bônus, ENTREGAR),
+  `ART.ui.coruja`, `ART.ui.coracao`, `ART.ui.barrasComparar`; recortes `ART.gameplay.PRESET.ampulheta` e `.clientes`.
+- Pranchas: `art/boards/p2_mercado.js`, `p2_wallstreet.js`, `p2_ampulheta.js`, `p2_clientes.js`.
+
+Helpers dos planos da Parte 2 (podem ser carregados na Parte 3 sem mudar):
+| Arquivo | Objeto | Planos |
+|---|---|---|
+| `scenes/planos/_grupoA_ep02.js` | `GA2` | mina do dia 4 e gameplay real: p207, p241–p250, p258 |
+| `scenes/planos/_grupoB_ep02.js` | `GB2` | vila e Toca: p204, p205, p208, p212–p214, p218, p232–p234, p239, p240, p256, p257, p264, p266 |
+| `scenes/planos/_grupoC5_ep02.js` | `GC5` | painéis Mercado e Clientes: p206, p209, p210, p216, p217, p230, p231, p235–p238, p252–p255, p259–p263, p265 |
+| `scenes/planos/_grupoD_ep02.js` | `GD` | inserto Wall Street p219–p229 e closes de objeto p201–p203, p211, p215, p251, p267 |
 
 ### 9.3 Outros arquivos
 | Caminho | O que é |
@@ -528,3 +561,105 @@ Render: ~160–180 ms por quadro por worker nos planos mais pesados (`render_tem
 - `tools/voz/vozes_qwen.json` descreve o `narrador-jovem` com "fast speaking rate, short pauses": isso só criou a
   referência e NÃO deve ser mudado; o ritmo vem do `--atempo 0.87` (ver "Voz definitiva").
 - `tools/voz/README.md` não documenta `VOZ_REF_TEMPO` nem `VOZ_QWEN_TEMP` (estão em `tools/voz/motores.py`).
+
+---
+
+## 12. Parte 2: o que mudou
+
+Vídeo final: `out/parte-02-final.mp4` (153,77 s, 4613 quadros, 1080×1920, 30 fps, ~5,7 Mbps, -14 LUFS, ~113 MB;
+cópia em `Videos Magma Dig/parte-02-final.mp4`, ao lado da Parte 1). Prévia leve: `out/parte-02-final-previa-celular.mp4`
+(720×1280, 1,25 Mbps, < 30 MB). Story `story/parte-02.json`; voz `build/voz/parte-02/qwen-narrador-jovem/`
+(entrada `tools/voz/roteiro_parte02_qwen_jovem.json`); amostra `out/vozes/parte-02-voz.m4a`.
+
+### 12.1 Ambiente: PC do dono, Windows nativo
+- Instalação: `powershell -ExecutionPolicy Bypass -File setup-windows.ps1` (sem WSL e sem administrador; tudo em
+  `.cache/`, ~10 GB: venv 0,4, Kokoro 0,34, ASR 1,0, playwright + Chromium 0,56, venv-voz com torch CUDA 5,2, Qwen Base
+  0.6B 2,4). Só o Base 0.6B: a referência da voz está versionada (`tools/voz/ref/`). Sem VoiceDesign, Chatterbox,
+  Supertonic, UTMOS (o `medir.py` faz o ASR, mas não UTMOS/DNSMOS).
+- `PY=.cache/venv/Scripts/python.exe`, `PYV=.cache/venv-voz/Scripts/python.exe`. Os scripts Python se relançam em
+  UTF-8 sozinhos no Windows (JSON com acento). `node art/tools/render.js` direto precisa de
+  `NODE_PATH=.cache/node/node_modules` e `PLAYWRIGHT_BROWSERS_PATH=.cache/ms-playwright`.
+- Voz na GPU (RTX 4070): `VOZ_QWEN_DTYPE=fp32` (entra na chave do cache: sem ela sai outra tomada). 65 frases em
+  ~4,8 min (~4,4 s por frase). Na CPU: fp32 ~25 s por frase; bf16 inviável aqui (~10 min por frase).
+- Render: ~3,3 min com `--workers 4` (188–202 s para 4613 quadros, ~24 q/s; 6 ou 8 workers não ganham nada).
+  Comando completo com contact sheet: ~3,5 min. `--so-audio` com a voz pronta: segundos.
+- Os `.sh` saem com CRLF no clone do Windows (`core.autocrlf=true`): use o `setup-windows.ps1`; a amostra `.m4a` sai com
+  `ffmpeg -i narracao.wav -af loudnorm=I=-16:TP=-1.5:LRA=11,aresample=48000 -ac 1 -c:a aac -b:a 160k saida.m4a`.
+- Passo que faltava no setup (agora nos dois scripts): extrair `build/art/gameplay/f_NNNN.jpg` do
+  `assets/game/preview.mp4`; sem isso os planos de gameplay real caem no placeholder.
+
+### 12.2 Voz da Parte 2 e comparação com a Parte 1
+- Receita A2 sem mudança: Base 0.6B clonando `tools/voz/ref/qwen-design-narrador-jovem-s0.wav`, uma frase por chamada,
+  `--atempo 0.87`, `revisar.py` (sementes 5,6,7 e depois 8,9,11), `falado` com reticências nas vírgulas engolidas
+  (frases 32, 38, 53, 56), `alongar_virgulas.py --min 0.22` e `--min 0.24`. "Wall Street" fica na grafia normal
+  (com "Uól Strít" o ASR piorou). Resultado: 0 de 20 vírgulas abaixo de 120 ms, perguntas sobem, WER 4–6% (números).
+- Comparação com o vídeo final da Parte 1 (8 frases iguais, extraídas do mp4): o timbre é o mesmo (similaridade de
+  locutor 0,87–0,93 em todas as configurações; a própria Parte 1 dá 0,89 contra a referência, por causa da trilha).
+  Frase a frase, as tomadas daqui saem ~13–15% mais curtas, até na configuração exata da Parte 1 (CPU bf16): é o
+  modelo nesta versão de torch/transformers, não o `atempo`. No episódio inteiro o ritmo bate: Parte 2 = 2,02
+  palavras/s no total e 2,19 só fala; Parte 1 = 2,04 e 2,21. Escolha: GPU fp32 (melhor similaridade, 4× mais rápida).
+  Detalhe em `build/voz/comparar-p1/`.
+
+### 12.3 Mecanismos novos do pipeline
+- `tools/gerar_story.py`: `TRILHA_AJUSTE` (deixas de trilha por plano, substituem as automáticas; sem ele a "trilha
+  suspensa" do p204 ia até o fim), `LEGENDA` (legenda em algarismos por plano, a fala segue por extenso: 40, 20, 1929,
+  6 VEZES, 90%, 87, 22%, 60, 240, 160, 26; o destaque vai no número), `LEGENDA_ANCORA` (vazio). Entradas 2xx em
+  `SFX_AJUSTE`, `PAUSAS` (211, 257 = 0,6 s) e `SEPARAR_ANTES` (211, 267). A Parte 1 gerada sai idêntica.
+- `make_video.py`: `legenda_ancora` por fala (`{"palavra exibida": "palavra falada"}`; existe, sem uso: no p223 deixava
+  1,4 s de fala sem legenda); `--cs-transicoes` (em cada corte, último quadro do plano ao lado do 1º do seguinte);
+  a linha de alinhamento lista as palavras sem âncora; extração do contact sheet em lotes (o ffmpeg 9 não aceita
+  `select` com centenas de termos).
+- `lib/sfx.py`: efeito `coruja` (pio "hu-huu" sintetizado), usado no p259 em "Coruja". `lib/mix.py`: a trilha
+  sintetizada podia sair 1 amostra mais curta que o vídeo e quebrar o mix (corrigido; a Parte 1 não muda).
+- `tools/voz/motores.py`: `VOZ_DEVICE` (padrão: cuda se houver). `falar.py`: dispositivo/dtype na chave do cache.
+
+### 12.4 Tabela canônica da Parte 2 (como ficou no vídeo)
+Dia 3 fora de cena (7 pedras). Dia 4: `max: 11, escala: 11`, sem fantasma. O cronômetro só sobe dentro do p247
+(5,0 → 7,0, a ampulheta). Do p247 (7,0) ao p248 (2,0) é pulo para baixo, permitido. Contador de moedas com ícone de
+moeda; o de cobre é outro contador com ícone de cobre. Lanterna na Toca: apagada. Cartão fixo no topo (y ≈ 365);
+meta 1.000 em todos.
+
+| Plano | Fala | Cronômetro | Contador / cartão / painel | Lanterna |
+|---|---|---|---|---|
+| p201 | E se esperar | — | — | acende (close) |
+| p204–p205 | Vocês mandaram segurar. / O Zeca segurou o cobre. | — | — | apagada (Toca) |
+| p206 | E a seta errou. | — | painel Cobre 40, seta verde gira e cai vermelha | — |
+| p208 | Ele abriu o painel sorrindo. | — | SALDO 14 · DIA 3 · COBRE 4% · RESTAM 27 | apagada |
+| p209–p210 | Ontem… quarenta. / Hoje, paga vinte. | — | ONTEM 40 → 40 riscado, 20, −50% | — |
+| p212 | O sorriso foi junto com o preço. | — | SALDO 14 · DIA 3 · COBRE 2% · RESTAM 27 | apagada |
+| p230–p231 | Vender agora era perder vinte. | — | VENDER +20, ONTEM 40 riscado | — |
+| p237 | Hoje, era o ferro. | — | EM ALTA HOJE: FERRO +50%; ferro ×0, cobre ×1 · 20 | — |
+| p240 | Dia quatro. | — | SALDO 14 · DIA 4 DE 30 | acesa, sem feixe (vila) |
+| p241 | Onze segundos de luz. | 11,0 fixo | moedas 0 | acende com feixe |
+| p242 | Pedra, pedra, pedra. | 10,8 → 8,0 | moedas 0 → 3 | acesa com feixe |
+| p243 | Seis segundos. | 7,0 → 6,0 | moedas 3 → 4 | (gameplay) |
+| p244 | E um bloco diferente, | 6,0 → 5,6 | moedas 4 | (gameplay) |
+| p245 | com uma ampulheta. | 5,6 → 5,2 | moedas 4 | acesa com feixe |
+| p246 | Crac. | 5,2 → 5,0 | moedas 4 | acesa com feixe |
+| p247 | Dois segundos de presente. | 5,0 → 7,0 (+2 s) | — | — |
+| p248 | Foi nesses dois que achou o veio. | 2,0 → 1,6 | moedas 6 | acesa com feixe |
+| p249 | Cobre. Cobre. Cobre. | 1,6 → 0,4 | moedas 6; cobre 1 → 4 | pisca a partir de 1,0 |
+| p250 | Apagou. | 0,4 → 0,0 | — | falha → apaga em 0,0 |
+| p251 | Quatro pepitas na mochila. | — | cobre 4 | — |
+| p252 | Noite quatro. Mercado. | — | SALDO 20 · DIA 4 · RESTAM 26; Cobre **NORMAL 40** | — |
+| p253–p254 | Em alta hoje: cobre. / Sessenta moedas cada. | — | EM ALTA HOJE: COBRE +50%; **NORMAL 40 → 60** | — |
+| p255 | Quatro pepitas, duzentos e quarenta. | — | cobre ×4; VENDER +240 | — |
+| p256 | Quase um quarto da meta. | — | SALDO 20 · DIA 4 · COBRE 24% · RESTAM 26 | — |
+| p259 | A Dona Coruja quer quatro cobres. | — | Dona Coruja · amizade 0 · pedido **4/4 Cobre** | — |
+| p260–p262 | Paga cento e sessenta. … vira amigo. | — | +160; ENTREGAR 160 × VENDER 240; amizade 0 → 1 | — |
+| p264 | Faltam vinte e seis dias. | — | RESTAM 26 | — |
+| p266–p267 | ou vende tudo hoje na alta? / Curte pra parte três. | — | — | apagada; a lanterna apaga depois de "três" |
+
+### 12.5 Lições desta rodada
+1. **A conta na tela tem que fechar para quem vê.** "20 → 60" com "+50%" não fecha (50% de 20 é 30): o painel passou
+   a mostrar "NORMAL 40 → 60". Antes de animar, confira cada número contra a fala e contra o plano anterior.
+2. **Cartão SALDO × META é um helper único desde o primeiro briefing.** Na Parte 3, um só helper
+   alimentado pela tabela canônica, usado por todos os animadores.
+3. **Cortes entre planos de animadores diferentes precisam de parâmetros compartilhados** (enquadramento, câmera,
+   recorte do gameplay, estado do painel no último/primeiro quadro). O p258 → p259 pulava de recorte e deixava letras
+   na borda. `--cs-transicoes` mostra os pares de corte: use no teste.
+4. **Número só entra na palavra**, inclusive em painel redesenhado sobre gameplay real (preço, contador, pedido):
+   nada aparece antes de ser dito.
+5. Legenda com número por extenso fica num bloco só (ex.: "EM 1929," desde o "Em"); se a cena precisa do número no
+   fim da fala, resolve-se na cena (contador que gira e trava na palavra), não na legenda.
+6. Caracteres especiais na legenda: a Anton tem ×, −, →, ·, mas o "×" é do tamanho de minúscula. Prefira palavras.

@@ -1,7 +1,8 @@
 # MAGMA DIG · série de Reels
 
 Reel vertical 1080×1920, 30 fps, ~2 min, que conta em série a história do Zeca, o tatu minerador do MAGMA DIG
-(jogo pago de iPhone do usuário, dev solo de Uberlândia). Vídeo promocional. Parte 1 pronta e aprovada.
+(jogo pago de iPhone do usuário, dev solo de Uberlândia). Vídeo promocional. Partes 1 e 2 prontas e aprovadas
+(`out/parte-02-final.mp4`; o que mudou na Parte 2: `docs/PRODUCAO.md` §12).
 
 **Leia `docs/PRODUCAO.md` antes de qualquer coisa.** Ele tem o passo a passo do episódio, os briefings, a tabela
 canônica, a lista de verificação e as pendências com o usuário.
@@ -25,10 +26,15 @@ canônica, a lista de verificação e as pendências com o usuário.
 - Sem clonar voz de pessoa real; só licenças com uso comercial.
 - Só `art/` é do diretor de arte; animadores só criam os seus `scenes/planos/pN##.js`.
 - "Corrigido" só vale com quadro do render oficial (`make_video.py … --plano pN## --rascunho`).
-- Um processo pesado por vez (voz OU render): 4 núcleos, 15 GB de RAM. Apague `build/*/runs/` antigos.
+- Um processo pesado por vez (voz OU render). Máquina atual: PC do dono (i7-13620H, 15,8 GB de RAM, poucos livres;
+  RTX 4070 Laptop 8 GB). Apague `build/*/runs/` antigos.
 
-## Instalação (container efêmero: `.cache/` não sobrevive)
+## Instalação neste PC (Windows nativo, sem WSL, sem administrador; tudo em `.cache/`)
 ```
-./setup.sh              # pipeline (~1,9 GB)
-tools/voz/instalar.sh   # vozes (~16,5 GB, demorado)
+powershell -ExecutionPolicy Bypass -File setup-windows.ps1   # pipeline + voz (torch CUDA, Qwen Base 0.6B), ~10 GB
+PY=.cache/venv/Scripts/python.exe        # pipeline
+PYV=.cache/venv-voz/Scripts/python.exe   # vozes; gerar com VOZ_QWEN_DTYPE=fp32 (GPU, ~5 min o episódio)
 ```
+`node art/tools/render.js` direto precisa de `NODE_PATH=.cache/node/node_modules` e
+`PLAYWRIGHT_BROWSERS_PATH=.cache/ms-playwright` (o `make_video.py` acha sozinho). Os `.sh` saem com CRLF no clone do
+Windows: use o `setup-windows.ps1`. No container Linux antigo valia `./setup.sh` + `tools/voz/instalar.sh` (`bin/python`).

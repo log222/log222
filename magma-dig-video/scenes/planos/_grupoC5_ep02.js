@@ -145,12 +145,13 @@ window.GC5_LOAD = window.GC5_LOAD || (async () => {
     return u.cartaoCliente(g, GC5.CLI.x, GC5.CLI.y, Object.assign({ t, s: 1, amizade: 0, recompensa: 160, pedido: { tem: 4, precisa: 4, tipo: "cobre", nome: "Cobre" }, sorriso: 0.3, amizadeEscala: 1.25 }, o));
   };
   /** recorte real da aba CLIENTES (o mesmo do fim do p258, parado no cartão da Dona Coruja). ÚNICO lugar para ajustar. */
-  GC5.REC258 = { topo: 84, base: 430, altura: 520, cy: 820, foco: [427, 204], zoom: [1.07, 1.07] };   // = fim do p258 (animador A)
+  // = último quadro do p258 (animador A): mesmos topo/base/altura/cy/foco/zoom/remendos; pul = brilho do contorno nesse quadro
+  GC5.REC258 = { topo: 84, base: 430, altura: 520, cy: 820, foco: [425, 204], zoom: [1.1, 1.1], remendosExtra: [[729, 84, 70, 62, "#1E1B2E"]], pul: 0.954 };
   GC5.recorteClientes = (g, t) => {
-    const ART = A(), v = ART.gameplay.cheio(g, t, Object.assign({}, ART.gameplay.PRESET.clientes, { dur: 1000 }, GC5.REC258));
+    const ART = A(), R = GC5.REC258, v = ART.gameplay.cheio(g, t, Object.assign({}, ART.gameplay.PRESET.clientes, { dur: 1000, topo: R.topo, base: R.base, altura: R.altura, cy: R.cy, foco: R.foco, zoom: R.zoom, remendos: ART.gameplay.REMENDOS.clientes.concat(R.remendosExtra) }));
     // contorno dourado do cartão da Dona Coruja, como no fim do p258
     const ca = v.map(125, 150), cb = v.map(730, 258);
-    g.save(); ART.rr(g, ca[0], ca[1], cb[0] - ca[0], cb[1] - ca[1], 16 * v.sc / 1.7); g.lineWidth = 7; g.strokeStyle = "#FFD23F"; g.shadowColor = "rgba(255,210,63,.9)"; g.shadowBlur = 18; g.stroke(); g.restore();
+    g.save(); ART.rr(g, ca[0], ca[1], cb[0] - ca[0], cb[1] - ca[1], 16 * v.sc / 1.7); g.lineWidth = 7; g.strokeStyle = "#FFD23F"; g.shadowColor = "rgba(255,210,63,.9)"; g.shadowBlur = 22 * R.pul; g.stroke(); g.restore();
     return v;
   };
 })();

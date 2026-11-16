@@ -14,7 +14,7 @@ MD.plano("p235", {
     const fant = ART.prog(t, tPal, tPal + 0.45, "inOutSine");
     const pAm = G.hit(t, tAm, 0.8) + (t > tAm ? 0.3 : 0);
     G.fundo(g, t, { dx: ART.map(t, 0, D, -10, 14), dy: ART.map(t, 0, D, 0, -10), z: 1.1, escuro: 0.15 });
-    const cam = G.cam(ART.map(t, 0, D, 1.1, 1.14, "inOutSine"), ART.map(t, 0, D, 534, 546), 700, 540, 760);
+    const cam = G.cam(ART.map(t, 0, D, 1.04, 1.08, "inOutSine"), ART.map(t, 0, D, 534, 546), 700, 510, 760);
     G.painel(g, cam, gg => {
       const c = ART.painelMercado(gg, t, { textoEscala: G.TXT, precoAntes: 40, preco: 20, rola: 1, antesFantasma: 0, varPct: -50, seta, setaFantasma: fant, botao: false,
         barras: G.B_N3.concat([0.33]), cores: [0, 0, 0, 0, 0, "#FFD23F"], corHoje: "#E63748", amanha: false });

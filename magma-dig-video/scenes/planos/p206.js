@@ -14,7 +14,7 @@ MD.plano("p206", {
     const giro = ART.prog(t, tSeta + 0.12, tErr + 0.3);
     const bate = G.hit(t, tErr + 0.22, 0.5);
     G.fundo(g, t, { dx: ART.map(t, 0, D, 10, -14), z: 1.1, escuro: 0.15 });
-    const cam = G.cam(ART.map(t, 0, D, 1.08, 1.14, "inOutSine"), 540, 700, 540, 760);
+    const cam = G.cam(ART.map(t, 0, D, 1.04, 1.08, "inOutSine"), 540, 700, 510, 760);
     cam.cy += bate * 10 * Math.sin(t * 50);
     G.painel(g, cam, gg => {
       const c = ART.painelMercado(gg, t, { textoEscala: G.TXT, preco: 40, varPct: 12, seta: 1, setaGiro: giro, tremor, botao: false });
