@@ -14,7 +14,8 @@ MD.plano("p216", {
     G.fundo(g, t, { dx: ART.map(t, 0, D, 30, -30), z: 1.1, escuro: 0.12 });
     const cam = G.cam(1.1, ART.map(t, 0, D, 520, 560, "inOutSine"), 840, 540, 780);
     G.painel(g, cam, gg => {
-      G.grafSemana(gg, t, { d, barras: G.B216 });
+      const cores = []; cores[11] = "#E63748";
+      G.grafSemana(gg, t, { d, barras: G.B216, cores, corHoje: "#7A739A" });
       // brilho na barra que acabou de entrar
       for (const t0 of ts) { const p = G.hit(t, t0 + 0.15, 0.5); if (p > 0) ART.glow(gg, G.GRAF.xHoje, G.GRAF.y + G.GRAF.h * 0.4, 160, "#FFD23F", 0.45 * p); }
     });

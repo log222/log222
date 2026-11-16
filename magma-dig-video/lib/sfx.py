@@ -404,7 +404,22 @@ def eco(a, atraso=0.22, repeticoes=4, decai=0.45, escuro=3000):
     return _norm(_room(out, 0.8, 0.25), 0.9)
 
 
-LIB = {"picareta": picareta, "rachar": rachar, "quebrar": quebrar, "moeda": moeda, "ding": ding,
+def coruja(seed=0, pitch=1.0, **_):
+    """pio de coruja curto e simpático ("hu-huu"): dois tons suaves descendo um pouco, vibrato leve e sopro."""
+    r = np.random.default_rng(seed)
+    n = int(0.9 * SR); x = np.zeros(n)
+    for ini, dur, f0, f1, amp in [(0.0, 0.16, 560, 520, 0.7), (0.24, 0.42, 600, 500, 1.0)]:
+        m = int(dur * SR); tt = np.arange(m) / SR
+        f = (f0 + (f1 - f0) * tt / dur) * pitch * (1 + 0.012 * np.sin(2 * np.pi * 6 * tt))
+        ph = 2 * np.pi * np.cumsum(f) / SR
+        tom = np.sin(ph) + 0.25 * np.sin(2 * ph) + 0.06 * np.sin(3 * ph)
+        sopro = _bp(r.standard_normal(m), 400 * pitch, 1400 * pitch) * 0.12
+        env = np.minimum(1, tt / 0.04) * np.minimum(1, (dur - tt) / 0.12) ** 1.5
+        s = int(ini * SR); x[s:s + m] += amp * (tom + sopro) * env
+    return _norm(_room(_lp(x, 3000), 0.5, 0.18, seed), 0.7)
+
+
+LIB = {"coruja": coruja, "picareta": picareta, "rachar": rachar, "quebrar": quebrar, "moeda": moeda, "ding": ding,
        "whoosh": whoosh, "ronco": ronco, "tictac": tictac, "sting": sting, "boom": boom, "pop": pop,
        "subida": subida, "clique": clique, "apagar": apagar, "zumbido": zumbido, "giz": giz,
        "acorde": acorde, "coracao": coracao, "passos": passos, "vento": vento, "folha": folha, "porta": porta,

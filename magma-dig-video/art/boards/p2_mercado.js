@@ -2,8 +2,20 @@
  * 0 p206 seta gira · 1 p209–210 40 riscado rola até 20 · 2 p230–231 VENDER +20 com 40 fantasma · 3 p235 seta fantasma "?"
  * 4 p236–238 faixa EM ALTA (vazia -> FERRO) + linhas · 5 p253–254 faixa COBRE + 20 rola até 60 · 6 p255 linha COBRE ×4 + VENDER +240
  * 7 p216 gráfico deslizando · 8 p217 barras sobe/desce/sobe + seta · 9 p203 etiqueta 40 racha -> 20 */
-ART.boards.p2_mercado = { dur: 10, render(g, t, f) {
-  const seg = Math.min(9, Math.floor(t)), u = t - seg, P = ART.prog, M = ART.painelMercado, U = ART.ui;
+/* Correção: 10 NORMAL 40 riscado -> 60 (+50%), textoEscala, Toca sem "1.000", botaoSub null antes da palavra · 11 preço "?" ·
+ * 12 linhas legíveis (textoEscala + moeda) · 13 pepita sem cintilas (brilho 0) · 14 Toca sem picareta na mesa */
+ART.boards.p2_mercado = { dur: 15, render(g, t, f) {
+  const seg = Math.min(14, Math.floor(t)), u = t - seg, P = ART.prog, M = ART.painelMercado, U = ART.ui;
+  if (seg === 13) { ART.holofote(g, t, { cor: "#FFB070", k: 0.35 }); ART.obj.pepitaCobre(g, t, { y: 900, r: 160, k: 0.3, brilho: 0 }); ART.post(g, f, { legenda: true, vinheta: 0.5 }); return; }
+  if (seg === 14) { ART.palco(g, t, { zoom: 1 }, ART.cenas.toca({ picareta: false, meta: false }), null, { frame: f }); return; }
+  if (seg >= 10) {
+    ART.palco(g, t, { zoom: 1 }, ART.cenas.tocaDesfocada({ meta: false }), null, { frame: f, legenda: false });
+    const fx = { minerio: "cobre", nome: "Cobre" };
+    if (seg === 10) M(g, t, { faixa: fx, precoAntes: 40, preco: 60, rola: P(u, 0.3, 0.95), rotuloAntes: "NORMAL", varPct: 50, varK: P(u, 0.6, 0.9), amanha: false, textoEscala: 1.35, botaoSub: u < 0.5 ? null : "+60 moedas" });
+    if (seg === 11) M(g, t, { faixa: fx, preco: 60, precoTexto: "?", varPct: false, amanha: false, textoEscala: 1.35, botaoSub: null });
+    if (seg === 12) M(g, t, { faixa: fx, botao: false, linhas: [{ tipo: "ferro", nome: "Ferro", qtd: 0, valor: 30, textoEscala: 1.3, moeda: true, a: 0.5 }, { tipo: "cobre", nome: "Cobre", qtd: 4, valor: 240, textoEscala: 1.3, moeda: true, destaque: true }] });
+    ART.post(g, f, { legenda: true, vinheta: 0.5 }); return;
+  }
   if (seg === 9) {
     ART.holofote(g, t, { cor: "#FFB070", k: 1 - 0.5 * P(u, 0.4, 0.8) });
     ART.obj.pepitaCobre(g, t, { y: 980, r: 130, k: 1 - 0.5 * P(u, 0.4, 0.8) });

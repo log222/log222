@@ -1,7 +1,7 @@
 /* p254 · C5 Mercado · "Sessenta moedas cada."
- * Mesmo painel (câmera contínua). No "Sessenta" o 20 de ontem leva o risco e o número rola para cima até 60 (pousa
+ * Mesmo painel (câmera contínua). No "Sessenta" o preço NORMAL 40 leva o risco e rola para cima até 60 (+50%; pousa
  * ainda dentro da palavra); a barra de hoje sobe acima de todas. No "moedas" o 60 estoura com moedinhas.
- * Sem % no cartão (o +50% fica só na faixa). O botão continua VENDER sem valor (o total entra no p255). */
+ * O +50% verde aparece no cartão junto com a rolagem e o botão vira VENDER +60 moedas no "Sessenta". */
 MD.plano("p254", {
   async setup() {
     if (!window.GC5) await (window.__GC5_P = window.__GC5_P || MD.loadScript("../scenes/planos/_grupoC5_ep02.js"));
@@ -21,7 +21,7 @@ MD.plano("p254", {
     cam.cy += pM * 6 * Math.sin(t * 50);
     G.painel(g, cam, gg => {
       ART.glow(gg, 540, 412, 560, "#FFC531", 0.2);
-      const c = G.mercadoN4(gg, t, { rola: rk, hoje, faixa: { minerio: "cobre", nome: "Cobre", k: 1, mk: 1 } });
+      const c = G.mercadoN4(gg, t, { rola: rk, hoje, faixa: { minerio: "cobre", nome: "Cobre", k: 1, mk: 1 }, sub: t >= tS ? "+60 moedas" : null });
       const s = 1.4, px = c.x0 + c.w - 36 * s - 80, py = c.y0 + 270 * s;
       if (pM > 0) ART.glow(gg, px, py, 320, "#FFD23F", 0.7 * pM);
       if (pC > 0) ART.glow(gg, px, py, 260, "#FFD23F", 0.35 * pC);

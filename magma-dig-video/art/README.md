@@ -170,3 +170,17 @@ Cartão 940×500 (s=1) centrado em x,y; devolve `{retrato, botao, recompensa, am
 Imagem real (p258): `ART.gameplay.cheio(g, t, Object.assign({}, ART.gameplay.PRESET.clientes, { dur }))` (setup: `preloadShot('shot_5')`): aba CLIENTES + cartões
 com "amizade N", bônus "+X% → Y%" e pedidos/recompensas apagados por remendos na cor do cartão (e a caixa de marketing). Recortes `RECORTES.clientes`/`.ampulheta`
 para o `visor`; `remendos: 'clientes' | [[x,y,w,h,cor]...]` vale em `cheio` e `visor`.
+
+### Parte 2 — rodada de correção (parâmetros opcionais; sem eles o desenho é idêntico, conferido byte a byte)
+Prova: `art/frames/p2-correcoes-contato.png` (pranchas `p2_mercado` 10–14 s, `p2_wallstreet` 10–11 s, `p2_clientes` 8 s, `p2_ampulheta` 5 s).
+- `ART.ciencia.grafLinha`: `eixoAnos` (número 0..1, ou mapa `{1921: k, 1925: k, 1929: k, 1932: k}`; ano ausente no mapa = apagado; padrão 1),
+  `textoEscala` (padrão 1; recomendado 1.4: anos do eixo, PRÓPRIO, EMPRESTADO, OUTUBRO, calendário "1 DIA"),
+  `posQueda` ([x,y] do −89%; padrão [875, 468]; recomendado [790, 455]), `posWallStreet` ([x,y]; padrão [540, 368]).
+- `ART.obj.pepitaCobre(g, t, {brilho: 0})` — sem as cintilas brancas (padrão 1).
+- `ART.cenas.tocaDesfocada({meta: false})` — sem o "1.000"/giz na parede. `ART.cenas.toca({meta: false, picareta: false})` — sem giz / sem a picareta na mesa.
+- `ART.painelMercado`: `rotuloAntes` (texto do preço riscado, ex. "NORMAL"), `precoTexto` ('?' no lugar do número, sem precoAntes), `precoK` (0..1; 0 esconde número e moeda),
+  `botaoSub: null|false` (botão só com VENDER), `textoEscala` (padrão 1; 1.35 recomendado: "HOJE PAGA"/"NORMAL"/"moedas" do cartão e o "+N moedas" do botão).
+  `ART.ui.botao(..., {textoEscala, subEscala})`; `ART.ui.cartaoMinerio(..., {textoEscala, precoTexto, precoK})`.
+- `ART.ui.cartaoCliente`: `pedidoK` (0..1, linha "0/4 Cobre"), `recompensaA` (0..1, linha "+160 moedas"; `recompensaK` continua sendo o destaque), `amizadeEscala` (padrão 1; 1.25).
+- `ART.ui.linhaMercado`: `textoEscala` (1.3 recomendado; linha mais alta, letras maiores, sem o mini gráfico) e `moeda: true` (ícone de moeda no botão de valor), `corBotao`.
+- `ART.estouroAreia(..., {alvo: t => [x, y]})` — alvo pode ser função do tempo (o mesmo `t` passado à função).

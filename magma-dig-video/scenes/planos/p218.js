@@ -28,7 +28,7 @@ MD.plano("p218", {
       sq: 1 + 0.045 * insp, bob: -24 + 7 * insp, lean: -3 * insp,
       alvo: [140, 820], headTurn: -0.18 + 0.16 * balanca, headTilt: 10 - 6 * insp + 4 * solta, headDy: 6 + 6 * solta,
       eyes: "preocupado", mouth: solta > 0.5 ? "neutro" : "triste", brows: solta > 0.6 ? "nenhum" : "triste", blink: fecha,
-      rim: "#B58CFF", rimA: 0.5, banho: { cor: "#7FD8FF", k: 0.25 }, blinkSeed: 0.6,
+      rim: "#B58CFF", rimA: 0.5, blinkSeed: 0.6,
     });
     const A1 = GB2.zecaTela(g, cam, p);
     { const sZ = GB2.Z.s * A1.z, [cx, cy] = GB2.colo(A1, sZ); GB2.pepita(g, t, cx, cy, sZ, { brilho: 0.7 }); }

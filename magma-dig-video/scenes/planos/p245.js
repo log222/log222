@@ -13,7 +13,7 @@ MD.plano("p245", {
     const ach = ART.prog(t, tA - 0.15, tA + 0.15, "outCubic");              // bloco acende
     const c0 = GA.centroBloco();
     const mov = ART.camera(t, { push: [1, 1.04], dur: D });
-    const cam = ART.camMais(GA.cam(560, 1010, 1.47, mov, { sy: 860 }), { y: ART.lerp(-70, 0, k), rot: ART.lerp(-2, 0, k) });
+    const cam = ART.camMais(GA.cam(640, 1010, 1.3, mov, { sy: 820 }), { y: ART.lerp(-70, 0, k), rot: ART.lerp(-2, 0, k) });
     ART.palco(g, t, cam, ART.cenas.mina({ luz: 0.85 }), gg => {
       ART.cubo(gg, GA.B.X, GA.B.Z, { especial: "ampulheta", t, brilho: 0.25 + 0.75 * ach, escuro: 0.62 * (1 - ach) });
       if (ach > 0) { gg.save(); gg.globalCompositeOperation = "lighter"; ART.glow(gg, c0[0], c0[1], 330, "#FFC531", 0.3 * ach * (0.85 + 0.15 * Math.sin(t * 7))); gg.restore(); }

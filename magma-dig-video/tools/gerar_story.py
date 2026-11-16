@@ -62,9 +62,12 @@ SFX_AJUSTE = {
     227: {"remover": [], "adicionar": [{"nome": "folha", "offset": 0.0, "vol": -8}]},
     228: {"remover": [], "adicionar": [{"nome": "boom", "palavra": "dia", "offset": 0.0, "vol": -10}]},
     232: {"remover": [], "adicionar": [{"nome": "pop", "palavra": "guardou", "offset": 0.1, "vol": -8, "kw": {"pitch": 0.7}}]},
+    237: {"remover": ["moeda"], "adicionar": [{"nome": "moeda", "palavra": "ferro.", "offset": 0.0, "vol": -2}]},
     242: {"remover": ["*"], "adicionar": [x for n in range(3) for x in (
         {"nome": "picareta", "palavra": "pedra", "n": n, "offset": 0.0, "seed": n},
         {"nome": "moeda", "palavra": "pedra", "n": n, "offset": 0.3, "vol": -2, "seed": n})]},
+    245: {"remover": ["rachar"], "adicionar": []},          # o golpe/estouro é no p246
+    259: {"remover": [], "adicionar": [{"nome": "coruja", "palavra": "Coruja", "offset": 0.0, "vol": -6}]},
     247: {"remover": [], "adicionar": [{"nome": "acorde", "palavra": "presente.", "offset": 0.0, "vol": -6, "kw": {"tipo": "claro"}}]},
     249: {"remover": ["*"], "adicionar": [x for n in range(3) for x in (
         {"nome": "picareta", "palavra": "Cobre.", "n": n, "offset": 0.0, "seed": n, "kw": {"pitch": 0.75}},
@@ -100,7 +103,7 @@ LEGENDA = {
     209: ("Ontem, o cobre pagava 40.", ["40"]),
     210: ("Hoje, paga 20.", ["20"]),
     223: ("Em 1929,", ["1929"]),
-    224: ("Wall Street tinha subido 6×.", ["6×"]),
+    224: ("Wall Street tinha subido 6 vezes.", ["6 VEZES"]),   # o "×" da Anton é do tamanho de minúscula
     226: ("Em três anos, caiu quase 90%.", ["90%"]),
     227: ("Em 87,", ["87"]),
     229: ("22%.", ["22%"]),
@@ -110,6 +113,8 @@ LEGENDA = {
     260: ("Paga 160.", ["160"]),
     264: ("Faltam 26 dias.", ["26"]),
 }
+# Palavra exibida que entra no tempo de uma palavra falada (vai para "legenda_ancora" da fala). Parte 2.
+LEGENDA_ANCORA = {}   # ex.: {223: {"1929,": "nove,"}}; não usado (p223 fica num bloco só, decisão do orquestrador)
 # Automação da trilha por deixa do roteiro (texto do campo sfx). Deixa persiste até a próxima deixa;
 # "baixa"/"corte seco" voltam ao normal no 1º plano de outro bloco; "some" dura até a próxima deixa
 # (silêncio de suspense p44 -> "Cobre." -> p48 "trilha baixa"); "suspensa" vai até o fim.
@@ -306,6 +311,9 @@ def main():
             idx += len(words(p["narracao"]))
         if any(p["id"] in LEGENDA for p in ps):   # legenda da fala = trechos dos planos (algarismos onde houver)
             f["legenda"] = " ".join(LEGENDA[p["id"]][0] if p["id"] in LEGENDA else p["narracao"].strip() for p in ps)
+        for p in ps:
+            if p["id"] in LEGENDA_ANCORA:
+                f.setdefault("legenda_ancora", {}).update(LEGENDA_ANCORA[p["id"]])
         out_falas.append(f)
     story = {
         "titulo": d.get("titulo", ""),

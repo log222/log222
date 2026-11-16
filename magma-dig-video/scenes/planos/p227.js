@@ -7,7 +7,7 @@ MD.plano("p227", {
     const ART = window.ART, GC = window.GC, GD = window.GD, S = GD.WS(), D = ctx.dur || 1.63;
     const tO = GD.wt(ctx, "oitenta", 0.36);
     GD.bp(g, t);
-    GD.graf(g, t, { prog: 1, regua: 1, wallStreet: 1, contador: true, queda: 1, pan: ART.prog(t, 0.0, D - 0.12), rotulo87: ART.prog(t, tO - 0.03, tO + 0.3), prog87: S.P87A * ART.prog(t, tO, D) });
+    GD.graf(g, t, { textoEscala: GD.TE, posQueda: GD.QUEDA, prog: 1, regua: 1, wallStreet: 1, contador: true, queda: 1, pan: ART.prog(t, 0.0, D - 0.12), rotulo87: ART.prog(t, tO - 0.03, tO + 0.3), prog87: S.P87A * ART.prog(t, tO, D) });
     GC.post(g, ctx, { vinheta: 0.55, legendaK: 0.32 });
   },
 });

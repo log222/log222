@@ -14,12 +14,10 @@ MD.plano("p246", {
     const vivo = t < h + 0.03;
     ART.palco(g, t, cam, ART.cenas.mina({ luz: 0.85 }), gg => {
       if (vivo) ART.cubo(gg, GA.B.X, GA.B.Z, { especial: "ampulheta", t, brilho: 1, crack: ART.prog(t, h - 0.02, h + 0.03) * 3, seed: 6 });
-      ART.zeca.draw(gg, GA.cava(t, [h], { ...GA.Z, turn: 0.84, lamp: 1, cone: 0.6, coneAng: 30, rim: "#FFC88A", eyes: t > h + 0.12 ? "espanto" : "determinado", mouth: t > h + 0.12 ? "o" : "esforco", banho: { cor: "#FFD23F", k: 0.6 * ART.prog(t, h, h + 0.2) } }, { periodo: 0.7 }));
-      ART.estouroAreia(gg, t, { t0: h, front: GA.frente(), seed: 9 });
-      GA2.lascas(gg, t, h, imp[0], imp[1], 46, { cor1: "#E2DCCB", cor2: "#C9C2B0", n: 10 });
+      ART.zeca.draw(gg, GA.cava(t, [h], { ...GA.Z, turn: 0.84, lamp: 1, cone: 0.6, coneAng: 46, rim: "#FFC88A", eyes: t > h + 0.12 ? "espanto" : "determinado", mouth: t > h + 0.12 ? "o" : "esforco", banho: { cor: "#FFD23F", k: 0.6 * ART.prog(t, h, h + 0.2) } }, { periodo: 0.7 }));
+      ART.estouroAreia(gg, t, { t0: h, front: GA.frente(), seed: 9, lascas: false });
     }, { frame: ctx.frame });
-    GA2.flash(g, t, h, "rgba(255,226,150,.18)", 0.034);
-    ART.ui.crac(g, 800, 640, t, h, { s: 1.5, rot: -6, dur: 0.75, cor: "#FFC531" });
+    ART.ui.crac(g, 820, 560, t, h, { s: 1.4, rot: -6, dur: 0.75, cor: "#FFC531" });
     GA2.hud(g, t, { cron: GA.cron(t, D, 5.2, 5.0), moedas: 4 });
   },
 });

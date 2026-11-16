@@ -27,7 +27,7 @@ MD.plano("p266", {
       bob: -24 + 1.5 * resp, sq: 1 + 0.015 * resp,
       eyes: fase === 2 ? "preocupado" : "aberto", mouth: fase === 2 ? "neutro" : fase === 1 ? "o" : "neutro", brows: fase === 2 ? "preocupado" : "surpreso",
       headTilt: fase === 0 ? -10 : fase === 1 ? 4 : 14, headDy: fase === 2 ? 6 : 0, blinkSeed: 0.7,
-      banho: { cor: ART.mix("#FF8A3C", "#7FD8FF", 0.6 * kPainel), k: 0.5 + 0.15 * kPainel }, rim: "#9FB4FF", rimA: 0.55,
+      banho: { cor: "#FF8A3C", k: 0.5 }, rim: "#9FB4FF", rimA: 0.55,
     });
     const A0 = GB2.ancoras(base), [cx, cy] = GB2.colo(A0, sZ);
     base.alvo = fase === 0 ? [1300, 760] : fase === 1 ? [-120, 900] : [cx, cy];

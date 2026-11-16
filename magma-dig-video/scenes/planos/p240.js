@@ -1,7 +1,7 @@
 /* p240 · C1 Vila / boca da mina · "Dia quatro."
  * Como o p26: câmera atrás do Zeca, acompanhando; ele anda de costas pela trilha com a picareta velha na pata, passa
  * por baixo da placa MINA A · TERRA RASA e entra no escuro da mina. Lanterna acesa SEM feixe (fora da mina).
- * Cartão fixo: SALDO 14 · DIA 4 DE 30 (pulsa no "quatro"). */
+ * Cartão fixo: SALDO 14 · DIA 4 DE 30 · RESTAM 26 + COBRE 2% (1 pepita a 20; pulsa no "quatro"). */
 MD.plano("p240", {
   async setup() { await (window.GB2_LOAD ? GB2_LOAD() : MD.loadScript("../scenes/planos/_grupoB_ep02.js").then(() => GB2_LOAD())); return {}; },
   render(g, t, ctx) {
@@ -23,6 +23,6 @@ MD.plano("p240", {
     if (b > 0) { const [px, py, z] = GB.proj(cam, 0.85, 610, 860); ART.glow(g, px, py, 330 * z, "#FFD98A", 0.35 * b); }
     // cartão fixo: entra já no corte e pulsa no "quatro"
     const kc = ART.ease.outBack(clamp((t + 0.05) / 0.22));
-    GB2.cartao(g, { saldo: 14, dia: 4, y: 365 - (1 - kc) * 200, a: clamp(kc * 2), pulso: GB.hit(t, tQu, 0.5) });
+    GB2.cartao(g, { saldo: 14, dia: 4, cobre: 0.02, tag: "COBRE 2%", rotulo: "RESTAM 26", y: 365 - (1 - kc) * 200, a: clamp(kc * 2), pulso: GB.hit(t, tQu, 0.5) });
   },
 });

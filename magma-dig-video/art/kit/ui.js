@@ -81,10 +81,11 @@
     ART.rr(g, x - w / 2 + 10, y - h / 2 + 16 - dep, w - 20, h * 0.28, r * 0.7); g.fillStyle = "rgba(255,255,255,.22)"; g.fill();
     const cy = y + 10 - dep;
     let tx = x;
-    if (o.icone) { const iw = h * 0.5; const total = iw + 16 + measure(g, o.texto, h * 0.36); UI.pix(g, o.icone, x - total / 2 + iw / 2, cy - (o.sub ? h * 0.12 : 0), iw); tx = x + (iw + 16) / 2; }
-    g.fillStyle = tc; g.textAlign = "center"; g.textBaseline = "middle"; g.font = F(h * 0.36);
-    g.fillText(o.texto || "", tx, cy - (o.sub ? h * 0.13 : 0));
-    if (o.sub) { g.font = F(h * 0.26, 800); g.globalAlpha *= 0.85; g.fillText(o.sub, tx, cy + h * 0.2); }
+    const te = o.textoEscala || 1, se = o.subEscala || 1;   // Parte 2 (correção): texto / sub maiores
+    if (o.icone) { const iw = h * 0.5; const total = iw + 16 + measure(g, o.texto, h * 0.36 * te); UI.pix(g, o.icone, x - total / 2 + iw / 2, cy - (o.sub ? h * 0.12 : 0), iw); tx = x + (iw + 16) / 2; }
+    g.fillStyle = tc; g.textAlign = "center"; g.textBaseline = "middle"; g.font = F(h * 0.36 * te);
+    g.fillText(o.texto || "", tx, cy - (o.sub ? h * 0.13 * (se > 1 ? 1.15 : 1) : 0));
+    if (o.sub) { g.font = F(h * 0.26 * se, 800); g.globalAlpha *= se > 1 ? 0.95 : 0.85; g.fillText(o.sub, tx, cy + h * (se > 1 ? 0.22 : 0.2)); }
     g.restore();
   };
   function measure(g, s, px) { g.save(); g.font = F(px); const w = g.measureText(s || "").width; g.restore(); return w; }
@@ -260,18 +261,20 @@
     UI.pix(g, o.tipo || "cobre", x0 + 87 * s, y0 + 87 * s, 72 * s);
     g.fillStyle = "#F4EEDC"; g.font = F(58 * s, 1000); g.textAlign = "left"; g.textBaseline = "alphabetic";
     g.fillText(o.nome || "Cobre", x0 + 168 * s, y0 + 92 * s);
-    const antes = o.precoAntes, rk = clamp(o.rola ?? 0);
+    const antes = o.precoAntes, rk = clamp(o.rola ?? 0), TE = o.textoEscala || 1;   // textoEscala: rótulos "HOJE PAGA"/"moedas" maiores
     if (o.varPct != null) { g.save(); if (antes != null) g.globalAlpha *= o.varK ?? ART.prog(rk, 0.55, 0.9); g.font = F(38 * s, 900); g.fillStyle = o.varPct >= 0 ? "#5FD35F" : "#FF5A66"; g.fillText((o.varPct >= 0 ? "+" : "") + o.varPct + "%", x0 + 170 * s, y0 + 136 * s); g.restore(); }
     const go = { barras: o.barras, amanha: o.amanha, prog: o.prog ?? 1, brilhoAmanha: o.brilhoAmanha || 0 };
     if (o.corHoje) go.corHoje = o.corHoje; if (o.cores) go.cores = o.cores;
     UI.grafico7(g, x0 + 36 * s, y0 + 180 * s, 250 * s, 160 * s, go);
     // preço
     if (antes == null) {
-      g.textAlign = "right"; g.font = F(30 * s, 800); g.fillStyle = "#A3A0AE"; g.fillText(o.rotuloPreco || "HOJE PAGA", x0 + w - 36 * s, y0 + 216 * s);
-      g.font = F(104 * s, 1000); g.fillStyle = o.corPreco || "#FFD23F"; g.fillText(String(o.preco ?? 40), x0 + w - 36 * s, y0 + 316 * s);
-      UI.pix(g, "moeda", x0 + w - 36 * s - measure(g, String(o.preco ?? 40), 104 * s) - 40 * s, y0 + 282 * s, 46 * s);
+      g.textAlign = "right"; g.font = F(30 * s * TE, 800); g.fillStyle = "#A3A0AE"; g.fillText(o.rotuloPreco || "HOJE PAGA", x0 + w - 36 * s, y0 + 216 * s - (TE - 1) * 14 * s);
+      const pt = o.precoTexto != null ? String(o.precoTexto) : String(o.preco ?? 40), pa = clamp(o.precoK ?? 1);   // precoTexto: '?' · precoK: 0 esconde
+      if (pa > 0) { g.save(); g.globalAlpha *= pa;
+      g.font = F(104 * s, 1000); g.fillStyle = o.corPreco || "#FFD23F"; g.fillText(pt, x0 + w - 36 * s, y0 + 316 * s);
+      UI.pix(g, "moeda", x0 + w - 36 * s - measure(g, pt, 104 * s) - 40 * s, y0 + 282 * s, 46 * s); g.restore(); }
     } else precoComAntes(g, x0, y0, w, s, o, antes, rk);
-    g.textAlign = "right"; g.font = F(26 * s, 800); g.fillStyle = "#A3A0AE"; g.fillText("moedas", x0 + w - 36 * s, y0 + 352 * s);
+    g.textAlign = "right"; g.font = F(26 * s * TE, 800); g.fillStyle = TE > 1 ? "#C3C0CE" : "#A3A0AE"; g.fillText("moedas", x0 + w - 36 * s, y0 + 352 * s + (TE - 1) * 8 * s);
     g.restore();
     return { x0, y0, w, h };
   };
@@ -281,21 +284,23 @@
     const corN = o.corPreco || (desce ? "#FF5A66" : "#FFD23F");
     const risco = ART.prog(rk, 0, 0.3, "outCubic"), rola = ART.prog(rk, 0.3, 0.85, "inOutCubic"), troca = ART.prog(rk, 0.3, 0.6);
     // rótulo: ONTEM -> HOJE PAGA
-    g.save(); g.textAlign = "right"; g.font = F(30 * s, 800); g.fillStyle = "#A3A0AE";
+    g.save(); g.textAlign = "right"; g.font = F(30 * s * (o.textoEscala || 1), 800); g.fillStyle = "#A3A0AE";
     g.globalAlpha *= 1 - troca; g.fillText(o.rotuloAntes || "ONTEM", xr, y0 + 216 * s); g.restore();
-    g.save(); g.textAlign = "right"; g.font = F(30 * s, 800); g.fillStyle = "#A3A0AE";
+    g.save(); g.textAlign = "right"; g.font = F(30 * s * (o.textoEscala || 1), 800); g.fillStyle = "#A3A0AE";
     g.globalAlpha *= troca; g.fillText(o.rotuloPreco || "HOJE PAGA", xr, y0 + 216 * s); g.restore();
     // número grande
     const px = 104 * s, cor = rola > 0 ? ART.mix("#FFD23F", corN, ART.prog(rola, 0, 0.3)) : "#FFD23F";
+    const pa = clamp(o.precoK ?? 1);
+    if (pa > 0) { g.save(); g.globalAlpha *= pa;
     const pw = UI.precoRolando(g, xr, y0 + 316 * s, antes, novo, rola, px, cor);
-    UI.pix(g, "moeda", xr - pw - 40 * s, y0 + 282 * s, 46 * s);
+    UI.pix(g, "moeda", xr - pw - 40 * s, y0 + 282 * s, 46 * s); g.restore(); }
     const some = 1 - ART.prog(rk, 0.3, 0.42);   // risco sobre o número antigo (some quando ele rola)
     if (risco > 0 && some > 0) { const ww = measure(g, String(antes), px) + 24 * s; g.save(); g.globalAlpha *= some; g.lineCap = "round"; g.strokeStyle = "#E63748"; g.lineWidth = 11 * s; g.beginPath(); g.moveTo(xr - ww, y0 + 290 * s); g.lineTo(xr - ww + (ww + 12 * s) * risco, y0 + 268 * s); g.stroke(); g.restore(); }
     // fantasma do preço antigo no canto superior direito
     const fk = ART.prog(rk, 0.6, 1) * (o.antesFantasma ?? 1);
     if (fk > 0) {
       g.save(); g.globalAlpha *= fk; g.textAlign = "right";
-      g.font = F(24 * s, 900); g.fillStyle = "#8E8A9A"; g.letterSpacing = 2 * s + "px"; g.fillText(o.rotuloAntes || "ONTEM", xr, y0 + 64 * s); g.letterSpacing = "0px";
+      g.font = F(24 * s * (o.textoEscala || 1), 900); g.fillStyle = "#8E8A9A"; g.letterSpacing = 2 * s + "px"; g.fillText(o.rotuloAntes || "ONTEM", xr, y0 + 64 * s); g.letterSpacing = "0px";
       g.font = F(64 * s, 1000); g.fillStyle = "#8E8A9A"; g.fillText(String(antes), xr, y0 + 128 * s);
       const aw = measure(g, String(antes), 64 * s);
       g.strokeStyle = "#E63748"; g.lineWidth = 7 * s; g.lineCap = "round"; g.beginPath(); g.moveTo(xr - aw - 8 * s, y0 + 116 * s); g.lineTo(xr + 8 * s, y0 + 96 * s); g.stroke();
@@ -312,6 +317,7 @@
       if (p > 0) { ART.rr(g, x - 4 * s, y - 4 * s, w + 8 * s, h + 8 * s, 28 * s); g.lineWidth = 7 * s; g.strokeStyle = ART.rgba("#FFD23F", 0.85 * p); g.stroke(); ART.glow(g, x + w / 2, y + h / 2, w * 0.55, "#FFD23F", 0.3 * p); }
       g.restore(); return;
     }
+    if (o.textoEscala || o.moeda) return linhaMercado2(g, x, y, o);
     const s = o.s || 1, w = (o.w || 900) * s, h = 120 * s;
     UI.cartao(g, x, y, w, h, { r: 24 * s, cor: o.destaque ? "#2A2540" : P.uiCard, borda: o.destaque ? "#FFD23F" : P.uiBorda, bw: o.destaque ? 4 : 2.5, sombra: false });
     ART.rr(g, x + 18 * s, y + 18 * s, 84 * s, 84 * s, 18 * s); g.fillStyle = "#2A2640"; g.fill();
@@ -322,6 +328,21 @@
     if (o.varPct != null) { g.fillStyle = o.varPct >= 0 ? "#5FD35F" : "#FF5A66"; g.font = F(38 * s, 900); g.fillText((o.varPct >= 0 ? "+" : "") + o.varPct + "%", x + 580 * s, y + 62 * s); }
     UI.botao(g, x + w - 120 * s, y + h / 2 - 6 * s, 200 * s, 80 * s, { texto: String(o.valor ?? ""), cor: "roxo", press: 1 });
   };
+  /** linha do Mercado legível (Parte 2, correção): textoEscala (1.3 recomendado) e moeda (ícone no botão de valor). Altura 120·s·(0.8+0.2·te). */
+  function linhaMercado2(g, x, y, o) {
+    const s = o.s || 1, te = o.textoEscala || 1, w = (o.w || 900) * s, h = 120 * s * (0.8 + 0.2 * te);
+    UI.cartao(g, x, y, w, h, { r: 24 * s, cor: o.destaque ? "#2A2540" : P.uiCard, borda: o.destaque ? "#FFD23F" : P.uiBorda, bw: o.destaque ? 4 : 2.5, sombra: false });
+    const q = h - 36 * s; ART.rr(g, x + 18 * s, y + 18 * s, q, q, 18 * s); g.fillStyle = "#2A2640"; g.fill();
+    UI.pix(g, o.tipo, x + 18 * s + q / 2, y + h / 2, q * 0.62);
+    let cx = x + 36 * s + q;
+    g.fillStyle = "#F4EEDC"; g.font = F(44 * s * te, 1000); g.textAlign = "left"; g.textBaseline = "middle"; g.fillText(o.nome, cx, y + h / 2 + 2 * s);
+    cx += measure(g, o.nome, 44 * s * te) + 18 * s;
+    g.fillStyle = "#C9C3E8"; g.font = F(36 * s * te, 900); g.fillText("×" + (o.qtd ?? 1), cx, y + h / 2 + 3 * s);
+    if (o.grafico !== false && te <= 1.15) UI.grafico7(g, x + 400 * s, y + 24 * s, 150 * s, 64 * s, { barras: o.barras, amanha: o.amanha, prog: o.prog ?? 1 });
+    if (o.varPct != null) { g.fillStyle = o.varPct >= 0 ? "#5FD35F" : "#FF5A66"; g.font = F(38 * s * te, 900); g.fillText((o.varPct >= 0 ? "+" : "") + o.varPct + "%", x + w - 300 * s * (0.8 + 0.2 * te) - 120 * s, y + h / 2 + 3 * s); }
+    const bw = 200 * s * te, bh = Math.min(h - 24 * s, 80 * s * te);
+    UI.botao(g, x + w - bw / 2 - 20 * s, y + h / 2 - 6 * s, bw, bh, { texto: String(o.valor ?? ""), cor: o.corBotao || "roxo", press: 1, icone: o.moeda ? "moeda" : undefined, textoEscala: te > 1 ? 1.25 : 1 });
+  }
 
   // ================================================================= etiqueta de raridade + feixe
   UI.etiqueta = (g, x, y, o = {}) => {

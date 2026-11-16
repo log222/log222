@@ -25,7 +25,7 @@ MD.plano("p213", {
       x: ART.lerp(Z.x, ZS.x, kS), y: ART.lerp(Z.y, ZS.y, kS), s: Z.s, turn: -0.22, lamp: 0, segura: null,
       sq: (p.sq || 1) - 0.07 * bate, bob: (p.bob || 0) - 6 * bate + 6 * Math.sin(Math.PI * kS) * (kS < 0.4 ? 1 : 0),
       eyes: "preocupado", mouth: "triste", brows: "triste",
-      rim: "#C0606A", rimA: 0.55, banho: { cor: "#E06A6A", k: 0.25 }, blinkSeed: 0.6,
+      rim: "#C0606A", rimA: 0.55, blinkSeed: 0.6,
     });
     const A1 = GB2.zecaTela(g, cam, p), sZ = Z.s * A1.z;
     { const m = A1.mao, [cx, cy] = GB2.colo(A1, sZ); GB2.pepita(g, t, ART.lerp(m.x + 4 * sZ, cx, kS), ART.lerp(m.y - 4 * sZ, cy, kS), sZ, { brilho: 0.7 }); }

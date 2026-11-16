@@ -10,13 +10,14 @@ MD.plano("p243", {
   },
   render(g, t, ctx) {
     const D = ctx.dur || 1.29, H = GA.ms(ctx, "picareta"); if (H.length < 2) H.push(...[0.05, D * 0.35].slice(H.length));
-    const tS = Math.max(0.3, GA2.wFim(ctx, "seis", 0, 0.35));
+    const tS = ART.clamp(GA2.wFim(ctx, "segundos", 0, D), D * 0.6, D);   // 6,0 só no fim de SEGUNDOS (quase no corte)
     const cron = { valor: GA.cron(t, D, 0, 0, [[0, 7.0], [tS, 6.0], [D + 1, 6.0]]), max: 11, escala: 11 };
     const B = t >= H[1] - 0.02;
     const v = B ? ART.gameplay.cheio(g, t, { de: 1.3, ate: 2.5, dur: D, foco: [690, 320], zoom: [1.45, 1.55], cronometro: cron })
                 : ART.gameplay.cheio(g, t, { de: 0.2, ate: 1.3, dur: D, foco: [620, 330], zoom: [1.05, 1.12], cronometro: cron });
     const p = v.map(640, 300);
     H.forEach((h, i) => ART.ui.crac(g, ART.clamp(p[0] + (i ? 50 : -60), 200, 880), ART.clamp(p[1] - 40, 520, 1100), t, h, { s: 1.05, rot: i ? 6 : -6, dur: 0.5 }));
+    GA.hud(g, t, { y: 370, moedas: t >= H[1] ? 4 : 3, pulso: ART.pulse(t, H[1], 0.3) });   // pedra paga no 2º golpe
     ART.post(g, ctx.frame, { vinheta: 0.45, legendaK: 0.32 });
   },
 });

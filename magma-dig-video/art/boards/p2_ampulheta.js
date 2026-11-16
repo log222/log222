@@ -1,8 +1,10 @@
 /* Parte 2 — bloco especial de ampulheta (C2/C3, planos 244–247). Um segundo por momento:
  * 0 p244 imagem real (shot_1) com push-in no bloco · 1 p245 o feixe acha o bloco (escuro -> claro) · 2 p246 golpe: estoura em areia dourada
  * 3 p246→247 a areia converge para o cronômetro · 4 close do bloco (conferência do desenho) */
-ART.boards.p2_ampulheta = { dur: 5, async setup() { await ART.gameplay.preloadShot("shot_1"); }, render(g, t, f) {
-  const seg = Math.min(4, Math.floor(t)), u = t - seg, P = ART.prog, Z = ART.zeca, BX = 0.15, BZ = 2.9;
+/* Correção: 5 areia indo a um alvo que se move (alvo: função de t) */
+ART.boards.p2_ampulheta = { dur: 6, async setup() { await ART.gameplay.preloadShot("shot_1"); }, render(g, t, f) {
+  const seg = Math.min(5, Math.floor(t)), u = t - seg, P = ART.prog, Z = ART.zeca, BX = 0.15, BZ = 2.9;
+  if (seg === 5) { g.fillStyle = "#0E0B18"; g.fillRect(0, 0, 1080, 1920); const alvo = tt => [ART.lerp(300, 800, ART.prog(tt, 0, 1.4)), 420]; ART.estouroAreia(g, u + 0.5, { t0: 0.1, centro: [540, 1000], tam: 380, alvo, tAlvo: 0.5 }); const A = alvo(u + 0.5); ART.circ(g, A[0], A[1], 30); g.strokeStyle = "#FFD23F"; g.lineWidth = 4; g.stroke(); return; }
   if (seg === 0) {
     ART.gameplay.cheio(g, u, Object.assign({}, ART.gameplay.PRESET.ampulheta, { dur: 1, cronometro: { valor: ART.lerp(6, 5.6, u), max: 11, escala: 11 } }));
     ART.post(g, f, { legenda: true, vinheta: 0.4 }); return;

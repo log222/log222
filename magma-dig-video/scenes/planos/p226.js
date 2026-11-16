@@ -11,7 +11,7 @@ MD.plano("p226", {
     const z = ART.lerp(S.Z225, 1, ART.prog(t, 0, tB, "inOutSine"));
     const sh = GC.shake(t, tB, 0.35, 16, 26);
     GD.bp(g, t);
-    GD.graf(g, t, { prog, regua: 1, wallStreet: 1, contador: true, x6: sai, emprestado: sai, queda: ART.prog(t, tB, tB + 0.35), zoom: z, foco: S.FOCO }, { dx: sh.x, dy: sh.y });
+    GD.graf(g, t, { textoEscala: GD.TE, posQueda: GD.QUEDA, prog, eixoAnos: { 1921: 1, 1925: 1, 1929: 1, 1932: ART.prog(prog, GL.anoProg(1931.85), GL.anoProg(1932.2)) }, regua: 1, wallStreet: 1, contador: true, x6: sai, emprestado: sai, queda: ART.prog(t, tB, tB + 0.35), zoom: z, foco: S.FOCO }, { dx: sh.x, dy: sh.y });
     const fl = GD.hit(t, tB, 0.5);
     if (fl > 0.02) ART.glow(g, 880, 470, 420, "#FF6B5B", 0.3 * fl);
     GC.post(g, ctx, { vinheta: 0.55, legendaK: 0.32 });

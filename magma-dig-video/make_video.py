@@ -429,7 +429,7 @@ def shown_words(f, lf):
     if len(shown) == len(spoken):
         for s, p in zip(shown, spoken):
             s["ini"], s["fim"] = p["ini"], p["fim"]
-        return shown
+        return _ancorar(shown, spoken, f.get("legenda_ancora"))
     sm = difflib.SequenceMatcher(a=[nk(x["w"]) for x in shown], b=[nk(p["w"]) for p in spoken], autojunk=False)
     for op, i1, i2, j1, j2 in sm.get_opcodes():
         if op == "equal":
@@ -444,6 +444,18 @@ def shown_words(f, lf):
             e = np.concatenate([[0], np.cumsum(L)]) / sum(L)
             for k in range(i2 - i1):
                 shown[i1 + k]["ini"] = t0 + (t1 - t0) * e[k]; shown[i1 + k]["fim"] = t0 + (t1 - t0) * e[k + 1]
+    return _ancorar(shown, spoken, f.get("legenda_ancora"))
+
+
+def _ancorar(shown, spoken, anc):
+    """legenda_ancora da fala: {"palavra exibida": "palavra falada"} -> a exibida entra no tempo da falada
+    (ex.: "1929," só quando a voz chega em "nove,"). Uma pausa > 0,35 s antes dela já quebra o bloco."""
+    for sw_, sp_ in (anc or {}).items():
+        s = next((x for x in shown if nk(x["w"]) == nk(sw_)), None)
+        p = next((x for x in spoken if nk(x["w"]) == nk(sp_)), None)
+        if s is None or p is None:
+            die(f"legenda_ancora: '{sw_}' ou '{sp_}' não está na fala")
+        s["ini"], s["fim"] = p["ini"], p["fim"]
     return shown
 
 
@@ -801,6 +813,8 @@ def main():
     ap.add_argument("--so-contact-sheet", action="store_true")
     ap.add_argument("--cs-quadros", type=int, default=24, help="nº de quadros no contact sheet")
     ap.add_argument("--cs-cortes", action="store_true", help="contact sheet: 1 quadro no meio de cada plano")
+    ap.add_argument("--cs-transicoes", action="store_true",
+                    help="contact sheet: em cada corte, último quadro do plano ao lado do 1º do seguinte (pares)")
     ap.add_argument("--cs-por-plano", type=int, default=0, help="contact sheet: N quadros por plano (3 = início, meio, fim)")
     ap.add_argument("--cs-max", type=int, default=0, help="divide o contact sheet em arquivos de até N quadros")
     ap.add_argument("--zona-segura", action="store_true")
@@ -940,6 +954,15 @@ def main():
             g1 = max(g0, g1)
             n = a.cs_por_plano
             cs += [(g0 + round((g1 - g0) * j / max(1, n - 1)), b["id"]) for j in range(n)]
+    elif a.cs_transicoes:
+        cs = []
+        for k in range(1, len(beats)):
+            ids = (beats[k - 1]["id"], beats[k]["id"], beats[k - 1]["fala"], beats[k]["fala"])
+            if sel_ids and not any(x in sel_ids for x in ids):
+                continue
+            g = int(math.ceil(pstart[k] * fps - 1e-6))
+            if f0 < g < f1:
+                cs += [(g - 1, f"{beats[k - 1]['id']} fim"), (g, f"{beats[k]['id']} início")]
     elif a.cs_cortes:
         cs = [(min(f1 - 1, int((pstart[k] + pend[k]) / 2 * fps)), b["id"]) for k, b in enumerate(beats)
               if (b["id"] in sel_ids or b["fala"] in sel_ids if sel_ids else
@@ -1004,9 +1027,11 @@ def main():
         tmp.mkdir(exist_ok=True)
         for q in tmp.glob("*.png"):
             q.unlink()
-        sel = "+".join(f"eq(n\\,{f - f0})" for f, _ in cs)
-        subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(out), "-vf", f"select={sel}", "-fps_mode", "passthrough",
-                        str(tmp / "c%04d.png")], check=True)
+        fs_ = sorted({f - f0 for f, _ in cs})
+        for k in range(0, len(fs_), 40):   # lotes: expressão de select muito longa quebra no ffmpeg 9
+            sel = "+".join(f"eq(n\\,{f})" for f in fs_[k:k + 40])
+            subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(out), "-vf", f"select={sel}", "-fps_mode", "passthrough",
+                            "-start_number", str(k + 1), str(tmp / "c%04d.png")], check=True)
         got = sorted(tmp.glob("c*.png"))
         uniq = sorted(set(cs))
         outs = contact_sheets([(q, f / fps, lab) for q, (f, lab) in zip(got, uniq)], cs_png, a.cs_max)

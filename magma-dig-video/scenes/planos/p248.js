@@ -19,13 +19,13 @@ MD.plano("p248", {
         [0, "cavando", { eyes: "determinado", mouth: "esforco" }, { periodo: 0.8, t0: h - 0.53 }],
         [h + 0.3, "parado", { eyes: "aberto", mouth: "neutro", alvo: [c0[0], c0[1] - 30], tool: "picareta" }],
         [Math.max(h + 0.6, tV - 0.2), "parado", { eyes: "espanto", mouth: "o", brows: "surpreso", alvo: [c0[0], c0[1] - 30], tool: "picareta", lean: 0.08 }],
-      ], { base: { ...GA.Z, turn: 0.84, lamp: 1, cone: 0.6, coneAng: 30, rim: "#FF9A50", rimA: 0.5 + 0.5 * veios, banho: { cor: "#FF8A3C", k: 0.7 * veios } }, blend: 0.25 }));
+      ], { base: { ...GA.Z, turn: 0.84, lamp: 1, cone: 0.6, coneAng: 46, rim: "#FF9A50", rimA: 0.5 + 0.5 * veios, banho: { cor: "#FF8A3C", k: 0.7 * veios } }, blend: 0.25 }));
       GA2.lascas(gg, t, h, imp[0], imp[1], 48, { faisca: "#FFC070", n: 16, fa: 18 });
     }, { frame: ctx.frame });
     GA2.flash(g, t, h, "rgba(255,230,190,.18)", 0.034);
     g.save(); g.globalCompositeOperation = "lighter"; g.fillStyle = `rgba(255,120,40,${0.08 * veios})`; g.fillRect(0, 0, 1080, 1920); g.restore();
     ART.dust(g, t, { count: 36, seed: 62, color: "#FFB070", alpha: 0.7 * veios, size: [2, 5], speed: 8, x: 300, w: 760, y: 600, h: 700 });
-    ART.ui.crac(g, 800, 640, t, h, { s: 1.6, rot: -5, dur: 1.0 });
+    ART.ui.crac(g, 790, 560, t, h, { s: 1.35, rot: -5, dur: 1.0 });
     GA2.hud(g, t, { cron: GA.cron(t, D, 2.0, 1.6), moedas: 6 });
   },
 });

@@ -203,7 +203,7 @@
         gg.restore();
       }),
       // giz na parede (dinâmico)
-      { d: 0.8, draw: (g, t) => ART.giz(g, parede.x, parede.y, t, Object.assign({ s: parede.s }, o.meta || {})) },
+      { d: 0.8, draw: (g, t) => { if (o.meta !== false) ART.giz(g, parede.x, parede.y, t, Object.assign({ s: parede.s }, o.meta || {})); } },   // meta: false = parede sem giz
       // chão de terra batida + tapete
       ART.camadaEstatica("toca:chao", 1, gg => {
         gg.fillStyle = ART.lg(gg, 0, gy - 10, 0, H, [[0, "#3A2A30"], [0.3, "#241A22"], [1, "#0C0810"]]); gg.fillRect(-160, gy - 10, W + 320, H);
@@ -213,7 +213,7 @@
         gg.restore();
       }),
       // móveis: cama (direita) e mesa (esquerda)
-      ART.camadaEstatica("toca:moveis", 1, gg => {
+      ART.camadaEstatica(o.picareta === false ? "toca:moveis:semPicareta" : "toca:moveis", 1, gg => {
         // cama
         const bx = 700, by = gy + 10;
         madeira(gg, bx - 10, by - 250, 34, 260, { cor: "#6B4428", vert: true, r: 10 });
@@ -234,7 +234,7 @@
         gg.fillStyle = "#7A3A2A"; gg.fillRect(-88, 8, 178, 6); gg.restore();
         for (let i = 0; i < 4; i++) { gg.save(); gg.translate(tx + 300, ty - 256 - i * 9); gg.scale(1, 0.4); ART.circ(gg, 0, 0, 24); gg.fillStyle = i === 3 ? "#FFD23F" : "#C88A10"; gg.fill(); gg.restore(); }
         // picareta velha encostada
-        gg.save(); gg.translate(470, gy - 20); gg.rotate(0.22); ART.drawPick(gg, "ferro", 150); gg.restore();
+        if (o.picareta !== false) { gg.save(); gg.translate(470, gy - 20); gg.rotate(0.22); ART.drawPick(gg, "ferro", 150); gg.restore(); }   // picareta: false (Parte 2, p239)
       }),
     ];
     const frente = [

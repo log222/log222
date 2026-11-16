@@ -20,14 +20,14 @@ MD.plano("p249", {
     const luz = 0.55 + 0.45 * lamp;
     ART.palco(g, t, cam, ART.cenas.mina({ luz: 0.35 + 0.5 * lamp }), gg => {
       ART.cubo(gg, GA.B.X, GA.B.Z, { crack: 2.6, seed: 9, veios: 0.75 + 0.25 * luz, t, crackGlow: "#FFB060" });
-      ART.zeca.draw(gg, GA.cava(t, H, { ...GA.Z, turn: 0.85, lamp, cone: 0.6 * lamp, coneAng: 30, rim: "#FF9A50", rimA: 0.8, sweat: 0.5 + 0.5 * kf, eyes: "determinado", banho: { cor: "#FF8A3C", k: 0.55 } }, { periodoMax: 0.75 }));
+      ART.zeca.draw(gg, GA.cava(t, H, { ...GA.Z, turn: 0.85, lamp, cone: 0.6 * lamp, coneAng: 46, rim: "#FF9A50", rimA: 0.8, sweat: 0.5 + 0.5 * kf, eyes: "determinado", banho: { cor: "#FF8A3C", k: 0.55 } }, { periodoMax: 0.75 }));
       for (const hh of H) GA2.lascas(gg, t, hh, imp[0], imp[1], 60 + hh * 9, { faisca: "#FFC070", cor1: "#C98A5A", n: 10 });
     }, { frame: ctx.frame });
     // escurece junto com a lanterna que falha
     g.save(); g.fillStyle = `rgba(4,3,8,${0.45 * (1 - lamp) * kf})`; g.fillRect(0, 0, 1080, 1920); g.restore();
     const bs = GA.tela(cam, imp[0], imp[1] - 10);
     H.forEach((hh, i) => GA2.voa(g, t, hh + 0.02, M[i], bs, [250, 448], (gg, x, y, k) => ART.pepita(gg, x, y, 34 * (1 - 0.35 * k), "cobre", t * 7 + i, { seed: i + 2, brilho: 0.5 }), 260));
-    H.forEach((hh, i) => ART.ui.crac(g, 790 + (i % 2) * 40, 640 - i * 12, t, hh, { s: 1.05, rot: i % 2 ? 6 : -6, dur: 0.45, cor: "#FF9A50" }));
+    H.forEach((hh, i) => ART.ui.crac(g, 780 + (i % 2) * 40, 560 - i * 8, t, hh, { s: 1.05, rot: i % 2 ? 6 : -6, dur: 0.45, cor: "#FF9A50" }));
     GA2.hud(g, t, { cron, moedas: 6, cobre: 1 + GA.n(t, M), pulsoCobre: GA.pulsos(t, M, 0.3) });
   },
 });

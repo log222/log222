@@ -17,7 +17,7 @@ MD.plano("p239", {
     const x = ART.kf(t, [[0, 800], [tPega - 0.08, xPick - 40, "inOutSine"], [tSobe, xPick - 30], [tPorta, xPorta, "inOutSine"]]);
     const y = ART.kf(t, [[0, 1345], [tPega, 1325, "inOutSine"], [tPorta, 1300, "inOutSine"]]);
     const aberta = (tt => ART.map(tt, tPorta - 0.35, tPorta + 0.25, 0, 1, "inOutCubic"));
-    const cena = GB2.toca({ lamp: 0.8, janela: 0.8, aberta });
+    const cena = GB2.toca({ lamp: 0.8, janela: 0.8, aberta, picareta: false });   // a única picareta é a do pé da cama
     const cam = ART.camera(t, { push: [1.36, 1.42], dur, ease: "linear" });
     GB.mira(cam, 1, ART.map(t, 0, dur, 905, 965, "inOutSine"), 1290, 540, 1230);
     const temPic = t >= tPega;
@@ -28,21 +28,23 @@ MD.plano("p239", {
     });
     // picareta velha encostada no pé da cama (até ele pegar)
     if (!temPic) { const [px, py, z] = GB2.tela(cam, xPick + 15, 1300); g.save(); g.translate(px, py); g.rotate(0.28); ART.drawPick(g, "ferro", 150 * z * 0.75); g.restore(); }
-    const andando = t < tPega - 0.08 || (t > tSobe && t < tPorta);
+    // andar <-> parar com transição suave (sem pulo de pose)
+    const kAnda = clamp(ART.map(t, tPega - 0.3, tPega - 0.08, 1, 0) + ART.map(t, tSobe - 0.05, tSobe + 0.15, 0, 1) - ART.map(t, tPorta - 0.15, tPorta + 0.15, 0, 1));
+    const andando = kAnda > 0.5;
     const abaixa = Math.sin(Math.PI * clamp((t - (tPega - 0.2)) / 0.5));
     const cap = Math.sin(Math.PI * clamp((t - tCap) / 0.45));
-    const volta = ART.map(t, tPorta + 0.05, tPorta + 0.4, 0, 1, "inOutSine");
+    const volta = ART.map(t, tPorta, tPorta + 0.45, 0, 1, "inOutSine");
     const anda = ART.zeca.pose("andando", t, {}, { periodo: 0.5 });
     const para = ART.zeca.pose("parado", t, {});
-    const base = andando ? anda : para;
+    const base = Object.assign(ART.zeca.mix(para, anda, ART.ease.inOutSine(kAnda)), { t });
     const p = Object.assign({}, base, {
-      x, y, s: GB2.Z.s, turn: ART.lerp(0.85, -0.25, volta), lamp: 0, rim: "#B58CFF", rimA: 0.6,
+      x, y, s: GB2.Z.s, turn: ART.lerp(0.85, 0.15, volta), lamp: 0, rim: "#B58CFF", rimA: 0.6,
       lean: (base.lean || 0) + 18 * abaixa, sq: (base.sq || 1) - 0.06 * abaixa, bob: (base.bob || 0) - 8 * abaixa,
-      tool: temPic ? "picareta" : null, aF: temPic ? 24 + 8 * Math.sin(t * 6) * (andando ? 1 : 0) : ART.lerp(base.aF ?? 14, 60, abaixa),
+      tool: temPic ? "picareta" : null, aF: temPic ? 24 + 8 * Math.sin(t * 6) * kAnda : ART.lerp(base.aF ?? 14, 60, abaixa),
       eF: temPic ? 30 : ART.lerp(base.eF ?? 20, 10, abaixa),
       aB: ART.lerp(base.aB ?? -12, 165, cap), eB: ART.lerp(base.eB ?? 15, 40, cap), bFrente: cap > 0.1 ? 1 : 0,
       eyes: "determinado", mouth: volta > 0.5 ? "sorriso" : "neutro", brows: "nenhum",
-      camera: 0.6 * volta, headTilt: (base.headTilt || 0) - 6 * cap, blinkSeed: 0.5,
+      camera: 0.85 * volta, headTilt: (base.headTilt || 0) - 6 * cap, blinkSeed: 0.5,
     });
     GB2.zecaTela(g, cam, p);
     ART.post(g, ctx.frame, { legendaK: 0.42 });

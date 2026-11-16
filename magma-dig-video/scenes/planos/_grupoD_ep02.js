@@ -107,6 +107,63 @@
   };
   /** câmera lerp: zoom em torno de foco1 -> foco2 com continuidade (interpola o ponto fixo) */
   GD.lerp2 = (a, b, k) => [A().lerp(a[0], b[0], k), A().lerp(a[1], b[1], k)];
+  /** parâmetros comuns do inserto (rodada de correção) */
+  GD.TE = 1.4; GD.QUEDA = [790, 455];
+
+  /** contador-odômetro de anos (p223): mesmo cartão e posição do contador do kit (G: X0 200, X1 900, YB 960),
+   *  mas o dígito das unidades rola continuamente. v = ano contínuo (ex.: 1923,4); tipX = x da ponta (mundo);
+   *  zoom/foco = os mesmos passados ao grafLinha. */
+  GD.odometro = (g, v, tipX, tipY, zoom, foco) => {
+    const ART = A(), BP = ART.BP, YB = 960;
+    const cx = clamp(tipX, 240, 880);
+    g.save(); g.translate(foco[0], foco[1]); g.scale(zoom, zoom); g.translate(-foco[0], -foco[1]);
+    GCneon(g, () => { g.beginPath(); g.moveTo(tipX, tipY + 16); g.lineTo(tipX, YB); g.stroke(); }, { w: 2, dash: [6, 8], cor: BP.fraca, blur: 2 });
+    ART.ui.cartao(g, cx - 95, YB + 72, 190, 76, { vidro: false, r: 20, cor: "rgba(6,26,38,.9)", borda: BP.linha, sombra: false });
+    // "192" fixo + unidade rolando (clip na janela do cartão)
+    const base = Math.floor(v), f0 = v - base, u = base % 10, u2 = (u + 1) % 10;
+    const f = ART.ease.inOutCubic(clamp((f0 - 0.45) / 0.55));   // cada ano: lê um instante, depois rola para o seguinte
+    g.save(); g.font = '900 52px "Nunito"'; g.letterSpacing = "2px";
+    const wAll = g.measureText(String(base)).width, w3 = g.measureText(String(base).slice(0, 3)).width;
+    g.restore();
+    const x0 = cx - wAll / 2, yC = YB + 112;
+    ART.bpRotulo(g, String(base).slice(0, 3), x0, yC, { size: 52, align: "left", cor: "#E8FAFF", sp: 2 });
+    g.save(); g.beginPath(); g.rect(x0 + w3 - 4, YB + 76, 60, 68); g.clip();
+    const H = 56, dy = -f * H;
+    ART.bpRotulo(g, String(u), x0 + w3, yC + dy, { size: 52, align: "left", cor: "#E8FAFF", sp: 2, a: 1 - 0.6 * f });
+    if (f > 0.001) ART.bpRotulo(g, String(u2), x0 + w3, yC + dy + H, { size: 52, align: "left", cor: "#E8FAFF", sp: 2, a: 0.4 + 0.6 * f });
+    g.restore();
+    g.restore();
+  };
+  const GCneon = (g, fn, o) => window.GC.neon(g, fn, o);
+
+  /** linha livre do p219 (sem eixo de números); continua no começo do p220 e sai em fade. k = desenho, dx = deslize, a = opacidade */
+  GD.linha219 = (g, t, k, dx, a = 1) => {
+    const ART = A(), BP = ART.BP, GC = window.GC;
+    if (a <= 0) return;
+    g.save(); g.translate(dx, 0); g.globalAlpha *= a;
+    const pts = []; const r = ART.rng(219);
+    for (let i = 0; i <= 24; i++) { const x = 120 + i * 36, y = 900 - i * 9 - 60 * Math.sin(i * 0.7) * (0.4 + r() * 0.6); pts.push([x, y]); }
+    const n = (pts.length - 1) * k;
+    GC.neon(g, () => {
+      g.beginPath(); g.moveTo(...pts[0]);
+      for (let i = 1; i <= Math.ceil(n); i++) { const f = Math.min(1, n - (i - 1)), p0 = pts[i - 1], p1 = pts[i]; g.lineTo(ART.lerp(p0[0], p1[0], f), ART.lerp(p0[1], p1[1], f)); }
+      g.stroke();
+    }, { w: 6 });
+    if (k > 0) { const i = Math.min(pts.length - 1, Math.floor(n)), f = n - i, p0 = pts[i], p1 = pts[Math.min(pts.length - 1, i + 1)]; const tx = ART.lerp(p0[0], p1[0], f), ty = ART.lerp(p0[1], p1[1], f); ART.glow(g, tx, ty, 46, BP.linha, 0.9 * a); ART.circ(g, tx, ty, 8); g.fillStyle = "#FFFFFF"; g.fill(); }
+    g.restore();
+  };
+  /** eixo fino do p219 (sem números) */
+  GD.eixo219 = (g, k, dx, a = 1) => { const ART = A(); if (a <= 0) return; g.save(); g.translate(dx, 0); window.GC.neon(g, () => { g.beginPath(); g.moveTo(90, 1000); g.lineTo(ART.lerp(90, 1000, k), 1000); g.stroke(); }, { w: 2.5, a: 0.8 * a }); g.restore(); };
+
+  /** Toca desfocada sem o giz (último quadro do p229 = primeiro do p230); mesma transformação do GB.fundoC5 (z 1,04) */
+  let TD = null;
+  GD.tocaDesfocada = (g, t, a = 1) => {
+    const ART = A();
+    if (!TD) TD = ART.cenas.tocaDesfocada({ meta: false });
+    g.save(); g.globalAlpha *= a; g.translate(540, 960); g.scale(1.04, 1.04); g.translate(-540, -960);
+    for (const L of TD.fundo) L.draw(g, t);
+    g.restore();
+  };
 
   // ------------------------------------------------------------------ Toca (p219, p229) — usa o _grupoB só para leitura
   GD.TOCA = null;

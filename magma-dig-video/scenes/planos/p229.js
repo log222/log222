@@ -8,10 +8,10 @@ MD.plano("p229", {
     const tV = GD.wt(ctx, "Vinte", 0.04);
     const z = ART.lerp(1, S.Z229, ART.prog(t, 0, D, "outSine"));
     const apaga = ART.prog(t, Math.max(tV + 0.6, D - 0.8), D - 0.15);
-    const volta = ART.prog(t, D - 0.5, D, "inOutSine");
+    const volta = ART.prog(t, D - 0.5, D - 1 / 30, "inOutSine");   // último quadro = Toca desfocada cheia (início do p230)
     GD.bp(g, t);
-    GD.graf(g, t, { prog: 1, regua: 1, wallStreet: 1, contador: true, queda: 1, pan: 1, rotulo87: 1, prog87: 1, segunda: 1, queda87: ART.prog(t, tV, tV + 0.4), apaga, zoom: z, foco: S.FOCO229 });
-    if (volta > 0) { g.save(); g.globalAlpha = volta; GB.fundoC5(g, t, { z: 1.04, escuro: 0.45 }); g.restore(); }
+    GD.graf(g, t, { textoEscala: GD.TE, posQueda: GD.QUEDA, prog: 1, regua: 1, wallStreet: 1, contador: true, queda: 1, pan: 1, rotulo87: 1, prog87: 1, segunda: 1, queda87: ART.prog(t, tV, tV + 0.4), apaga, zoom: z, foco: S.FOCO229 });
+    if (volta > 0) GD.tocaDesfocada(g, t, volta);
     GC.post(g, ctx, { vinheta: 0.55, legendaK: 0.32 });
   },
 });

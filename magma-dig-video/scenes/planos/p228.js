@@ -12,7 +12,7 @@ MD.plano("p228", {
     else p87 = ART.lerp(0.742, 1, ART.prog(t, tD + 0.08, D - 0.05, "outSine"));
     const sh = GC.shake(t, tD, 0.3, 14, 28);
     GD.bp(g, t);
-    GD.graf(g, t, { prog: 1, regua: 1, wallStreet: 1, contador: true, queda: 1, pan: 1, rotulo87: 1, prog87: p87, segunda: ART.prog(t, tD, tD + 0.35) }, { dx: sh.x, dy: sh.y });
+    GD.graf(g, t, { textoEscala: GD.TE, posQueda: GD.QUEDA, prog: 1, regua: 1, wallStreet: 1, contador: true, queda: 1, pan: 1, rotulo87: 1, prog87: p87, segunda: ART.prog(t, tD, tD + 0.35) }, { dx: sh.x, dy: sh.y });
     GC.post(g, ctx, { vinheta: 0.55, legendaK: 0.32 });
   },
 });

@@ -30,10 +30,10 @@ MD.plano("p212", {
     const expr = k < 0.18 ? ["feliz", "aberto"] : k < 0.45 ? ["aberto", "sorriso"] : k < 0.72 ? ["aberto", "neutro"] : ["preocupado", "triste"];
     Object.assign(p, {
       x: Z.x + 22 * passo, y: Z.y - 14 * passo, s: Z.s, turn: -0.22, lamp: 0, segura: "pepita",
-      rim: ART.mix("#7FD8FF", "#C0606A", kCai), rimA: 0.75,
+      rim: ART.mix("#9FC8FF", "#C0808A", kCai), rimA: 0.45,
       eyes: expr[0], mouth: expr[1], brows: k > 0.55 ? "triste" : "nenhum",
       liftB: (p.liftB || 0) + 10 * Math.sin(Math.PI * passo), lean: (p.lean || 0) - 5 * Math.sin(Math.PI * passo),
-      banho: { cor: ART.mix("#7FD8FF", "#E06A6A", kCai), k: 0.6 - 0.25 * kCai }, blinkSeed: 0.2,
+      blinkSeed: 0.2,
     });
     GB2.zecaTela(g, cam, p);
     GB2.luzPainel(g, t, 1 - 0.3 * kCai, { fx, fy, cor: ART.mix("#7FD8FF", "#E06A6A", kCai) });

@@ -22,10 +22,11 @@ MD.plano("p233", {
     const acena = Math.sin(Math.PI * clamp((t - tBa + 0.02) / 0.32));
     const resp = Math.sin(t * 2.2);
     const p = ART.zeca.pose("parado", t, {
-      x: ZS.x, y: ZS.y, s: S, turn: -0.3, lamp: 0, aF: 8, eF: 12, aB: -8, eB: 12,
+      x: ZS.x, y: ZS.y, s: S, turn: -0.3, lamp: 0, aF: 8, eF: 12, aB: 34, eB: 64, bFrente: 1,
+      seguraB: (gg, x, y) => GB2.saquinho(gg, x, y + 4, 0.34, { fecha: 1, cheio: 1, rot: 0.06 * Math.sin(t * 2.5) }),   // o saquinho amarrado do p232
       lean: 3 * inc, headDy: 2 * resp + 7 * Math.max(0, acena), headTilt: -4 + 3 * inc - 4 * Math.max(0, acena),
       eyes: t > tPr - 0.05 && t < tBa + 0.5 ? "meio" : "determinado", mouth: "sorriso", brows: "bravo", camera: 0.55, blinkSeed: 0.9,
-      rim: "#7FD8FF", rimA: 0.95, banho: { cor: "#7FD8FF", k: 0.3 },
+      rim: "#9FC8FF", rimA: 0.4,
     });
     GB2.zecaTela(g, cam, p);
     // brilho quente pela direita (luminária) e frio pela esquerda (painel)

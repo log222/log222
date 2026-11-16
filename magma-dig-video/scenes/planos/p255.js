@@ -17,11 +17,11 @@ MD.plano("p255", {
     G.fundoN4(g, tau, 1);
     const cam = G.camN4(tau);
     cam.cy += pD * 6 * Math.sin(t * 50);
-    const X = [300, 430, 560, 690], Y = 1030;
+    const X = [370, 495, 620, 745], Y = 1030;
     G.painel(g, cam, gg => {
       ART.glow(gg, 540, 412, 560, "#FFC531", 0.2);
       G.mercadoN4(gg, t, { rola: 1, hoje: 0.98, faixa: { minerio: "cobre", nome: "Cobre", k: 1, mk: 1 },
-        sub: t >= tDuz ? "+240 moedas" : null, pulso: t >= tDuz ? 0.6 + 0.4 * pD : 0 });
+        sub: t >= tDuz ? "+240 moedas" : "+60 moedas", pulso: t >= tDuz ? 0.6 + 0.4 * pD : 0 });
       // fila de pepitas acima do botão
       let n = 0;
       for (let i = 0; i < 4; i++) {
@@ -34,7 +34,7 @@ MD.plano("p255", {
       }
       if (n > 0) {
         const kx = ART.ease.outBack(clamp((t - ti(0)) / 0.25)), sx = 1 + 0.25 * G.hit(t, ti(n - 1), 0.3);
-        gg.save(); gg.translate(815, Y); gg.scale(kx * sx, kx * sx);
+        gg.save(); gg.translate(235, Y); gg.scale(kx * sx, kx * sx);
         G.txt(gg, "×" + n, 0, 0, { size: 84, fill: "#FFB27A", stroke: "#2A1408", sw: 10 }); gg.restore();
       }
       if (pD > 0) ART.glow(gg, 540, 1160, 420, "#FFF2A6", 0.6 * pD);

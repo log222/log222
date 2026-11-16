@@ -10,7 +10,7 @@ MD.plano("p225", {
     const em = ART.prog(t, a, b);
     const z = ART.lerp(S.Z224, S.Z225, ART.prog(t, 0, D));
     GD.bp(g, t);
-    GD.graf(g, t, { prog: GL.PICO, regua: 1, wallStreet: 1, contador: true, x6: 1, emprestado: em, zoom: z, foco: S.FOCO });
+    GD.graf(g, t, { textoEscala: GD.TE, posQueda: GD.QUEDA, prog: GL.PICO, eixoAnos: { 1921: 1, 1925: 1, 1929: 1 }, regua: 1, wallStreet: 1, contador: true, x6: 1, emprestado: em, zoom: z, foco: S.FOCO });
     GC.post(g, ctx, { vinheta: 0.55, legendaK: 0.32 });
   },
 });

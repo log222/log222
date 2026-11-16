@@ -250,7 +250,7 @@
       const rad = rr * (0.25 + 0.75 * e) * (1 + 0.35 * dt);
       let x = cx + Math.cos(ang) * rad, y = cy - vy * dt * (0.9 + 0.25 * dt) + Math.sin(ang) * rad * 0.28;
       let s = 1, al = 1 - Math.pow(dt / life, 2);
-      if (alvo && dt > ta) { const q = ART.ease.inCubic(clamp((dt - ta) / (life - ta))); x = lerp(x, alvo[0], q); y = lerp(y, alvo[1], q); s = 1 - 0.6 * q; al = 1; if (q >= 1) { chegou++; continue; } }
+      if (alvo && dt > ta) { const q = ART.ease.inCubic(clamp((dt - ta) / (life - ta))), A = typeof alvo === "function" ? alvo(t) : alvo; x = lerp(x, A[0], q); y = lerp(y, A[1], q); s = 1 - 0.6 * q; al = 1; if (q >= 1) { chegou++; continue; } }
       const frente = Math.sin(ang) > 0 ? 1 : 0.55;
       g.globalAlpha = clamp(al) * frente;
       g.fillStyle = cor < 0.45 ? "#FFD23F" : cor < 0.8 ? "#FFE9A0" : "#F0A238";

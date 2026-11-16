@@ -21,17 +21,12 @@ MD.plano("p210", {
     G.fundo(g, t, { dx: ART.map(t, 0, D, 5, 25), z: 1.08, escuro: 0.1 + 0.12 * varK, tinta: `rgba(90,10,20,${0.12 * varK})` });
     const cam = G.cam(ART.lerp(1.06, 1.1, k), ART.lerp(570, 600, k), 860, 540, 880 + bate * 9 * Math.sin(t * 55));
     G.painel(g, cam, gg => {
-      const c = ART.painelMercado(gg, t, { precoAntes: 40, preco: 20, rola: rk, varPct: -50, varK, seta: 0, botao: false,
+      const c = ART.painelMercado(gg, t, { textoEscala: G.TXT, precoAntes: 40, preco: 20, rola: rk, varPct: -50, varK, seta: 0, botaoSub: t >= tV ? "+20 moedas" : null, botaoPulso: G.hit(t, tV, 0.5),
         barras: G.B_N3.concat([Math.max(0.001, hoje)]), cores: [0, 0, 0, 0, 0, "#FFD23F"], corHoje: "#E63748", amanha: false });
       const s = 1.55;
       // seta vermelha para baixo ao lado do −50% (queda de hoje, fato do Mercado)
       if (varK > 0) { u.seta(gg, c.x0 + 330 * s, c.y0 + 124 * s, { s: 0.45 * ART.ease.outBack(varK), dir: "baixo" }); }
       if (bate > 0) ART.glow(gg, c.x0 + c.w - 150, c.y0 + 270 * s, 320, "#E63748", 0.55 * bate);
-      // botão: VENDER sem valor até o "vinte"; depois +20 moedas
-      const sb = 1 + 0.06 * G.hit(t, tV, 0.4);
-      gg.save(); gg.translate(540, 1130); gg.scale(sb, sb); gg.translate(-540, -1130);
-      u.botao(gg, 540, 1130, 720, 150, t >= tV ? { texto: "VENDER", sub: "+20 moedas", icone: "moeda" } : { texto: "VENDER", icone: "moeda" });
-      gg.restore();
     });
     G.fim(g, t, ctx);
   },

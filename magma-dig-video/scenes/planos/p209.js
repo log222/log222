@@ -16,7 +16,7 @@ MD.plano("p209", {
     const cam = G.cam(ART.lerp(1.0, 1.06, k), ART.lerp(540, 570, k), 860, 540, 880);
     const pop = G.hit(t, tQ, 0.45), pc = G.hit(t, tCob, 0.6), po = G.hit(t, tOn, 0.8);
     G.painel(g, cam, gg => {
-      const c = ART.painelMercado(gg, t, { preco: t >= tQ ? 40 : "?", rotuloPreco: "ONTEM", varPct: false, seta: 0, botao: false,
+      const c = ART.painelMercado(gg, t, { textoEscala: G.TXT, preco: 40, precoTexto: t >= tQ ? undefined : "?", rotuloPreco: "ONTEM", varPct: false, seta: 0, botaoSub: null,
         barras: G.B_N3.concat([0]), cores: [0, 0, 0, 0, 0, "#FFD23F"], amanha: false });
       const s = 1.55;
       // barra de ontem acende no "Ontem" (e fica com brilho leve)
@@ -24,7 +24,6 @@ MD.plano("p209", {
       ART.glow(gg, bx + bw / 2, c.y0 + 180 * s + 160 * s - bh, 150, "#FFD23F", 0.25 + 0.5 * po);
       if (pc > 0) ART.glow(gg, c.x0 + 87 * s, c.y0 + 87 * s, 200, "#FF8A3C", 0.7 * pc);
       // botão sem valor (o preço de hoje ainda não foi dito)
-      u.botao(gg, 540, 1130, 720, 150, { texto: "VENDER", icone: "moeda" });
       // estouro do 40
       const px = c.x0 + c.w - 36 * s - 90, py = c.y0 + 270 * s;
       if (pop > 0) ART.glow(gg, px, py, 300, "#FFD23F", 0.7 * pop);

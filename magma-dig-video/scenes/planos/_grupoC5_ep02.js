@@ -26,7 +26,20 @@ window.GC5_LOAD = window.GC5_LOAD || (async () => {
   GC5.cam = (z, ax, ay, sx, sy) => ({ z, px: ax, py: ay, cx: sx, cy: sy });
   GC5.camMix = (a, b, k) => { const L = A().lerp; return { z: L(a.z, b.z, k), px: L(a.px, b.px, k), py: L(a.py, b.py, k), cx: L(a.cx, b.cx, k), cy: L(a.cy, b.cy, k) }; };
   /** fundo (Toca desfocada) com deriva; o = {dx, dy, z, escuro, tinta} */
-  GC5.fundo = (g, t, o = {}) => window.GB.fundoC5(g, t, o);
+  //   (mesma conta do GB.fundoC5, mas com a Toca SEM o "1.000" na parede: tocaDesfocada({meta:false}))
+  let FUNDO = null;
+  GC5.fundo = (g, t, o = {}) => {
+    const ART = A();
+    if (!FUNDO) FUNDO = ART.cenas.tocaDesfocada({ meta: false });
+    const z = o.z ?? 1.04;
+    g.save(); g.translate(540 + (o.dx || 0), 960 + (o.dy || 0)); g.scale(z, z); g.translate(-540, -960);
+    for (const L of FUNDO.fundo) L.draw(g, t);
+    g.restore();
+    if (o.escuro) { g.save(); g.fillStyle = `rgba(10,8,18,${o.escuro})`; g.fillRect(0, 0, 1080, 1920); g.restore(); }
+    if (o.tinta) { g.save(); g.fillStyle = o.tinta; g.fillRect(0, 0, 1080, 1920); g.restore(); }
+  };
+  /** escala de texto dos painéis do Mercado (kit: textoEscala) */
+  GC5.TXT = 1.35;
   GC5.painel = (g, cam, fn) => window.GB.noPainel(g, cam, fn);
   /** acabamento: brilhos lentos subindo (movimento até o último quadro), vinheta, faixa da legenda, grão */
   GC5.fim = (g, t, ctx, o = {}) => {
@@ -64,7 +77,7 @@ window.GC5_LOAD = window.GC5_LOAD || (async () => {
   };
 
   /** gráfico de preço por dia (p216–p217): cartão com cabeçalho do Cobre e janela de 7 barras que desliza */
-  GC5.B216 = [0.42, 0.5, 0.38, 0.55, 0.47, 0.66, 0.33, 0.6, 0.45, 0.72, 0.4, 0.62];
+  GC5.B216 = [0.42, 0.5, 0.38, 0.55, 0.47, 0.66, 0.33, 0.6, 0.45, 0.72, 0.4, 0.22];   // o último (hoje) é baixo e vermelho: o 20
   const GW = 780, GGAP = GW * 0.035, GBW = (GW - GGAP * 6) / 7;
   GC5.GRAF = { x: 150, y: 640, w: GW, h: 360, bw: GBW, passo: GBW + GGAP, xHoje: 150 + 6 * (GBW + GGAP) + GBW / 2 };
   GC5.grafSemana = (g, t, o = {}) => {
@@ -73,7 +86,7 @@ window.GC5_LOAD = window.GC5_LOAD || (async () => {
     ART.rr(g, 122, 500, 110, 110, 24); g.fillStyle = "rgba(255,255,255,.07)"; g.fill(); u.pix(g, "cobre", 177, 555, 74);
     g.save(); g.font = '1000 66px "Nunito"'; g.fillStyle = "#F4EEDC"; g.textAlign = "left"; g.textBaseline = "middle"; g.fillText("Cobre", 256, 538);
     g.font = '900 34px "Nunito"'; g.fillStyle = "#A3A0AE"; g.letterSpacing = "2px"; g.fillText("PREÇO DE CADA DIA", 258, 590); g.restore();
-    u.grafico7(g, R.x, R.y, R.w, R.h, { barras: o.barras, desliza: o.d || 0, janela: 7, cores: o.cores });
+    u.grafico7(g, R.x, R.y, R.w, R.h, { barras: o.barras, desliza: o.d || 0, janela: 7, cores: o.cores, corHoje: o.corHoje });
     g.save(); g.font = '1000 32px "Nunito"'; g.textAlign = "center"; g.fillStyle = "#FFD23F"; g.fillText("HOJE", R.xHoje, R.y + R.h + 36); g.restore();
   };
 
@@ -104,41 +117,40 @@ window.GC5_LOAD = window.GC5_LOAD || (async () => {
     return { faixa: f, ferro: fe, cobre: co };
   };
 
-  /** Noite 4 (p252–p255): câmera contínua pelos quatro planos. tau = tempo desde o início do p252 (T0 de cada plano). */
+  /** Noite 4 (p252–p255): câmera contínua pelos quatro planos. tau = tempo desde o início do p252 (T0 de cada plano).
+   *  O p252 tem empurrão mais forte (0,92 -> 0,99) para não parecer parado; p253–p255 seguem de 0,99 a 1,04. */
   GC5.N4 = { T: 10.37, T0: { p252: 0, p253: 2.40, p254: 4.99, p255: 7.16 } };
-  GC5.camN4 = (tau) => { const ART = A(), k = clamp(tau / GC5.N4.T); return GC5.cam(ART.lerp(1.0, 1.04, k), ART.lerp(528, 552, k), 780, 540, 800); };
-  GC5.fundoN4 = (g, tau, quente = 0) => GC5.fundo(g, tau, { dx: A().map(tau, 0, GC5.N4.T, 22, -22), z: 1.1, escuro: 0.26, tinta: quente > 0 ? `rgba(120,80,10,${0.1 * quente})` : null });
-  /** painel da noite 4. o = {faixa, preco ('?' | número), rola (0..1 de 20 para 60), hoje (altura da barra de hoje), sub (texto do botão), pulso, a (painel)} */
+  GC5.camN4 = (tau) => {
+    const ART = A(), T1 = GC5.N4.T0.p253, T = GC5.N4.T;
+    const z = tau < T1 ? ART.lerp(0.92, 0.99, tau / T1) : ART.lerp(0.99, 1.04, clamp((tau - T1) / (T - T1)));
+    return GC5.cam(z, ART.lerp(526, 554, clamp(tau / T)), 780, 540, 800);
+  };
+  GC5.fundoN4 = (g, tau, quente = 0) => GC5.fundo(g, tau, { dx: A().map(tau, 0, GC5.N4.T, 22, -22), z: 1.1, escuro: 0.2, tinta: quente > 0 ? `rgba(120,80,10,${0.1 * quente})` : null });
+  /** painel da noite 4: preço NORMAL 40 riscado -> 60 (40 + 50%), varPct +50% verde.
+   *  o = {faixa, rola (0..1: 40 -> 60), hoje (altura da barra de hoje), sub (texto do botão ou null), pulso} */
   GC5.mercadoN4 = (g, t, o = {}) => {
-    const ART = A(), u = ART.ui;
-    const p = { faixa: Object.assign({ s: 0.9 }, o.faixa || {}), varPct: false, amanha: false, seta: 0, botao: false, antesFantasma: 0,
-      barras: GC5.B_N4.concat([Math.max(0.001, o.hoje || 0)]), cores: [0, 0, 0, 0, 0, "#E63748"] };
-    if (o.rola != null) Object.assign(p, { precoAntes: 20, preco: 60, rola: o.rola });
-    else Object.assign(p, { preco: o.preco ?? "?", rotuloPreco: "HOJE PAGA" });
-    const c = ART.painelMercado(g, t, p);
-    const pu = clamp(o.pulso || 0), bs = 1 + 0.05 * pu * (0.5 + 0.5 * Math.sin(t * 6));
-    if (pu > 0) ART.glow(g, 540, 1160, 520, "#FFD23F", 0.4 * pu);
-    g.save(); g.translate(540, 1160); g.scale(bs, bs); g.translate(-540, -1160);
-    u.botao(g, 540, 1160, 720, 150, o.sub ? { texto: "VENDER", sub: o.sub, icone: "moeda" } : { texto: "VENDER", icone: "moeda" });
-    g.restore();
-    return c;
+    const ART = A();
+    return ART.painelMercado(g, t, { faixa: Object.assign({ s: 0.9 }, o.faixa || {}), precoAntes: 40, preco: 60, rola: o.rola ?? 0, rotuloAntes: "NORMAL",
+      varPct: 50, antesFantasma: 0, amanha: false, seta: 0, textoEscala: GC5.TXT, botaoSub: o.sub ?? null, botaoPulso: o.pulso || 0,
+      barras: GC5.B_N4.concat([Math.max(0.001, o.hoje || 0)]), cores: [0, 0, 0, 0, 0, "#E63748"] });
   };
 
   // ------------------------------------------------------------------ Clientes
-  /** retalho na cor do cartão de cliente (esconde uma linha antes da palavra que a revela) */
-  GC5.retalho = (g, x, y, w, h, a = 1) => {
-    if (a <= 0) return; const ART = A();
-    g.save(); g.globalAlpha *= a; ART.rr(g, x, y, w, h, 14); g.fillStyle = "#211E33"; g.fill(); g.restore();
-  };
   /** aba CLIENTES: título + cartão da Dona Coruja (centro 540,720, s=1). Pedido 4/4 Cobre (o Zeca tem as 4 pepitas),
-   *  recompensa +160. o: campos do ART.ui.cartaoCliente + escondePedido / escondeRecompensa (0..1 = retalho por cima) */
+   *  recompensa +160. o: campos do ART.ui.cartaoCliente (pedidoK, recompensaA, recompensaK, amizade…) */
   GC5.CLI = { x: 540, y: 720 };
   GC5.cliente = (g, t, o = {}) => {
     const ART = A(), u = ART.ui;
     u.titulo(g, 540, 330, "CLIENTES", { s: 0.9 });
-    const c = u.cartaoCliente(g, GC5.CLI.x, GC5.CLI.y, Object.assign({ t, s: 1, amizade: 0, recompensa: 160, pedido: { tem: 4, precisa: 4, tipo: "cobre", nome: "Cobre" }, sorriso: 0.3 }, o));
-    GC5.retalho(g, c.x0 + 30, c.y0 + 318, 555, 84, o.escondePedido || 0);
-    GC5.retalho(g, c.x0 + 30, c.y0 + 404, 555, 78, o.escondeRecompensa || 0);
-    return c;
+    return u.cartaoCliente(g, GC5.CLI.x, GC5.CLI.y, Object.assign({ t, s: 1, amizade: 0, recompensa: 160, pedido: { tem: 4, precisa: 4, tipo: "cobre", nome: "Cobre" }, sorriso: 0.3, amizadeEscala: 1.25 }, o));
+  };
+  /** recorte real da aba CLIENTES (o mesmo do fim do p258, parado no cartão da Dona Coruja). ÚNICO lugar para ajustar. */
+  GC5.REC258 = { topo: 84, base: 430, altura: 520, cy: 820, foco: [427, 204], zoom: [1.07, 1.07] };   // = fim do p258 (animador A)
+  GC5.recorteClientes = (g, t) => {
+    const ART = A(), v = ART.gameplay.cheio(g, t, Object.assign({}, ART.gameplay.PRESET.clientes, { dur: 1000 }, GC5.REC258));
+    // contorno dourado do cartão da Dona Coruja, como no fim do p258
+    const ca = v.map(125, 150), cb = v.map(730, 258);
+    g.save(); ART.rr(g, ca[0], ca[1], cb[0] - ca[0], cb[1] - ca[1], 16 * v.sc / 1.7); g.lineWidth = 7; g.strokeStyle = "#FFD23F"; g.shadowColor = "rgba(255,210,63,.9)"; g.shadowBlur = 18; g.stroke(); g.restore();
+    return v;
   };
 })();

@@ -16,7 +16,7 @@ MD.plano("p207", {
     const k = ART.prog(t, tM - 0.1, Math.min(D, tM + 0.35), "inOutSine");
     if (k > 0) {
       g.save(); g.globalAlpha = k;
-      ART.palco(g, t, { zoom: 1 }, ART.cenas.tocaDesfocada(), null, { frame: ctx.frame, legenda: false });
+      ART.palco(g, t, { zoom: 1 }, ART.cenas.tocaDesfocada({ meta: false }), null, { frame: ctx.frame, legenda: false });
       const z = ART.lerp(1, 1.07, ART.prog(t, tM - 0.1, D, "linear"));
       g.translate(540, 760); g.scale(z, z); g.translate(-540, -760);
       tit();

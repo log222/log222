@@ -33,7 +33,12 @@ window.GB2_LOAD = window.GB2_LOAD || (async () => {
   GB2.toca = (o = {}) => {
     const GB = B();
     const num = o.numero ? 1 : 0;
-    const c = GB.toca({ prog: num, tracos: num ? 30 : 0, riscados: num ? (o.riscados ?? 3) : 0 }, { lamp: o.lamp ?? 1, janela: o.janela ?? 1 });
+    const meta = { prog: num, tracos: num ? 30 : 0, riscados: num ? (o.riscados ?? 3) : 0 };
+    let c;
+    if (o.picareta === false) {   // mesmo que GB.toca, mas sem a picareta da mesa (opção nova do kit)
+      c = A().cenas.toca({ meta: Object.assign({ tracos: 30 }, meta), luminaria: o.lamp ?? 1, janela: o.janela ?? 1, picareta: false });
+      c.luz = null;
+    } else c = GB.toca(meta, { lamp: o.lamp ?? 1, janela: o.janela ?? 1 });
     const M = c.fundo[3], LAMP = c.fundo[4];   // camadas dos móveis (cama + mesa) e do lampião do kit
     // a Toca do kit acaba em x≈1240 do mundo: estende parede (escura, canto da toca) e chão para a direita
     c.fundo.unshift({ d: 0.8, draw: g => { g.fillStyle = "#1A1424"; g.fillRect(1150, -400, 1400, 2600); } });

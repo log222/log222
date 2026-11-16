@@ -184,7 +184,8 @@
     const ax = tx + 26 * s, ay = y0 + 154 * s, cs = 1 + 0.25 * pulo + pop;
     g.save(); g.translate(ax, ay); g.scale(cs, cs); UI.coracao(g, 0, 2 * s, 24 * s, { cheio }); g.restore();
     if (cheio > 0) ART.glow(g, ax, ay, 70 * s, "#FF5A8A", 0.25 * cheio + 0.3 * pulo);
-    g.font = F(42 * s, 900); g.fillStyle = "#C9C3E8"; g.fillText("amizade " + nAm, ax + 44 * s, ay + 3 * s);
+    const ae = o.amizadeEscala ?? 1;   // Parte 2 (correção): "amizade N" maior (ex. 1.25)
+    g.font = F(42 * s * ae, 900); g.fillStyle = ae > 1 ? "#DCD6F4" : "#C9C3E8"; g.fillText("amizade " + nAm, ax + 44 * s + (ae - 1) * 10 * s, ay + 3 * s);
     // bônus (sem número)
     const bk = clamp(o.bonus ?? 0);
     if (bk > 0) {
@@ -194,21 +195,25 @@
     // divisória
     g.fillStyle = "rgba(255,255,255,.08)"; g.fillRect(x0 + 34 * s, y0 + 290 * s, w - 68 * s, 3 * s);
     // pedido
-    const py = y0 + 360 * s;
+    const py = y0 + 360 * s, pk = clamp(o.pedidoK ?? 1);   // pedidoK 0 = linha do pedido escondida
+    if (pk > 0) { g.save(); g.globalAlpha *= pk;
     ART.rr(g, x0 + 34 * s, py - 42 * s, 84 * s, 84 * s, 20 * s); g.fillStyle = "#2A2640"; g.fill();
     UI.pix(g, ped.tipo, x0 + 76 * s, py, 56 * s);
     g.font = F(54 * s, 1000); g.fillStyle = "#F4EEDC"; const pedTxt = `${ped.tem}/${ped.precisa}`; g.fillText(pedTxt, x0 + 140 * s, py + 3 * s);
     g.font = F(46 * s, 900); g.fillStyle = "#C9C3E8"; g.fillText(ped.nome, x0 + 140 * s + mede(g, pedTxt + " ", F(54 * s, 1000)), py + 4 * s);
+    g.restore(); }
     // recompensa
     const qy = y0 + 440 * s, rk = clamp(o.recompensaK ?? 1), rTxt = `+${ART.num(o.recompensa ?? 160)}`;
-    g.save(); g.globalAlpha *= 0.45 + 0.55 * rk;
+    const ra = clamp(o.recompensaA ?? 1);   // recompensaA 0 = linha da recompensa escondida (recompensaK continua sendo o destaque)
+    if (ra > 0) {
+    g.save(); g.globalAlpha *= (0.45 + 0.55 * rk) * ra;
     if (rk > 0 && o.recompensaK != null) ART.glow(g, x0 + 230 * s, qy, 240 * s, "#FFD23F", 0.45 * rk * (0.8 + 0.2 * Math.sin(t * 6)));
     UI.pix(g, "moeda", x0 + 76 * s, qy, 50 * s);
     const rsc = 1 + 0.12 * (o.recompensaK != null ? Math.sin(Math.PI * clamp(rk)) : 0);
     g.save(); g.translate(x0 + 140 * s, qy); g.scale(rsc, rsc);
     g.font = F(54 * s, 1000); g.fillStyle = "#FFD23F"; g.fillText(rTxt, 0, 3 * s);
     g.font = F(40 * s, 900); g.fillStyle = "#E8DCA8"; g.fillText(" moedas", mede(g, rTxt, F(54 * s, 1000)), 5 * s); g.restore();
-    g.restore();
+    g.restore(); }
     // botão ENTREGAR (cinza como no jogo -> amarelo quando dá para entregar)
     const bxc = x0 + w - 190 * s, byc = y0 + 395 * s, bk2 = clamp(o.botaoK ?? 0);
     if (bk2 < 1) UI.botao(g, bxc, byc, 300 * s, 112 * s, { texto: "ENTREGAR", cor: "roxo", press: o.press || 0, a: 1 - bk2 });
@@ -285,11 +290,13 @@
     g.translate(fx, fy); g.scale(z, z); g.translate(-fx - pan, -fy);
     const tela = (x, y) => [(x - pan - fx) * z + fx, (y - fy) * z + fy];
     const res = { ponta: null, ponta87: null, ano: null };
+    const TE = o.textoEscala ?? 1, eixoK = a => { const e = o.eixoAnos ?? 1; return typeof e === "object" ? clamp(e[a] ?? 0) : clamp(e); };
+    const [qx, qy] = o.posQueda || [875, 468], [wx, wy] = o.posWallStreet || [540, 368];
     // ------------------------------------------------ gráfico 1: 1921–1932
     const p = clamp(o.prog ?? 1), dTip = lerp(G.A0, G.A1, p), regua = clamp(o.regua ?? 1);
     // eixo do tempo
     neon(g, () => { g.beginPath(); g.moveTo(G.X0 - 30, G.YB); g.lineTo(G.X1 + 30, G.YB); g.stroke(); for (let a = 1922; a <= 1932; a++) { g.beginPath(); g.moveTo(xA(a), G.YB); g.lineTo(xA(a), G.YB + (a % 2 ? 10 : 18)); g.stroke(); } }, { w: 2.5, a: ap * 0.9 });
-    for (const a of [1921, 1925, 1929, 1932]) rot(g, String(a), xA(a + (a === 1921 ? 0.6 : 0)), G.YB + 44, { size: 28, align: "center", cor: BP.fraca, sp: 1, a: ap });
+    for (const a of [1921, 1925, 1929, 1932]) { const ek = eixoK(a); if (ek > 0) rot(g, String(a), xA(a + (a === 1921 ? 0.6 : 0)), G.YB + 44 + (TE - 1) * 14, { size: 28 * TE, align: "center", cor: TE > 1 ? "#B8E6F4" : BP.fraca, sp: 1, a: ap * ek }); }
     // régua vertical (valores)
     if (regua > 0) {
       const rx = 150;
@@ -321,7 +328,7 @@
       if (p > 0.985) rot(g, "41", tip[0] + 18, tip[1] - 4, { size: 46, cor: "#FFD2CC", sp: 1, a: ART.prog(p, 0.985, 1) });
     }
     // etiquetas
-    const ws = clamp(o.wallStreet ?? 0); if (ws > 0) rot(g, "WALL STREET · NOVA YORK", 540, 368, { size: 42, align: "center", a: ws * ap });
+    const ws = clamp(o.wallStreet ?? 0); if (ws > 0) rot(g, "WALL STREET · NOVA YORK", wx, wy, { size: 42, align: "center", a: ws * ap });
     const x6 = clamp(o.x6 ?? 0);
     if (x6 > 0) {
       neon(g, () => { const y0 = yV(63.9) - 10, y1 = lerp(y0, yV(381.2) + 10, ART.ease.outCubic(x6)); g.beginPath(); g.moveTo(112, y0); g.lineTo(112, y1); g.moveTo(98, y1 + 18); g.lineTo(112, y1); g.lineTo(126, y1 + 18); g.stroke(); }, { w: 5, cor: "#FFFFFF", a: ap });
@@ -330,7 +337,7 @@
     }
     const qd = clamp(o.queda ?? 0);
     if (qd > 0) {
-      g.save(); g.globalAlpha *= qd; const sc = ART.ease.outBack(qd); g.translate(875, 468); g.scale(sc, sc);
+      g.save(); g.globalAlpha *= qd; const sc = ART.ease.outBack(qd); g.translate(qx, qy); g.scale(sc, sc);
       ART.textFx(g, "−89%", 0, 0, { size: 132, fam: "Lilita One", fill: CORAL, stroke: "#03121A", sw: 14, shadow: "rgba(255,107,91,.6)", sblur: 34, sdy: 0 }); g.restore();
     }
     // moedas: 1 própria (cheia) + 9 emprestadas (tracejadas)
@@ -345,9 +352,9 @@
       }
       const lk = ART.prog(em, 0.6, 1);
       if (lk > 0) {
-        rot(g, "PRÓPRIO", x0, 1232, { size: 26, align: "center", sp: 2, a: lk * ap });
+        rot(g, "PRÓPRIO", x0 + (TE - 1) * 30, 1232 + (TE - 1) * 10, { size: 26 * TE, align: "center", sp: 2, a: lk * ap });
         neon(g, () => { g.beginPath(); g.moveTo(x0 + dx - r, 1214); g.lineTo(x0 + dx - r, 1222); g.lineTo(x0 + 9 * dx + r, 1222); g.lineTo(x0 + 9 * dx + r, 1214); g.stroke(); }, { w: 2.5, cor: BP.amarelo, a: lk * ap });
-        rot(g, "EMPRESTADO", x0 + 5 * dx, 1252, { size: 36, align: "center", cor: BP.amarelo, sp: 4, a: lk * ap });
+        rot(g, "EMPRESTADO", x0 + 5 * dx, 1252 + (TE - 1) * 16, { size: 36 * TE, align: "center", cor: BP.amarelo, sp: 4, a: lk * ap });
       }
     }
     // ------------------------------------------------ gráfico 2: outubro de 1987 (à direita)
@@ -357,7 +364,7 @@
       neon(g, () => { g.beginPath(); g.moveTo(L0 - 30, G.YB); g.lineTo(L0 - 30 + (L1 - L0 + 60) * clamp(Math.max(p87, r87) * 1.6), G.YB); g.stroke(); for (let i = 0; i < 17; i++) { if (x87(i) > L0 - 30 + (L1 - L0 + 60) * clamp(Math.max(p87, r87) * 1.6)) break; g.beginPath(); g.moveTo(x87(i), G.YB); g.lineTo(x87(i), G.YB + 10); g.stroke(); } }, { w: 2.5, a: ap * 0.9 });
       if (r87 > 0) {
         g.save(); g.globalAlpha *= r87 * ap; ART.textFx(g, "1987", G.OX + 540, 405, { size: 110, fam: "Lilita One", fill: "#E8FAFF", stroke: "#03121A", sw: 12, shadow: "rgba(143,211,232,.6)", sblur: 30, sdy: 0 }); g.restore();
-        rot(g, "OUTUBRO", G.OX + 540, 480, { size: 30, align: "center", cor: BP.fraca, sp: 8, a: r87 * ap });
+        rot(g, "OUTUBRO", G.OX + 540, 480 + (TE - 1) * 14, { size: 30 * TE, align: "center", cor: BP.fraca, sp: 8, a: r87 * ap });
       }
       if (p87 > 0) {
         const d = p87 * D87, dom = OUT87.map((v, i) => [i87(i), v]), q = ate(dom, d).map(([ii, v]) => [G.OX + G.X0 + ii / D87 * (G.X1 - G.X0), y87(v)]);
@@ -370,11 +377,11 @@
       const sg = clamp(o.segunda ?? 0);
       if (sg > 0) {
         const sx = (x87(11) + x87(12)) / 2, sy = 600, sc = ART.ease.outBack(sg);
-        g.save(); g.globalAlpha *= clamp(sg * 2); g.translate(sx, sy); g.scale(sc, sc);
+        g.save(); g.globalAlpha *= clamp(sg * 2); g.translate(sx, sy); g.scale(sc * (TE > 1 ? 0.5 + 0.5 * TE : 1), sc * (TE > 1 ? 0.5 + 0.5 * TE : 1));
         UI.cartao(g, -70, -66, 140, 132, { vidro: false, r: 18, cor: "rgba(6,26,38,.92)", borda: BP.linha, sombra: false });
         g.fillStyle = BP.linha; ART.rr(g, -70, -66, 140, 34, 18); g.fill(); g.fillRect(-70, -48, 140, 16);
         for (const xx of [-36, 36]) { ART.rr(g, xx - 6, -80, 12, 30, 6); g.fillStyle = "#E8FAFF"; g.fill(); }
-        rot(g, "1", 0, 14, { size: 64, align: "center", cor: "#E8FAFF", sp: 0 }); rot(g, "DIA", 0, 50, { size: 24, align: "center", sp: 3 });
+        rot(g, "1", 0, 14, { size: 64, align: "center", cor: "#E8FAFF", sp: 0 }); rot(g, "DIA", 0, 50, { size: 24 * (TE > 1 ? 1.3 : 1), align: "center", sp: 3 });
         g.restore();
         neon(g, () => { g.beginPath(); g.moveTo(sx, sy + 70); g.lineTo(sx, y87(2247) - 14); g.stroke(); }, { w: 2, dash: [6, 7], cor: BP.fraca, blur: 2, a: sg });
         rot(g, "SEGUNDA-FEIRA NEGRA", G.OX + 540, G.YB + 60, { size: 40, align: "center", cor: "#E8FAFF", sp: 3, a: sg });

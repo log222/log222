@@ -21,13 +21,13 @@ MD.plano("p208", {
     // balanço de expectativa (cresce no "sorrindo")
     const sw = 0.35 + 0.65 * feliz, ph = t * 5.2;
     GB2.zecaTela(g, cam, ART.zeca.pose("parado", t, {
-      x: Z.x, y: Z.y, s: Z.s, turn: -0.22, lamp: 0, rim: "#7FD8FF", rimA: 0.35 + 0.4 * kP,
+      x: Z.x, y: Z.y, s: Z.s, turn: -0.22, lamp: 0, rim: ART.mix("#B58CFF", "#9FC8FF", kP), rimA: 0.45,
       aF: 52 + 6 * Math.sin(ph), eF: 62, aB: 40, eB: 78, bFrente: 1, segura: "pepita",
       lean: 3.5 * Math.sin(ph) * sw, bob: Math.abs(Math.sin(ph)) * 7 * sw, liftF: Math.max(0, Math.sin(ph)) * 6 * sw, liftB: Math.max(0, -Math.sin(ph)) * 6 * sw,
       sq: 1 + 0.05 * GB.hit(t, tAb, 0.3) - 0.03 * GB.hit(t, tSo, 0.3),
       eyes: feliz > 0.5 ? "feliz" : "aberto", mouth: feliz > 0.5 ? "aberto" : "sorriso", brows: "nenhum",
       headTilt: -5 + 5 * Math.sin(ph * 0.5) * sw, alvo: [ART.lerp(420, 170, kP), ART.lerp(1000, 780, kP)],
-      banho: { cor: "#7FD8FF", k: 0.6 * kP }, blinkSeed: 0.2,
+      blinkSeed: 0.2,
     }));
     GB2.luzPainel(g, t, kP, { fx, fy });
     ART.post(g, ctx.frame, { legendaK: 0.42 });

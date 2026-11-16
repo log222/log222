@@ -10,15 +10,15 @@
   // ================================================================= fundo "noite na Toca" desfocado (para painéis)
   /** cena de fundo para painéis: a Toca bem desfocada e escurecida (cacheada) */
   ART.cenas.tocaDesfocada = (o = {}) => {
-    const base = ART.cenas.toca({ meta: { riscados: o.riscados ?? 1 } });
+    const sm = o.meta === false, base = ART.cenas.toca({ meta: sm ? false : { riscados: o.riscados ?? 1 } });   // meta: false = sem o "1.000" na parede
     return {
       fundo: [{ d: 0.3, draw(g, t) {
-        const c = ART.cache("tocaDesf", W / 3, H / 3, (gg) => {
+        const c = ART.cache(sm ? "tocaDesf:semMeta" : "tocaDesf", W / 3, H / 3, (gg) => {
           gg.scale(1 / 3, 1 / 3); const cam = { zoom: 1.15, x: 0, y: 0 };
           for (const L of base.fundo) ART.withLayer(gg, cam, L.d, x => L.draw(x, 0));
           base.luz(gg, 0, cam);
         });
-        const cb = ART.blurred(c, 4, "tocaDesfB");
+        const cb = ART.blurred(c, 4, sm ? "tocaDesfB:semMeta" : "tocaDesfB");
         g.save(); g.drawImage(cb, -40, -40, W + 80, H + 80);
         g.fillStyle = "rgba(14,11,24,.62)"; g.fillRect(0, 0, W, H); g.restore();
         ART.dust(g, t, { count: 30, seed: 8, color: "#FFE0B0", alpha: 0.35 });
@@ -41,7 +41,7 @@
   };
   /** painel MERCADO: linhas Pedra/Cobre e botão VENDER. o = {preco, varPct, saldo, prog, press, seta, setaSombra} */
   ART.painelMercado = (g, t, o = {}) => {
-    const P2 = ["faixa", "linhas", "precoAntes", "setaGiro", "setaFantasma", "barras", "amanha", "corHoje", "cores", "botao", "botaoSub", "botaoPulso", "rotuloPreco", "rola"];
+    const P2 = ["faixa", "linhas", "precoAntes", "setaGiro", "setaFantasma", "barras", "amanha", "corHoje", "cores", "botao", "botaoSub", "botaoPulso", "rotuloPreco", "rola", "rotuloAntes", "precoTexto", "precoK", "textoEscala"];
     if (P2.some(k => o[k] !== undefined) || o.varPct === false) return painelMercado2(g, t, o);
     const u = UI();
     u.titulo(g, 540, o.y0 ?? 330, "MERCADO", { s: 0.9 });
@@ -75,7 +75,7 @@
     } else {
       const vp = o.varPct === false ? null : o.varPct ?? 12;
       c = u.cartaoMinerio(g, 540, pos.cartao, { tipo: o.tipo || "cobre", nome: o.nome || "Cobre", preco: o.preco ?? 40, varPct: vp, barras: o.barras || [0.42, 0.5, 0.38, 0.55, 0.47, 0.6, 0.66], amanha: o.amanha ?? 0.82, corHoje: o.corHoje, cores: o.cores,
-        prog: o.prog ?? 1, s: novo ? 1.4 : 1.55, brilhoAmanha: o.brilhoAmanha || 0, precoAntes: o.precoAntes, rola: o.rola, rotuloPreco: o.rotuloPreco, rotuloAntes: o.rotuloAntes, antesFantasma: o.antesFantasma, corPreco: o.corPreco, varK: o.varK });
+        prog: o.prog ?? 1, s: novo ? 1.4 : 1.55, brilhoAmanha: o.brilhoAmanha || 0, precoAntes: o.precoAntes, rola: o.rola, rotuloPreco: o.rotuloPreco, rotuloAntes: o.rotuloAntes, antesFantasma: o.antesFantasma, corPreco: o.corPreco, varK: o.varK, precoTexto: o.precoTexto, precoK: o.precoK, textoEscala: o.textoEscala });
       const sv = o.seta ?? (novo ? 0 : 1);
       if (sv > 0) {
         const k = ART.ease.outBack(clamp(sv)), sx = c.x0 + c.w - 30, sy = c.y0 - 20, gk = clamp(o.setaGiro || 0), fk = clamp(o.setaFantasma || 0);
@@ -94,7 +94,8 @@
       const pu = clamp(o.botaoPulso || 0), bs = 1 + 0.04 * pu * (0.5 + 0.5 * Math.sin(t * 6));
       if (pu > 0) ART.glow(g, 540, pos.botao, 520, "#FFD23F", 0.35 * pu * (0.6 + 0.4 * Math.sin(t * 6)));
       g.save(); g.translate(540, pos.botao); g.scale(bs, bs); g.translate(-540, -pos.botao);
-      u.botao(g, 540, pos.botao, 720, 150, { texto: "VENDER", sub: o.botaoSub || `+${o.preco ?? 40} moedas`, icone: "moeda", press: o.press || 0 });
+      const sub = o.botaoSub === undefined ? `+${o.preco ?? 40} moedas` : o.botaoSub || undefined;   // botaoSub: null/false = sem sub
+      u.botao(g, 540, pos.botao, 720, 150, { texto: "VENDER", sub, icone: "moeda", press: o.press || 0, subEscala: o.textoEscala });
       g.restore();
     }
     c.pos = pos;
@@ -585,6 +586,7 @@
     ART.pepita(g, 0, 0, r, "cobre", Math.sin(t * 0.8) * 0.2, { seed: 7 });
     g.restore();
     // brilhos estelares
-    for (let i = 0; i < 3; i++) { const ph = (t * 0.9 + i / 3) % 1, a = Math.sin(ph * Math.PI); const px = x + Math.cos(i * 2.1) * r * 0.7, py = y + Math.sin(i * 2.1) * r * 0.5; g.save(); g.globalCompositeOperation = "lighter"; g.globalAlpha = a; g.fillStyle = "#FFE8C8"; g.translate(px, py); g.rotate(0.3); g.fillRect(-r * 0.25, -2, r * 0.5, 4); g.fillRect(-2, -r * 0.25, 4, r * 0.5); g.restore(); }
+    const cint = o.brilho ?? 1;   // Parte 2: brilho 0 = sem cintilas (pepita "apagada")
+    if (cint > 0) for (let i = 0; i < 3; i++) { const ph = (t * 0.9 + i / 3) % 1, a = Math.sin(ph * Math.PI) * cint; const px = x + Math.cos(i * 2.1) * r * 0.7, py = y + Math.sin(i * 2.1) * r * 0.5; g.save(); g.globalCompositeOperation = "lighter"; g.globalAlpha = a; g.fillStyle = "#FFE8C8"; g.translate(px, py); g.rotate(0.3); g.fillRect(-r * 0.25, -2, r * 0.5, 4); g.fillRect(-2, -r * 0.25, 4, r * 0.5); g.restore(); }
   };
 })();

@@ -1,6 +1,6 @@
 /* p247 · "Dois segundos de presente." (C7) — close do cronômetro no escuro da mina. Embaixo, uma ampulheta pequena
  * brilha; a areia dourada sobe em espiral e entra na ponta da barra amarela: a cada grão que chega a barra cresce e o
- * número sobe 5,0 → 7,0 (a ÚNICA subida do dia, dentro do plano). "+2 s" salta quando chega a 7,0. Push-in lento. */
+ * número sobe 5,0 → 7,0 (a ÚNICA subida do dia, dentro do plano). "+2 s" grande entra na palavra DOIS. Push-in lento. */
 MD.plano("p247", {
   async setup(ctx) {
     if (!window.GA) await MD.loadScript("../scenes/planos/_grupoA.js");
@@ -22,20 +22,21 @@ MD.plano("p247", {
     // cronômetro grande
     g.save(); g.translate(540, 900); g.scale(z, z); g.translate(-540, -900);
     const cy = 600, s = 2.35, w = 350 * s, bx = 540 - w / 2 + 28 * s, bw = w - 56 * s, by = cy + 40 * s, bh = 14 * s;
-    const ax = 540, ay = 1040;
+    const ax = 360, ay = 1040;
     // areia: sai da ampulheta e converge para a ponta da barra (7/11)
-    const alvo = [bx + bw * 7 / 11 - 10, by + bh / 2];
+    const valDe = x => ART.lerp(5.0, 7.0, ART.ease.inOutSine(ART.prog(x, t0 + 0.55, t0 + 1.86)));   // sobe enquanto a areia entra na barra
+    const alvo = x => [bx + bw * valDe(x) / 11 - 6, by + bh / 2];   // a areia segue a ponta da barra
     ART.obj.ampulheta(g, t, { x: ax, y: ay, s: 0.36, areia: ART.lerp(0.25, 1, ART.prog(tt, t0, t0 + 1.86)), brilho: 0.6 + 0.3 * Math.sin(t * 5) });
     const frac = ART.estouroAreia(g, tt, { t0, centro: [ax, ay - 40], tam: 200, alvo, tAlvo: 0.3, n: 200, seed: 13, lascas: false });
-    const val = ART.lerp(5.0, 7.0, ART.ease.inOutSine(ART.prog(tt, t0 + 0.55, t0 + 1.86)));   // sobe enquanto a areia entra na barra
-    const fim = ART.prog(t, tFim - 0.1, tFim + 0.18);
+    const val = valDe(tt);
+    const fim = ART.prog(t, tFim - 0.1, tFim + 0.18), pe = ART.prog(t, tD - 0.04, tD + 0.22);   // "+2 s" entra em DOIS
     ART.glow(g, 540, cy, 620, "#FFD23F", 0.16 + 0.22 * fim + 0.12 * ART.prog(val, 5, 7));
     ART.ui.cronometro(g, 540, cy, { valor: val, max: 11, escala: 11, s, icone: "sol" });
     // brilho na ponta da barra que cresce
     if (val > 5.01 && val < 6.99) { g.save(); g.globalCompositeOperation = "lighter"; ART.glow(g, bx + bw * val / 11, by + bh / 2, 90, "#FFF1B0", 0.8); g.restore(); }
     const tc = t; // "+2 s" salta quando chega a 7,0 e fica até o corte
-    const pk = fim > 0 ? ART.ease.outBack(fim) : 0;
-    if (pk > 0.01) { g.save(); g.translate(840, cy - 230 - 6 * Math.sin(tc * 4)); g.scale(pk, pk); ART.textFx(g, "+2 s", 0, 0, { size: 84, fam: "Nunito", weight: 1000, fill: "#FFD23F", stroke: "#1A1020", sw: 14 }); g.restore(); }
+    const pk = pe > 0 ? ART.ease.outBack(pe) * (1 + 0.12 * fim * Math.max(0, 1 - (t - tFim) / 0.3)) : 0;
+    if (pk > 0.01) { g.save(); g.translate(740, 1040 - 8 * Math.sin(tc * 4)); g.scale(pk, pk); ART.glow(g, 0, 0, 220, "#FFD23F", 0.35); ART.textFx(g, "+2 s", 0, 0, { size: 140, fam: "Nunito", weight: 1000, fill: "#FFD23F", stroke: "#1A1020", sw: 18 }); g.restore(); }
     g.restore();
     // rótulo do dia, discreto, no alto
     g.save(); g.globalAlpha = 0.85; g.font = '900 44px "Nunito"'; g.letterSpacing = "6px"; g.textAlign = "center"; g.fillStyle = "#D8D2E8"; g.shadowColor = "rgba(0,0,0,.7)"; g.shadowBlur = 12; g.fillText("DIA 4 DE 30", 540, 330); g.restore();

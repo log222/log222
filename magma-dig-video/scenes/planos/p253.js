@@ -1,7 +1,7 @@
 /* p253 · C5 Mercado · "Em alta hoje: cobre."
  * Mesmo painel do p252 (câmera contínua). No "alta" a faixa EM ALTA HOJE acende em dourado (acorde claro);
  * no "cobre" a vaga vira COBRE +50% com o ícone do cobre e faíscas, e um brilho varre a faixa.
- * O cartão do Cobre ainda mostra o preço de ontem (20); o de hoje entra no p254. */
+ * O cartão do Cobre ainda mostra o preço NORMAL 40; o de hoje (60 = 40 + 50%) entra no p254. */
 MD.plano("p253", {
   async setup() {
     if (!window.GC5) await (window.__GC5_P = window.__GC5_P || MD.loadScript("../scenes/planos/_grupoC5_ep02.js"));

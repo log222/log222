@@ -1,5 +1,5 @@
 /* p230 · C5 Mercado · "Vender agora era perder vinte."
- * Volta do inserto ao painel do Mercado (dissolve curto do escuro). Cobre HOJE PAGA 20 (vermelho, −50%), o "ONTEM 40"
+ * Volta do inserto ao painel do Mercado: começa já na Toca desfocada (sem preto) e o painel entra subindo em fade. Cobre HOJE PAGA 20 (vermelho, −50%), o "ONTEM 40"
  * riscado no canto, botão VENDER +20 moedas. No "perder" o 40 fantasma acende em vermelho; no "vinte" um −20 vermelho
  * salta entre o 40 e o 20 (40 − 20 = 20: a conta do que se perde). Empurrão lento para o botão (continua no p231). */
 MD.plano("p230", {
@@ -14,8 +14,10 @@ MD.plano("p230", {
     G.fundo(g, t, { dx: ART.map(t, 0, D, -20, 0), z: 1.08, escuro: 0.14 });
     const cam = G.cam(ART.lerp(1.0, 1.05, k), ART.lerp(540, 560, k), 880, 540, 900);
     const pPer = G.hit(t, tPer, 0.7) + (t > tPer ? 0.25 : 0), pV = G.hit(t, tV, 0.5);
+    const ent = ART.ease.outCubic(clamp(t / 0.35));
     G.painel(g, cam, gg => {
-      const c = ART.painelMercado(gg, t, { precoAntes: 40, preco: 20, rola: 1, varPct: -50, seta: 0,
+      gg.globalAlpha = ent; gg.translate(0, 60 * (1 - ent));
+      const c = ART.painelMercado(gg, t, { textoEscala: G.TXT, precoAntes: 40, preco: 20, rola: 1, varPct: -50, seta: 0,
         barras: G.B_N3.concat([0.33]), cores: [0, 0, 0, 0, 0, "#FFD23F"], corHoje: "#E63748", amanha: false,
         botaoPulso: 0.35 * G.hit(t, tVen, 0.8) });
       const s = 1.55, xr = c.x0 + c.w - 36 * s;
@@ -30,6 +32,5 @@ MD.plano("p230", {
       }
     });
     G.fim(g, t, ctx);
-    G.dissolve(g, t, 0.28);
   },
 });

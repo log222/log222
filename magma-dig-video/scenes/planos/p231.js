@@ -15,7 +15,7 @@ MD.plano("p231", {
     const cam = G.cam(ART.lerp(1.05, 1.1, k), ART.lerp(560, 580, k), ART.lerp(880, 883, k), 540, 900);
     const pulso = clamp((t - tVe + 0.1) / 0.3) * (0.55 + 0.45 * Math.sin(t * 6.5));
     G.painel(g, cam, gg => {
-      const c = ART.painelMercado(gg, t + 2.36, { precoAntes: 40, preco: 20, rola: 1, varPct: -50, seta: 0,
+      const c = ART.painelMercado(gg, t + 2.36, { textoEscala: G.TXT, precoAntes: 40, preco: 20, rola: 1, varPct: -50, seta: 0,
         barras: G.B_N3.concat([0.33]), cores: [0, 0, 0, 0, 0, "#FFD23F"], corHoje: "#E63748", amanha: false, botaoPulso: pulso });
       const s = 1.55, xr = c.x0 + c.w - 36 * s;
       G.txt(gg, "−20", xr - 120, c.y0 + 168 * s - 10, { size: 66, fill: "#FF5A66", stroke: "#2A0A10", sw: 12 });
