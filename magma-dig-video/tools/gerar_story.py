@@ -81,6 +81,8 @@ SFX_AJUSTE = {
     261: {"remover": [], "adicionar": [{"nome": "ding", "offset": 0.0, "vol": -10, "kw": {"pitch": 1.0}},
                                        {"nome": "ding", "offset": 0.3, "vol": -10, "kw": {"pitch": 1.33}}]},
     262: {"remover": [], "adicionar": [{"nome": "ding", "palavra": "amigo.", "offset": 0.0, "vol": -8, "kw": {"pitch": 2.0}}]},
+    267: {"remover": ["*"], "adicionar": [{"nome": "clique", "palavra": "três.", "offset": 0.45},     # como o p57
+                                          {"nome": "apagar", "palavra": "três.", "offset": 0.5}]},
 }
 # Automação da trilha à mão por plano (substitui a deixa automática; [] = nenhuma). Parte 2.
 TRILHA_AJUSTE = {

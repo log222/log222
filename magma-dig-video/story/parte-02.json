@@ -2369,11 +2369,13 @@
      "sfx": [
       {
        "nome": "clique",
-       "offset": 0.02
+       "palavra": "três.",
+       "offset": 0.45
       },
       {
        "nome": "apagar",
-       "offset": 0.1
+       "palavra": "três.",
+       "offset": 0.5
       }
      ],
      "roteiro": {
